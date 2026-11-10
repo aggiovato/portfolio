@@ -258,7 +258,9 @@ samp {
 
 /*
  * Page transitions (native cross-document View Transitions, no JavaScript).
- * - Short page cross-fade; the header (site-header) stays still.
+ * - Short page cross-fade. The header is identical on every page, so the cross-fade leaves it
+ *   still; it has no view-transition-name of its own because that would make it a backdrop root
+ *   and the mobile menu's glass could not blur the page behind it.
  * - Elements with the same view-transition-name on both pages «fly» from one to the other:
  *   card screenshot → case study cover (cover-<slug>) and title → h1 (title-<slug>).
  * - Browsers without support: normal navigation. Reduced motion: no transition.
@@ -276,10 +278,5 @@ samp {
   ::view-transition-group(*) {
     animation-duration: 420ms;
     animation-timing-function: var(--ease-out);
-  }
-
-  /* The header is identical on every page: no animation of its own. */
-  ::view-transition-group(site-header) {
-    animation: none;
   }
 }

@@ -40,6 +40,26 @@ test.describe('mobile menu', () => {
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(toggle).toBeFocused();
   });
+
+  test('opens over the content without moving it, and closes from the scrim', async ({ page }) => {
+    await page.goto('/');
+    const toggle = page.getByRole('button', { name: 'Menu' });
+    const main = page.locator('main');
+    const before = await main.boundingBox();
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    // Overlay, not a push-down: the header keeps its height and the content stays put.
+    expect(await main.boundingBox()).toEqual(before);
+    // The page behind is inert while the menu is open.
+    await expect(main).toHaveJSProperty('inert', true);
+
+    // Tap the scrim, below the panel.
+    const viewport = page.viewportSize()!;
+    await page.mouse.click(viewport.width / 2, viewport.height - 20);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(main).toHaveJSProperty('inert', false);
+  });
 });
 
 test.describe('without JavaScript', () => {

@@ -32,15 +32,18 @@ const languages = locales
   }));
 ---
 
-<header class="site-header" style="view-transition-name: site-header">
+<header class="site-header">
   <div class="container bar">
     <a class="brand" href={localizePath('/', locale)} aria-label={t('nav.home', { brand: site.brand })}>
       <LogoMark size={44} class="brand-mark" />
       <span class="brand-word">{site.brand}</span>
     </a>
 
-    <!-- Without JS the links are always shown. With JS on mobile they fold behind the button. -->
-    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" hidden>
+    <!--
+      Without JS the links are always shown. With JS on mobile they fold behind the button and open
+      as a panel over the content (CSS keys off the early `js` class, so there is no flash).
+    -->
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
       <span class="visually-hidden">{t('nav.menu')}</span>
       <svg
         width="24"
@@ -93,30 +96,44 @@ const languages = locales
 </header>
 
 <script>
+  /**
+   * Mobile menu: a panel over the content (§9). While open, the page behind is inert and does not
+   * scroll, so focus stays in the header; Escape, the scrim, the toggle and leaving the mobile
+   * breakpoint close it. It also closes before the page is captured for a view transition, so the
+   * next page does not animate from an open menu.
+   */
   const toggle = document.querySelector<HTMLButtonElement>('.menu-toggle');
   const navEl = document.getElementById('site-nav');
+  // Must match the max-width media query in the styles below.
   const mq = window.matchMedia('(max-width: 767px)');
+  const behind = [document.querySelector('main'), document.querySelector('footer')];
 
   if (toggle && navEl) {
-    const setOpen = (open: boolean, returnFocus = false) => {
+    const isOpen = () => toggle.getAttribute('aria-expanded') === 'true';
+
+    const setOpen = (open: boolean, { focus = true } = {}) => {
       toggle.setAttribute('aria-expanded', String(open));
       navEl.dataset.open = String(open);
+      document.documentElement.dataset.menuOpen = String(open);
+      behind.forEach((el) => el && (el.inert = open));
+      if (!focus) return;
       if (open) navEl.querySelector('a')?.focus();
-      else if (returnFocus) toggle.focus();
+      else toggle.focus();
     };
 
-    const sync = () => {
-      toggle.hidden = !mq.matches;
-      navEl.dataset.collapsible = String(mq.matches);
-      setOpen(false);
-    };
-
-    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    toggle.addEventListener('click', () => setOpen(!isOpen()));
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') setOpen(false, true);
+      if (e.key === 'Escape' && isOpen()) setOpen(false);
     });
-    mq.addEventListener('change', sync);
-    sync();
+    // The scrim is the header's ::after, so a click on it targets the header itself.
+    document.addEventListener('click', (e) => {
+      const target = e.target as Node;
+      if (isOpen() && !navEl.contains(target) && !toggle.contains(target)) setOpen(false);
+    });
+    mq.addEventListener('change', () => isOpen() && setOpen(false, { focus: false }));
+    addEventListener('pageswap', () => isOpen() && setOpen(false, { focus: false }));
+    // Back/forward cache restores the page as it was left.
+    addEventListener('pageshow', (e) => e.persisted && isOpen() && setOpen(false, { focus: false }));
   }
 </script>
 
@@ -125,9 +142,21 @@ const languages = locales
     position: sticky;
     top: 0;
     z-index: 50;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /*
+   * The blur lives on a pseudo-element: backdrop-filter on the header itself would make it the
+   * containing block of the fixed mobile panel and a backdrop root, so the panel's own glass could
+   * not blur the page behind it.
+   */
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     background: color-mix(in srgb, var(--color-bg) 94%, transparent);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--color-border);
   }
 
   .bar {
@@ -213,7 +242,7 @@ const languages = locales
   }
 
   .menu-toggle {
-    display: inline-grid;
+    display: none;
     place-items: center;
     width: 44px;
     height: 44px;
@@ -222,10 +251,6 @@ const languages = locales
     border: 1px solid var(--color-control-border);
     border-radius: var(--radius-control);
     cursor: pointer;
-  }
-
-  .menu-toggle[hidden] {
-    display: none;
   }
 
   .menu-toggle path {
@@ -241,39 +266,90 @@ const languages = locales
     transform: translateY(-4px) rotate(-45deg);
   }
 
-  /* Mobile with JS: collapsible menu */
-  .nav[data-collapsible='true'] {
-    display: none;
-    flex-basis: 100%;
-    padding-bottom: var(--space-4);
-  }
+  /* Mobile with JS: the menu is a glass panel over the content; the header keeps its height. */
+  @media (max-width: 767px) {
+    :global(.js) .menu-toggle {
+      display: inline-grid;
+    }
 
-  .nav[data-collapsible='true'][data-open='true'] {
-    display: block;
-  }
+    :global(.js) .nav {
+      position: fixed;
+      inset-inline: 0;
+      top: var(--header-h);
+      z-index: 1;
+      max-height: calc(100dvh - var(--header-h));
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-block: var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom));
+      padding-inline: max(var(--space-6), env(safe-area-inset-left))
+        max(var(--space-6), env(safe-area-inset-right));
+      background: color-mix(in srgb, var(--color-bg) 78%, transparent);
+      backdrop-filter: blur(18px) saturate(140%);
+      border-bottom: 1px solid var(--color-border);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition:
+        opacity var(--duration-fast) var(--ease-out),
+        transform var(--duration-fast) var(--ease-out),
+        visibility 0s linear var(--duration-fast);
+    }
 
-  .nav[data-collapsible='true'] ul {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    :global(.js) .nav[data-open='true'] {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      transition-delay: 0s;
+    }
 
-  .nav[data-collapsible='true'] a {
-    font-size: 1.25rem;
-    padding-inline: 0;
-  }
+    /* Scrim over the page; a click on it closes the menu (see the script). */
+    :global(.js) .site-header::after {
+      content: '';
+      position: fixed;
+      inset-inline: 0;
+      top: var(--header-h);
+      height: 100dvh;
+      background: rgb(8 9 13 / 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity var(--duration-fast) var(--ease-out),
+        visibility 0s linear var(--duration-fast);
+    }
 
-  .nav[data-collapsible='true'] .nav-github {
-    margin: var(--space-2) 0 0;
-    padding: var(--space-2) 0 0;
-    border-left: 0;
-    border-top: 1px solid var(--color-border);
-  }
+    :global(html[data-menu-open='true']) .site-header::after {
+      opacity: 1;
+      visibility: visible;
+      transition-delay: 0s;
+    }
 
-  .nav[data-collapsible='true'] .github-label {
-    position: static;
-    width: auto;
-    height: auto;
-    clip: auto;
+    :global(html[data-menu-open='true']) {
+      overflow: hidden;
+    }
+
+    :global(.js) .nav ul {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    :global(.js) .nav a {
+      font-size: 1.25rem;
+      padding-inline: 0;
+    }
+
+    :global(.js) .nav-github {
+      margin: var(--space-2) 0 0;
+      padding: var(--space-2) 0 0;
+      border-left: 0;
+      border-top: 1px solid var(--color-border);
+    }
+
+    :global(.js) .github-label {
+      position: static;
+      width: auto;
+      height: auto;
+      clip: auto;
+    }
   }
 
   @media (max-width: 767px) {
