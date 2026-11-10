@@ -30,7 +30,10 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
+    "@astrojs/react": "^7.1.7",
     "@axe-core/playwright": "^4.14.0",
+    "@keystatic/astro": "^6.0.0",
+    "@keystatic/core": "^0.6.9",
     "@playwright/test": "^1.65.0",
     "@typescript-eslint/parser": "^8.72.2",
     "@vitest/coverage-v8": "^5.1.0",
@@ -38,6 +41,8 @@
     "eslint-plugin-astro": "^3.2.1",
     "prettier": "^3.9.10",
     "prettier-plugin-astro": "^1.1.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.2",
     "vitest": "^5.1.0"

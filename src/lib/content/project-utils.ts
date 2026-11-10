@@ -103,3 +103,13 @@ export function getNextProject<T extends ProjectLike>(current: T, list: T[]): T 
   const i = list.findIndex((p) => p.id === current.id);
   return list[(i + 1) % list.length];
 }
+
+/**
+ * An optional image object without `src` means "no image" (§13): Keystatic writes `cover: {}`, or
+ * keeps a typed alt text, when no file was uploaded, because its object fields cannot be optional.
+ * Used as a schema preprocess so the editor's empty cover is not a validation error.
+ */
+export function withoutEmptyMedia(value: unknown): unknown {
+  const isObject = typeof value === 'object' && value !== null && !Array.isArray(value);
+  return isObject && !('src' in value) ? undefined : value;
+}
