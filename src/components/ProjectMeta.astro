@@ -1,4 +1,9 @@
 ---
+/**
+ * Case study fact sheet: type, period, status, role and context.
+ * Lays itself out from its own width (container query): one column when narrow (next to the
+ * cover on desktop, small phones), a two-or-more column grid otherwise.
+ */
 import type { Project } from '../lib/content/projects';
 import { resolveLocale, useTranslations } from '../i18n';
 
@@ -8,31 +13,59 @@ interface Props {
 const { data } = Astro.props;
 const t = useTranslations(resolveLocale(Astro.currentLocale));
 const status = t(`project.status.${data.projectStatus}`);
-const items: [string, string][] = [
-  [t('project.meta.type'), t(`project.type.${data.projectType}`)],
-  [t('project.meta.period'), data.periodLabel],
-  [
-    t('project.meta.status'),
-    // Professional work without a public demo: say so instead of leaving the reader looking for a link.
-    data.projectType === 'professional' && !data.links.demo
-      ? `${status} · ${t('project.privateProduct')}`
-      : status,
-  ],
-  [t('project.meta.role'), data.role.join(', ')],
+// Professional work without a public demo: say so instead of leaving the reader looking for a link.
+const statusText =
+  data.projectType === 'professional' && !data.links.demo
+    ? `${status} · ${t('project.privateProduct')}`
+    : status;
+// The dot only reinforces the status text; it carries no meaning of its own.
+const tone = ({ active: 'live', prototype: 'warm', completed: 'neutral', paused: 'neutral' } as const)[
+  data.projectStatus
 ];
-if (data.team) items.push([t('project.meta.context'), data.team]);
 ---
 
-<dl class="meta">
-  {items.map(([k, v]) => (
+<div class="meta-host">
+  <dl class="meta">
     <div>
-      <dt>{k}</dt>
-      <dd>{v}</dd>
+      <dt>{t('project.meta.type')}</dt>
+      <dd>
+        <span class="chip">{t(`project.type.${data.projectType}`)}</span>
+      </dd>
     </div>
-  ))}
-</dl>
+    <div>
+      <dt>{t('project.meta.period')}</dt>
+      <dd>{data.periodLabel}</dd>
+    </div>
+    <div>
+      <dt>{t('project.meta.status')}</dt>
+      <dd class="status" data-tone={tone}>
+        <span class="dot" aria-hidden="true"></span>
+        {statusText}
+      </dd>
+    </div>
+    <div>
+      <dt>{t('project.meta.role')}</dt>
+      <dd>
+        <ul class="chip-list">
+          {data.role.map((r) => (
+            <li class="chip">{r}</li>
+          ))}
+        </ul>
+      </dd>
+    </div>
+    {data.team && (
+      <div>
+        <dt>{t('project.meta.context')}</dt>
+        <dd>{data.team}</dd>
+      </div>
+    )}
+  </dl>
+</div>
 
 <style>
+  .meta-host {
+    container-type: inline-size;
+  }
   .meta {
     display: grid;
     /* Two columns already on mobile: the fact sheet must not fill the first screen. */
@@ -41,7 +74,15 @@ if (data.team) items.push([t('project.meta.context'), data.team]);
     padding-block: var(--space-6);
     border-block: 1px solid var(--color-border);
   }
+  /* Narrow column (beside the cover, 320 px phones): one item per row. */
+  @container (max-width: 20rem) {
+    .meta {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+  }
   dt {
+    margin-bottom: var(--space-2);
     font-family: var(--font-mono);
     font-size: var(--text-meta);
     color: var(--color-text-subtle);
@@ -49,5 +90,28 @@ if (data.team) items.push([t('project.meta.context'), data.team]);
   dd {
     margin: 0;
     font-weight: 600;
+  }
+  /* Chips can wrap inside the narrow column instead of overflowing it. */
+  dd .chip {
+    white-space: normal;
+  }
+  .status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .dot {
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-text-subtle);
+  }
+  .status[data-tone='live'] .dot {
+    background: var(--color-success);
+    box-shadow: 0 0 0 3px rgb(157 221 187 / 0.18);
+  }
+  .status[data-tone='warm'] .dot {
+    background: var(--color-jupiter);
   }
 </style>

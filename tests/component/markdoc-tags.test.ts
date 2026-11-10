@@ -56,7 +56,9 @@ describe('ProjectMeta', () => {
   it('lists type, period, status and role', async () => {
     const html = await container.renderToString(ProjectMeta, { props: { data: base } });
     expect(html).toContain('Open source');
-    expect(html).toContain('Development, Documentation');
+    // One chip per role.
+    expect(html).toMatch(/<li class="chip"[^>]*>Development<\/li>/);
+    expect(html).toMatch(/<li class="chip"[^>]*>Documentation<\/li>/);
     expect(html).not.toContain('Context');
   });
 
