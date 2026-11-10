@@ -60,6 +60,29 @@ test.describe('mobile menu', () => {
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(main).toHaveJSProperty('inert', false);
   });
+
+  test('the close icon is centred in its button', async ({ browser }) => {
+    // Reduced motion: no transition to wait for before measuring the final X.
+    const ctx = await browser.newContext({ ...test.info().project.use, reducedMotion: 'reduce' });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    const toggle = page.getByRole('button', { name: 'Menu' });
+    await toggle.click();
+
+    const offsets = await toggle.evaluate((button) => {
+      const centre = (el: Element) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+      };
+      const b = centre(button);
+      return [...button.querySelectorAll('path')].map((p) => {
+        const c = centre(p);
+        return Math.hypot(c.x - b.x, c.y - b.y);
+      });
+    });
+    for (const offset of offsets) expect(offset).toBeLessThan(0.5);
+    await ctx.close();
+  });
 });
 
 test.describe('without JavaScript', () => {

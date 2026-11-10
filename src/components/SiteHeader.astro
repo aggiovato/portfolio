@@ -253,8 +253,13 @@ const languages = locales
     cursor: pointer;
   }
 
+  /*
+   * fill-box: each line rotates around its own centre. With the SVG default (view-box) the origin is
+   * the icon centre, so the lines, 4px above and below it, swing sideways and the X lands off-centre.
+   */
   .menu-toggle path {
     transition: transform var(--duration-fast) var(--ease-out);
+    transform-box: fill-box;
     transform-origin: center;
   }
 
