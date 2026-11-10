@@ -15,6 +15,11 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /*
+   * Mobile WebKit/Blink paint a rectangle over tapped links and buttons that ignores their radius
+   * (FAB, menu toggle). Controls have their own states, and keyboard focus keeps :focus-visible.
+   */
+  -webkit-tap-highlight-color: transparent;
   scroll-padding-top: calc(var(--header-h) + var(--space-4));
 }
 
