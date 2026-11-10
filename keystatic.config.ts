@@ -45,6 +45,13 @@ const requiredText = (label: string) => fields.text({ label, validation: { lengt
 const optionalText = (label: string) => fields.text({ label });
 
 /**
+ * On phones the content layout stacks every field above the article editor, which then starts
+ * thousands of pixels down. The form layout follows the schema order instead. The config is also
+ * read on the server (API), where there is no window: entryLayout only affects the UI.
+ */
+const isPhone = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+
+/**
  * fields.url only rejects unsafe schemes and accepts any text ("asdf"), while the Astro schema
  * uses z.url(). Require an absolute http(s) URL; the pattern also runs on empty values, so allow ''.
  */
@@ -63,11 +70,38 @@ const projects = (locale: Locale) =>
     // The file name doubles as the public slug, as in the hand-written files.
     slugField: 'slug',
     format: { contentField: 'content' },
-    entryLayout: 'content',
+    entryLayout: isPhone ? 'form' : 'content',
     columns: ['title', 'publicationStatus'],
     schema: {
       slug: fields.slug({ name: { label: 'Slug', description: 'Same value in every locale.' } }),
       title: fields.text({ label: 'Title', validation: { length: { min: 1 } } }),
+      // Right after the title: on phones (form layout) the article is reachable without scrolling
+      // past every field. The desktop content layout moves it to the main area regardless.
+      content: fields.markdoc({
+        label: 'Case study',
+        extension: 'mdoc',
+        options: { image: { directory: 'src/assets/projects', publicPath: '../../../assets/projects/' } },
+        // Mirrors the tags in markdoc.config.mjs so they can be edited instead of shown as raw blocks.
+        components: {
+          callout: wrapper({
+            label: 'Callout',
+            schema: {
+              type: select('Type', ['note', 'constraint', 'learning', 'editorial'], 'note'),
+              title: fields.text({ label: 'Title' }),
+            },
+          }),
+          decision: block({
+            label: 'Decision',
+            schema: {
+              problem: fields.text({ label: 'Problem', multiline: true }),
+              decision: fields.text({ label: 'Decision', multiline: true }),
+              alternatives: fields.text({ label: 'Alternatives', multiline: true }),
+              tradeoff: fields.text({ label: 'Trade-off', multiline: true }),
+              evidence: fields.text({ label: 'Evidence', multiline: true }),
+            },
+          }),
+        },
+      }),
       summary: fields.text({
         label: 'Summary',
         multiline: true,
@@ -116,31 +150,6 @@ const projects = (locale: Locale) =>
         demo: link('Demo URL'),
         code: link('Code URL'),
         docs: link('Docs URL'),
-      }),
-      content: fields.markdoc({
-        label: 'Case study',
-        extension: 'mdoc',
-        options: { image: { directory: 'src/assets/projects', publicPath: '../../../assets/projects/' } },
-        // Mirrors the tags in markdoc.config.mjs so they can be edited instead of shown as raw blocks.
-        components: {
-          callout: wrapper({
-            label: 'Callout',
-            schema: {
-              type: select('Type', ['note', 'constraint', 'learning', 'editorial'], 'note'),
-              title: fields.text({ label: 'Title' }),
-            },
-          }),
-          decision: block({
-            label: 'Decision',
-            schema: {
-              problem: fields.text({ label: 'Problem', multiline: true }),
-              decision: fields.text({ label: 'Decision', multiline: true }),
-              alternatives: fields.text({ label: 'Alternatives', multiline: true }),
-              tradeoff: fields.text({ label: 'Trade-off', multiline: true }),
-              evidence: fields.text({ label: 'Evidence', multiline: true }),
-            },
-          }),
-        },
       }),
     },
   });
