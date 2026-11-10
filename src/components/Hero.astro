@@ -551,7 +551,12 @@ const t = useTranslations(locale);
 
     if (desktop.matches) {
       // Short pause so the first paint is the text, not the animation (§15).
-      window.setTimeout(() => entrance(), 450);
+      const start = () => window.setTimeout(() => entrance(), 450);
+      // A prerendered page (speculation rules) runs scripts while hidden: fly once it is shown.
+      // `prerendering` is not in TypeScript's DOM lib yet.
+      const { prerendering } = document as Document & { prerendering?: boolean };
+      if (prerendering) document.addEventListener('prerenderingchange', start, { once: true });
+      else start();
     }
 
     /* ================= Rocket → «Back to top» FAB =================
