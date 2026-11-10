@@ -3,9 +3,10 @@
 Personal portfolio of Alejandro Lugo. Astro 7 · TypeScript strict · Content Collections + Markdoc ·
 CSS tokens · static output · English (default) + Spanish (`/es/`).
 
-- **Spec:** `docs/especificacion.md` (Spanish). Design and content decisions come from it; cite sections (§n).
+- **Spec:** `docs/especificacion.md` (Spanish, **local only**, gitignored like all of `docs/`). Design and
+  content decisions come from it; cite sections (§n). Never commit it.
 - **Language:** site copy in English and Spanish via `src/i18n/`; **all code comments in English**;
-  `.claude/` in English; spec and README in Spanish.
+  `.claude/` and README in English; the local spec in Spanish.
 - Logo and planet are provisional assets; do not treat them as final.
 - Non-final images (`docs/referencias/` design references, `src/assets/projects/` example screenshots)
   are gitignored and exist only locally; CI runs `npm run assets:placeholders`. Never commit them

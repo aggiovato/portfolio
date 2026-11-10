@@ -15,6 +15,7 @@ the next person to maintain. This is a small editorial site: prefer boring, read
 - State assumptions explicitly. If a request is ambiguous, ask before implementing.
 - If there is more than one valid interpretation, present the options and recommend one.
 - Design and content decisions come from `docs/especificacion.md` (cite the section, e.g. §15).
+  It is local only (gitignored); never commit it or copy long passages into versioned files.
   If a request contradicts the spec, say so before doing it.
 
 ## 2. Prefer the simplest solution
