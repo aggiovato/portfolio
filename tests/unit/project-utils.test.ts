@@ -10,6 +10,7 @@ import {
   isVisibleStatus,
   translationKey,
   withFallback,
+  withoutEmptyMedia,
   type ProjectLike,
 } from '../../src/lib/content/project-utils';
 
@@ -128,5 +129,22 @@ describe('getNextProject', () => {
 
   it('returns nothing when there is no other project', () => {
     expect(getNextProject(a, [a])).toBeUndefined();
+  });
+});
+
+describe('withoutEmptyMedia', () => {
+  it('turns an image object without src into undefined (Keystatic empty cover)', () => {
+    expect(withoutEmptyMedia({})).toBeUndefined();
+    expect(withoutEmptyMedia({ alt: 'alt text' })).toBeUndefined();
+  });
+
+  it('keeps an object with src for the schema to validate', () => {
+    const media = { src: './cover.png', alt: '' };
+    expect(withoutEmptyMedia(media)).toBe(media);
+  });
+
+  it('leaves non-objects untouched', () => {
+    expect(withoutEmptyMedia(undefined)).toBeUndefined();
+    expect(withoutEmptyMedia('x')).toBe('x');
   });
 });

@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { withoutEmptyMedia } from './lib/content/project-utils';
 
 /**
  * Project contract — docs/especificacion.md §12.
@@ -42,7 +43,11 @@ const projects = defineCollection({
         publishedAt: z.coerce.date().optional(),
         updatedAt: z.coerce.date().optional(),
         stack: z.array(stackItem).default([]),
-        cover: z.object({ src: image(), alt: z.string().min(1), caption: z.string().optional() }).optional(),
+        // Keystatic saves an empty cover as `{}` (or alt only): that means no cover.
+        cover: z.preprocess(
+          withoutEmptyMedia,
+          z.object({ src: image(), alt: z.string().min(1), caption: z.string().optional() }).optional(),
+        ),
         gallery: z
           .array(z.object({ src: image(), alt: z.string().min(1), caption: z.string().optional() }))
           .default([]),
