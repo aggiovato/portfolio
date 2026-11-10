@@ -52,6 +52,20 @@ const optionalText = (label: string) => fields.text({ label });
 const isPhone = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
 
 /**
+ * Keystatic sizes its app shell with `100vh`, which on mobile browsers is the height with the
+ * address bar hidden. With the bar (or the keyboard) shown the page overflows, the browser scrolls
+ * the document and the top bar with Save leaves the screen. Size the shell to the visible height
+ * instead. The shell's only stable hook is its inline `--primary-pane-width` custom property (the
+ * classes are generated).
+ */
+if (typeof document !== 'undefined' && !document.getElementById('keystatic-mobile-fix')) {
+  const style = document.createElement('style');
+  style.id = 'keystatic-mobile-fix';
+  style.textContent = '[style*="--primary-pane-width"] { height: 100dvh !important; }';
+  document.head.append(style);
+}
+
+/**
  * fields.url only rejects unsafe schemes and accepts any text ("asdf"), while the Astro schema
  * uses z.url(). Require an absolute http(s) URL; the pattern also runs on empty values, so allow ''.
  */
