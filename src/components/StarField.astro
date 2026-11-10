@@ -1,0 +1,78 @@
+---
+/**
+ * Subtle starry sky (decorative). Stars are generated at build time from a fixed seed:
+ * same sky on every visit, no JS and no extra image. A few twinkle very slowly.
+ */
+interface Props {
+  count?: number;
+  seed?: number;
+}
+const { count = 170, seed = 7 } = Astro.props;
+
+// mulberry32: tiny deterministic PRNG.
+function rng(a: number) {
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const rand = rng(seed);
+const W = 1600;
+const H = 1000;
+const stars = Array.from({ length: count }, (_, i) => {
+  const big = rand() > 0.94;
+  return {
+    x: +(rand() * W).toFixed(1),
+    y: +(rand() * H).toFixed(1),
+    r: +(big ? 1.1 + rand() * 0.6 : 0.4 + rand() * 0.6).toFixed(2),
+    o: +(big ? 0.45 + rand() * 0.25 : 0.12 + rand() * 0.3).toFixed(2),
+    warm: rand() > 0.85,
+    twinkle: big && i % 2 === 0,
+    delay: +(rand() * 8).toFixed(1),
+  };
+});
+---
+
+<svg class="starfield" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  {stars.map((s) => (
+    <circle
+      cx={s.x}
+      cy={s.y}
+      r={s.r}
+      fill={s.warm ? '#E8AE91' : '#F5F2FA'}
+      opacity={s.o}
+      class={s.twinkle ? 'twinkle' : undefined}
+      style={s.twinkle ? `animation-delay:${s.delay}s` : undefined}
+    />
+  ))}
+</svg>
+
+<style>
+  .starfield {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .twinkle {
+      animation: twinkle 7s ease-in-out infinite;
+    }
+  }
+
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 0.7;
+    }
+    50% {
+      opacity: 0.2;
+    }
+  }
+</style>

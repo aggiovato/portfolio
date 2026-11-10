@@ -1,0 +1,394 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectMeta from '../../../components/ProjectMeta.astro';
+import TechList from '../../../components/TechList.astro';
+import ContactCTA from '../../../components/ContactCTA.astro';
+import {
+  getNextProject,
+  getProjectAlternates,
+  getProjectsInLocale,
+  projectPath,
+  type Project,
+} from '../../../lib/content/projects';
+import { defaultLocale, localizePath, locales, resolveLocale, useTranslations } from '../../../i18n';
+
+// One route per case study and locale where it is written; untranslated ones have no page here
+// (listings link to the default-locale original instead of duplicating its content).
+export const getStaticPaths = (async () => {
+  const perLocale = await Promise.all(
+    locales.map(async (locale) => {
+      const projects = await getProjectsInLocale(locale);
+      return projects.map((project) => ({
+        params: { locale: locale === defaultLocale ? undefined : locale, slug: project.data.slug },
+        props: { project, next: getNextProject(project, projects) },
+      }));
+    }),
+  );
+  return perLocale.flat();
+}) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+  next?: Project;
+}
+
+const { project, next } = Astro.props;
+const { data } = project;
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const alternates = await getProjectAlternates(project);
+const { Content, headings } = await render(project);
+const toc = headings.filter((h) => h.depth === 2);
+const links = [
+  data.links.demo && { href: data.links.demo, label: t('project.liveDemo') },
+  data.links.code && { href: data.links.code, label: t('project.sourceCode') },
+  data.links.docs && { href: data.links.docs, label: t('project.documentation') },
+].filter(Boolean) as { href: string; label: string }[];
+---
+
+<BaseLayout
+  title={data.seo?.title ?? data.title}
+  description={data.seo?.description ?? data.summary}
+  ogImage={data.cover?.src.src}
+  noindex={data.publicationStatus !== 'published'}
+  alternates={alternates}
+>
+  <article>
+    <header class="container head">
+      <p class="path-label">
+        <a href={localizePath('/work/', locale)}>~/work</a>/<b>{data.slug}</b>
+      </p>
+      <h1 style={`view-transition-name: title-${data.slug}`}>{data.title}</h1>
+      {data.tagline && <p class="lead">{data.tagline}</p>}
+      <p class="summary">{data.summary}</p>
+      {links.length > 0 && (
+        <ul class="links">
+          {links.map((l) => (
+            <li>
+              <a class="link-underline" href={l.href} rel="noopener" target="_blank">
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </header>
+
+    {data.cover && (
+      <figure class="container cover">
+        <Image
+          style={`view-transition-name: cover-${data.slug}`}
+          src={data.cover.src}
+          alt={data.cover.alt}
+          widths={[640, 1024, 1440, 1920, 2560]}
+          sizes="(min-width: 1360px) 1280px, 94vw"
+          loading="eager"
+          fetchpriority="high"
+        />
+        {(data.cover.caption || data.links.demo) && (
+          <figcaption>
+            {data.cover.caption}
+            {data.links.demo && (
+              <>
+                {data.cover.caption && ' '}
+                <a href={data.links.demo} rel="noopener" target="_blank">
+                  {t('project.tryItLive')}
+                </a>
+              </>
+            )}
+          </figcaption>
+        )}
+      </figure>
+    )}
+
+    <div class="container meta-wrap">
+      <ProjectMeta data={data} />
+    </div>
+
+    <div class="container layout">
+      {toc.length > 2 && (
+        <nav class="toc" aria-label={t('project.onThisPage')}>
+          <details class="toc-compact">
+            <summary>{t('project.onThisPage')}</summary>
+            <ol>
+              {toc.map((h) => (
+                <li>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+            </ol>
+          </details>
+          <div class="toc-full">
+            <p class="toc-title">{t('project.onThisPage')}</p>
+            <ol>
+              {toc.map((h) => (
+                <li>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </nav>
+      )}
+
+      <div class="prose">
+        <Content />
+        {data.stack.length > 0 && (
+          <>
+            <h2 id="stack">{t('project.stack')}</h2>
+            <TechList stack={data.stack} />
+          </>
+        )}
+        {data.gallery.length > 0 && (
+          <>
+            <h2 id="gallery">{t('project.gallery')}</h2>
+            {data.gallery.map((g) => (
+              <figure class="shot">
+                <Image
+                  src={g.src}
+                  alt={g.alt}
+                  widths={[640, 1024, 1600, 2000]}
+                  sizes="(min-width: 1024px) 760px, 94vw"
+                />
+                {g.caption && <figcaption>{g.caption}</figcaption>}
+              </figure>
+            ))}
+          </>
+        )}
+      </div>
+    </div>
+
+    {next && (
+      <nav class="container next" aria-label={t('project.next')}>
+        <p class="path-label">{t('project.next')}</p>
+        <a href={projectPath(next)}>
+          <span class="next-title">{next.data.title}</span>
+          <span class="next-summary">{next.data.summary}</span>
+        </a>
+      </nav>
+    )}
+  </article>
+
+  <ContactCTA />
+</BaseLayout>
+
+<style>
+  .head {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-12);
+  }
+  .head .path-label a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .head .path-label a:hover {
+    color: var(--color-text);
+  }
+  h1 {
+    margin-top: var(--space-4);
+    font-size: var(--text-h1-project);
+    max-width: 18ch;
+    /* Box fitted to the text: the card → case study transition does not distort the title. */
+    width: fit-content;
+  }
+  /* Short lead (tagline) with the summary below it, less prominent. */
+  .lead {
+    margin-top: var(--space-4);
+    max-width: 30ch;
+    font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: var(--color-text);
+  }
+  .summary {
+    margin-top: var(--space-4);
+    max-width: 56ch;
+    color: var(--color-text-muted);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-8);
+    margin-top: var(--space-6);
+    padding: 0;
+    list-style: none;
+  }
+
+  .head {
+    padding-bottom: var(--space-8);
+  }
+  .cover :global(img) {
+    width: 100%;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-card-border);
+  }
+  /* Makes clear it is a screenshot (not a widget) and links to the real demo. */
+  .cover figcaption {
+    margin-top: var(--space-3);
+    font-size: var(--text-meta);
+    color: var(--color-text-subtle);
+  }
+  /* Larger touch area through padding (does not change the caption line height). */
+  .cover figcaption a {
+    padding-block: 0.75rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    text-underline-offset: 3px;
+  }
+  .meta-wrap {
+    margin-top: var(--space-8);
+  }
+
+  .layout {
+    display: grid;
+    gap: var(--space-8);
+    padding-block: var(--space-12) var(--space-24);
+  }
+
+  .toc-full {
+    display: none;
+  }
+  .toc details {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    padding: 0 var(--space-4);
+  }
+  .toc summary {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 650;
+  }
+  .toc ol {
+    margin: 0;
+    padding: 0 0 var(--space-3) 1.25rem;
+    color: var(--color-text-subtle);
+  }
+  .toc a {
+    display: inline-block;
+    padding-block: var(--space-1);
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+  .toc a:hover {
+    color: var(--color-text);
+  }
+
+  @media (min-width: 1024px) {
+    .layout {
+      grid-template-columns: 14rem minmax(0, var(--measure));
+      gap: var(--space-16);
+    }
+    .toc {
+      position: sticky;
+      top: calc(var(--header-h) + var(--space-8));
+      align-self: start;
+    }
+    .toc-compact {
+      display: none;
+    }
+    .toc-full {
+      display: block;
+    }
+    .toc-title {
+      margin-bottom: var(--space-2);
+      font-family: var(--font-mono);
+      font-size: var(--text-meta);
+      color: var(--color-text-subtle);
+    }
+    .toc-full ol {
+      padding-bottom: 0;
+    }
+    .prose {
+      grid-column: 2;
+    }
+  }
+
+  /* ---------- Case study prose ---------- */
+  .prose {
+    max-width: var(--measure);
+  }
+  .prose :global(h2) {
+    margin-top: var(--space-16);
+    margin-bottom: var(--space-4);
+    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
+  }
+  .prose :global(h3) {
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-2);
+    font-size: 1.25rem;
+  }
+  .prose :global(> :first-child) {
+    margin-top: 0;
+  }
+  .prose :global(p),
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin-bottom: var(--space-4);
+    color: var(--color-text-muted);
+  }
+  .prose :global(strong) {
+    color: var(--color-text);
+  }
+  .prose :global(a) {
+    color: var(--color-accent);
+    text-underline-offset: 3px;
+  }
+  .prose :global(:not(pre) > code) {
+    padding: 0.1em 0.35em;
+    border-radius: 6px;
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+  }
+  .prose :global(pre) {
+    margin-block: var(--space-6);
+    padding: var(--space-4) var(--space-6);
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-border);
+    overflow-x: auto;
+  }
+
+  .next {
+    padding-bottom: var(--space-16);
+  }
+  .next a {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding: var(--space-8);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    text-decoration: none;
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+  .next a:hover {
+    border-color: var(--color-accent);
+  }
+  .next-title {
+    font-size: var(--text-h3);
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+  .next-summary {
+    color: var(--color-text-muted);
+  }
+
+  .shot {
+    margin-block: var(--space-6) var(--space-8);
+  }
+  .shot :global(img) {
+    width: 100%;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-card-border);
+  }
+  .shot figcaption {
+    margin-top: var(--space-2);
+    font-size: var(--text-meta);
+    color: var(--color-text-subtle);
+  }
+</style>

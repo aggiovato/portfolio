@@ -1,0 +1,64 @@
+---
+slug: yrest-vscode
+title: yRest for VS Code
+summary: A VS Code extension for yRest files — syntax highlighting, hover documentation, context-aware autocompletion and diagnostics for db.yml and *.yrest.yml, also inside yrest tagged templates in TypeScript and JavaScript.
+tagline: Write db.yml with an editor that understands it.
+publicationStatus: draft
+projectStatus: active
+projectType: open-source
+featured: true
+featuredOrder: 3
+categories:
+  - VS Code
+  - TypeScript
+  - Developer tools
+role:
+  - Development
+  - Documentation
+periodLabel: June 2026
+stack:
+  - name: VS Code Extension API
+    layer: interface
+    rationale: Hover, completion and diagnostics providers.
+  - name: TextMate grammars
+    layer: interface
+    rationale: Highlighting for yRest files, injected into plain YAML and into TS/JS tagged templates.
+  - name: TypeScript + yaml
+    layer: runtime
+    rationale: Validation logic on top of the same YAML parser yRest uses.
+  - name: Vitest
+    layer: quality
+    rationale: Unit tests for the validation rules and shared constants.
+links:
+  code: https://github.com/aggiovato/yRest-vscode
+  docs: https://marketplace.visualstudio.com/items?itemName=aggiovato.yrest
+---
+
+## Problem
+
+yRest's `db.yml` format grew its own conventions: relations (`_rel`), custom routes (`_routes`), a compact relation DSL and template variables. Without editor support, a typo in a collection name or a key without its `_` prefix only showed up when the server ran.
+
+## My contribution
+
+I built and published the extension on my own: grammars, providers, validation rules, tests and the release pipeline.
+
+## Solution
+
+- **Highlighting** for reserved keys, relation types and aliases, cardinalities, the relation DSL, template variables and path parameters.
+- **Hover documentation** for every reserved key, with a short description and a YAML example.
+- **Autocompletion** in ten contexts, such as collection names for relation targets or HTTP methods for `_method`.
+- **Diagnostics** on every keystroke: YAML errors with exact position, relations pointing to collections that don't exist, invalid relation types or cardinalities, and `_routes` keys written without their `_` prefix.
+- **The same help inside tests:** hover and diagnostics also work in ``yrest`...` `` tagged templates in TypeScript and JavaScript.
+
+## Technical decisions
+
+{% decision
+   problem="Errors were reported on the first occurrence of a word anywhere in the file, causing false positives."
+   decision="Scope each diagnostic to its section, searching from the _rel: or _routes: offset."
+   alternatives="Highlight the whole line, or skip positions."
+   tradeoff="The validator has to track section offsets."
+   evidence="Fixed in v0.2.2; a field named status inside _schema is no longer flagged." /%}
+
+## Quality
+
+45 unit tests cover the validation rules. CI compiles, lints and packages the extension on every push; tags publish to the VS Code Marketplace.

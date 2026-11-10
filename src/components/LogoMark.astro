@@ -1,0 +1,33 @@
+---
+/**
+ * A-rocket mark — PROVISIONAL.
+ * Stroke approximation until the official vector SVG arrives.
+ * When it does: replace the <svg> content keeping a coherent viewBox and
+ * `fill="currentColor"` so it inherits colour (mono / reverse / lavender).
+ */
+interface Props {
+  size?: number;
+  class?: string;
+  title?: string;
+}
+const { size = 40, class: className, title } = Astro.props;
+---
+
+<svg
+  class={className}
+  width={size}
+  height={Math.round(size * 0.8)}
+  viewBox="0 0 120 96"
+  fill="none"
+  stroke="currentColor"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  role={title ? 'img' : undefined}
+  aria-label={title}
+  aria-hidden={title ? undefined : 'true'}
+>
+  <path d="M40 82 L55 26 Q60 10 65 26 L80 82" stroke-width="13"></path>
+  <path d="M49 60 Q60 57 71 60" stroke-width="8"></path>
+  <path d="M45 44 C30 50 16 57 14 65 C13 72 28 79 41 84" stroke-width="8"></path>
+  <path d="M75 44 C90 50 104 57 106 65 C107 72 92 79 79 84" stroke-width="8"></path>
+</svg>

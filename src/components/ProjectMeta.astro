@@ -1,0 +1,53 @@
+---
+import type { Project } from '../lib/content/projects';
+import { resolveLocale, useTranslations } from '../i18n';
+
+interface Props {
+  data: Project['data'];
+}
+const { data } = Astro.props;
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+const status = t(`project.status.${data.projectStatus}`);
+const items: [string, string][] = [
+  [t('project.meta.type'), t(`project.type.${data.projectType}`)],
+  [t('project.meta.period'), data.periodLabel],
+  [
+    t('project.meta.status'),
+    // Professional work without a public demo: say so instead of leaving the reader looking for a link.
+    data.projectType === 'professional' && !data.links.demo
+      ? `${status} · ${t('project.privateProduct')}`
+      : status,
+  ],
+  [t('project.meta.role'), data.role.join(', ')],
+];
+if (data.team) items.push([t('project.meta.context'), data.team]);
+---
+
+<dl class="meta">
+  {items.map(([k, v]) => (
+    <div>
+      <dt>{k}</dt>
+      <dd>{v}</dd>
+    </div>
+  ))}
+</dl>
+
+<style>
+  .meta {
+    display: grid;
+    /* Two columns already on mobile: the fact sheet must not fill the first screen. */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+    gap: var(--space-4) var(--space-8);
+    padding-block: var(--space-6);
+    border-block: 1px solid var(--color-border);
+  }
+  dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-text-subtle);
+  }
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+</style>

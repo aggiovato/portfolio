@@ -1,0 +1,116 @@
+---
+import LogoMark from './LogoMark.astro';
+import { nav, site } from '../data/site';
+import { localizePath, resolveLocale, useTranslations } from '../i18n';
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container inner">
+    <div class="sign">
+      <LogoMark size={32} class="sign-mark" />
+      <p>
+        <strong>{site.brand}</strong> {t('footer.meaning')}
+        <br />
+        <span class="muted">{t('footer.builtBy', { person: site.person })}</span>
+      </p>
+    </div>
+
+    <nav aria-label={t('footer.label')}>
+      <ul>
+        {nav.map((item) => (
+          <li>
+            <a href={localizePath(item.href, locale)}>{t(item.label)}</a>
+          </li>
+        ))}
+        <li>
+          <a href={`mailto:${site.email}`}>{site.email}</a>
+        </li>
+        <li>
+          <a href={site.links.github} rel="me noopener" target="_blank">
+            GitHub
+          </a>
+        </li>
+        {site.links.linkedin && (
+          <li>
+            <a href={site.links.linkedin} rel="me noopener" target="_blank">
+              LinkedIn
+            </a>
+          </li>
+        )}
+      </ul>
+    </nav>
+
+    <p class="legal">
+      © {year} {site.person}
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    padding-block: var(--space-12) max(var(--space-8), env(safe-area-inset-bottom));
+    color: var(--color-text-muted);
+    font-size: 0.9375rem;
+  }
+
+  .inner {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .sign {
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+
+  .sign :global(.sign-mark) {
+    color: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .sign strong {
+    color: var(--color-text);
+  }
+
+  .muted,
+  .legal {
+    color: var(--color-text-subtle);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-6);
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--color-text);
+  }
+
+  @media (min-width: 900px) {
+    .inner {
+      grid-template-columns: 1fr auto;
+      align-items: start;
+    }
+    .legal {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

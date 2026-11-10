@@ -1,0 +1,92 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import { site } from '../../data/site';
+import { localeParams, resolveLocale, useTranslations } from '../../i18n';
+
+export const getStaticPaths = (() => localeParams()) satisfies GetStaticPaths;
+
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+
+const channels = [
+  { label: t('contact.email'), value: site.email, href: `mailto:${site.email}` },
+  { label: 'GitHub', value: site.links.github.replace('https://', ''), href: site.links.github },
+  site.links.linkedin && {
+    label: 'LinkedIn',
+    value: site.links.linkedin.replace('https://', ''),
+    href: site.links.linkedin,
+  },
+].filter(Boolean) as { label: string; value: string; href: string }[];
+---
+
+<BaseLayout title={t('contact.title')} description={t('contact.description', { person: site.person })}>
+  <section class="section">
+    <div class="container">
+      <SectionHeading path="contact" id="page-title" level="h1">
+        {t('contact.heading')}
+      </SectionHeading>
+      <p class="intro">{t('contact.intro')}</p>
+
+      <dl class="channels">
+        {channels.map((c) => (
+          <div>
+            <dt>{c.label}</dt>
+            <dd>
+              <a href={c.href} rel={c.href.startsWith('http') ? 'me noopener' : undefined}>
+                {c.value}
+              </a>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro {
+    margin-top: calc(var(--space-8) * -1);
+    margin-bottom: var(--space-12);
+    max-width: 48ch;
+    font-size: var(--text-lead);
+    color: var(--color-text-muted);
+  }
+  .channels {
+    display: grid;
+    max-width: 40rem;
+  }
+  .channels > div {
+    display: grid;
+    gap: var(--space-1);
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+  dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-text-subtle);
+  }
+  dd {
+    margin: 0;
+  }
+  dd a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    font-size: var(--text-h3);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  dd a:hover {
+    color: var(--color-accent);
+  }
+  @media (min-width: 640px) {
+    .channels > div {
+      grid-template-columns: 8rem 1fr;
+      align-items: center;
+    }
+  }
+</style>

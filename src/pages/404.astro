@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { defaultLocale, useTranslations } from '../i18n';
+
+// Static hosts serve a single /404.html, so it is rendered in the default locale.
+const t = useTranslations(defaultLocale);
+---
+
+<BaseLayout title={t('notFound.title')} noindex>
+  <section class="section">
+    <div class="container">
+      <p class="path-label">
+        ~/<b>404</b>
+      </p>
+      <h1>{t('notFound.heading')}</h1>
+      <p class="lead">{t('notFound.body')}</p>
+      <ul>
+        <li>
+          <a class="btn btn-primary" href="/">
+            {t('notFound.home')}
+          </a>
+        </li>
+        <li>
+          <a class="link-underline" href="/work/">
+            {t('notFound.projects')}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin-top: var(--space-2);
+    font-size: var(--text-h1-project);
+  }
+  .lead {
+    margin-block: var(--space-6) var(--space-8);
+    max-width: 48ch;
+    font-size: var(--text-lead);
+    color: var(--color-text-muted);
+  }
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4) var(--space-8);
+    padding: 0;
+    list-style: none;
+  }
+</style>

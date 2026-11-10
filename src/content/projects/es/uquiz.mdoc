@@ -1,0 +1,96 @@
+---
+slug: uquiz
+title: UQuiz
+summary: Una app de preguntas para Android, offline-first, hecha con Kotlin y Jetpack Compose, con un modo Estudio para repasar a tu ritmo y un modo Juego con temporizadores adaptativos, puntuación y un ranking personal.
+tagline: Estudia a tu ritmo o compite contra el reloj.
+publicationStatus: draft
+projectStatus: completed
+projectType: personal
+featured: true
+featuredOrder: 2
+categories:
+  - Android
+  - Kotlin
+  - Jetpack Compose
+role:
+  - Diseño de producto
+  - Desarrollo Android
+periodLabel: Enero – mayo de 2026
+stack:
+  - name: Kotlin + Jetpack Compose
+    layer: interface
+    rationale: UI declarativa con un pequeño sistema de diseño propio (tokens y componentes base).
+  - name: Room
+    layer: data
+    rationale: Almacenamiento SQLite local para que el contenido y el progreso funcionen sin conexión.
+  - name: DataStore
+    layer: data
+    rationale: Preferencias del usuario, como el tema y el idioma.
+  - name: Coroutines + Flow
+    layer: runtime
+    rationale: Lecturas reactivas desde los repositorios hasta los ViewModels.
+  - name: Kotlinx Serialization
+    layer: tooling
+    rationale: Importación y exportación de packs de preguntas como archivos JSON .uquiz.
+  - name: JUnit 4 + MockK
+    layer: quality
+    rationale: Tests unitarios de la lógica de puntuación, tiempos y utilidades del juego.
+cover:
+  src: ../../../assets/projects/uquiz/cover.png
+  alt: Tres pantallas de UQuiz una junto a otra — estadísticas personales con precisión y sesiones, el detalle de un pack «Angular 20 – RxJS» con 20 preguntas y el resumen de una partida con la puntuación de la sesión.
+  caption: Capturas de la app UQuiz para Android.
+gallery:
+  - src: ../../../assets/projects/uquiz/library.jpg
+    alt: Biblioteca del modo Estudio con carpetas como Frontend, Java y UNIVERSAE y un campo de búsqueda de packs.
+    caption: Biblioteca — preguntas organizadas en carpetas y packs.
+  - src: ../../../assets/projects/uquiz/game.jpg
+    alt: Inicio del modo Juego con una tarjeta de partida aleatoria y packs en curso con sus barras de progreso.
+    caption: Modo Juego — continuar packs en curso o empezar una partida aleatoria.
+  - src: ../../../assets/projects/uquiz/study_session.jpg
+    alt: Introducción del modo Estudio para el pack Tech Mix, con 40 preguntas y dificultad media.
+    caption: Introducción del modo Estudio.
+  - src: ../../../assets/projects/uquiz/study_summary.jpg
+    alt: Resumen de estudio con 10 respuestas correctas, 0 incorrectas, 100 % de precisión y 45 segundos de tiempo efectivo.
+    caption: Resumen de estudio.
+links:
+  code: https://github.com/aggiovato/uquiz
+---
+
+## Problema
+
+Quería entrenar conocimientos técnicos (Angular, RxJS, Java…) con mis propias preguntas, sin conexión y en dos modos: repaso tranquilo mientras aprendo y presión cuando quiero ponerme a prueba.
+
+## Mi contribución
+
+Un proyecto personal: idea de producto, pantallas, arquitectura, reglas del juego y tests.
+
+## Solución
+
+- **Contenido:** carpetas, packs y preguntas de opción múltiple con 2–6 opciones, dificultad y una explicación opcional. Los packs se pueden compartir como archivos JSON `.uquiz`.
+- **Modo Estudio:** repaso secuencial con respuesta inmediata y niveles de dominio por pregunta (Nueva → Aprendiendo → Familiar → Dominada).
+- **Modo Juego:** cada pregunta tiene su propia cuenta atrás y después un tiempo extra en el que las respuestas siguen contando, pero cuestan más.
+- **Ranking:** un MMR personal suavizado con una media móvil ponderada exponencialmente, con nueve niveles de Initiate a Paragon e histéresis para que el rango no parpadee en los límites.
+
+## Decisiones técnicas
+
+{% decision
+   problem="Un temporizador fijo es injusto: las preguntas largas necesitan más tiempo de lectura que las cortas."
+   decision="Un presupuesto de tiempo adaptativo por pregunta: tiempo base según la dificultad más un extra por la longitud del texto, combinado con el historial del usuario y acotado entre 5 y 60 segundos."
+   alternatives="Un temporizador fijo por pregunta o por dificultad."
+   tradeoff="La regla es más difícil de explicar a los jugadores, así que está documentada y cubierta por tests."
+   evidence="Tests unitarios de los tiempos base, el extra por longitud, su límite, la mezcla con el historial y el acotado." /%}
+
+{% decision
+   problem="La app tiene que funcionar sin conexión y seguir siendo mantenible a medida que crecen las funciones."
+   decision="Clean Architecture con módulos de dominio (contenido, intentos, estadísticas, ranking, usuario, importación/exportación) y Room como única fuente de verdad."
+   alternatives="Una sola capa de pantallas que hablan directamente con la base de datos."
+   tradeoff="Más archivos y código de mapeo por funcionalidad."
+   evidence="La capa de dominio no depende de Android, así que la lógica de puntuación y tiempos se prueba sin dispositivos." /%}
+
+## Calidad
+
+Los tests unitarios cubren la lógica de negocio pura: la puntuación del juego (todas las ramas), el cálculo del presupuesto de tiempo y las utilidades del juego.
+
+## Qué aprendí
+
+Las reglas de un juego hay que escribirlas como fórmulas antes de programarlas; así ajustar la puntuación y los temporizadores fue mucho más fácil.

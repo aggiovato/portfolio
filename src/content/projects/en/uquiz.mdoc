@@ -1,0 +1,96 @@
+---
+slug: uquiz
+title: UQuiz
+summary: An offline-first Android quiz app built with Kotlin and Jetpack Compose, with a Study mode for self-paced review and a Game mode with adaptive timers, scoring and a personal ranking.
+tagline: Study at your pace, or race the clock.
+publicationStatus: draft
+projectStatus: completed
+projectType: personal
+featured: true
+featuredOrder: 2
+categories:
+  - Android
+  - Kotlin
+  - Jetpack Compose
+role:
+  - Product design
+  - Android development
+periodLabel: January – May 2026
+stack:
+  - name: Kotlin + Jetpack Compose
+    layer: interface
+    rationale: Declarative UI with a small in-house design system (tokens and base components).
+  - name: Room
+    layer: data
+    rationale: Local SQLite storage so content and progress work fully offline.
+  - name: DataStore
+    layer: data
+    rationale: User preferences such as theme and language.
+  - name: Coroutines + Flow
+    layer: runtime
+    rationale: Reactive reads from repositories into ViewModels.
+  - name: Kotlinx Serialization
+    layer: tooling
+    rationale: Import and export of question packs as .uquiz JSON files.
+  - name: JUnit 4 + MockK
+    layer: quality
+    rationale: Unit tests for the scoring, timing and game utility logic.
+cover:
+  src: ../../../assets/projects/uquiz/cover.png
+  alt: Three UQuiz screens side by side — personal stats with accuracy and sessions, the detail of an "Angular 20 – RxJS" pack with 20 questions, and a game summary with the session score.
+  caption: Screenshots of the UQuiz Android app.
+gallery:
+  - src: ../../../assets/projects/uquiz/library.jpg
+    alt: Study mode library with folders such as Frontend, Java and UNIVERSAE and a search field for packs.
+    caption: Library — questions organised into folders and packs.
+  - src: ../../../assets/projects/uquiz/game.jpg
+    alt: Game mode home with a random play card and packs in progress with their completion bars.
+    caption: Game mode — continue packs in progress or start a random game.
+  - src: ../../../assets/projects/uquiz/study_session.jpg
+    alt: Study mode intro for the Tech Mix pack, with 40 questions and medium average difficulty.
+    caption: Study mode intro.
+  - src: ../../../assets/projects/uquiz/study_summary.jpg
+    alt: Study summary showing 10 correct answers, 0 incorrect, 100% accuracy and 45 seconds of effective time.
+    caption: Study summary.
+links:
+  code: https://github.com/aggiovato/uquiz
+---
+
+## Problem
+
+I wanted to train technical knowledge (Angular, RxJS, Java…) with my own questions, offline, and in two moods: calm review when learning, and pressure when testing myself.
+
+## My contribution
+
+A personal project: product idea, screens, architecture, game rules and tests.
+
+## Solution
+
+- **Content:** folders, packs and multiple-choice questions with 2–6 options, difficulty and an optional explanation. Packs can be shared as `.uquiz` JSON files.
+- **Study mode:** sequential review with immediate feedback and per-question mastery levels (New → Learning → Familiar → Mastered).
+- **Game mode:** each question gets its own countdown, then an overtime window where answers still count but cost more.
+- **Ranking:** a personal MMR smoothed with an exponentially weighted moving average, with nine tiers from Initiate to Paragon and hysteresis so the rank doesn't flicker at the borders.
+
+## Technical decisions
+
+{% decision
+   problem="A fixed timer is unfair: long questions need more reading time than short ones."
+   decision="An adaptive time budget per question: base time by difficulty plus a bonus by text length, blended with the user's history and clamped between 5 and 60 seconds."
+   alternatives="One fixed timer per question or per difficulty."
+   tradeoff="The rule is harder to explain to players, so it is documented and covered by tests."
+   evidence="Unit tests for base times, length bonus, its cap, the historical blend and the clamp." /%}
+
+{% decision
+   problem="The app has to work without a connection and stay maintainable as features grow."
+   decision="Clean Architecture with domain slices (content, attempts, stats, ranking, user, import/export) and Room as the only source of truth."
+   alternatives="A single layer of screens talking to the database directly."
+   tradeoff="More files and mapping code per feature."
+   evidence="The domain layer has no Android dependencies, so scoring and timing logic is tested without devices." /%}
+
+## Quality
+
+Unit tests cover the pure business logic: game scoring (every branch), the time budget calculation and game utilities.
+
+## What I learned
+
+Game rules need to be written down as formulas before they are coded; it made tuning the scoring and timers much easier.

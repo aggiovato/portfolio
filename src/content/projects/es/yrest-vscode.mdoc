@@ -1,0 +1,64 @@
+---
+slug: yrest-vscode
+title: yRest para VS Code
+summary: Extensión de VS Code para archivos de yRest — resaltado, documentación al pasar el ratón, autocompletado según el contexto y diagnósticos para db.yml y *.yrest.yml, también en plantillas yrest de TS y JS.
+tagline: Escribe db.yml con un editor que lo entiende.
+publicationStatus: draft
+projectStatus: active
+projectType: open-source
+featured: true
+featuredOrder: 3
+categories:
+  - VS Code
+  - TypeScript
+  - Herramientas para desarrolladores
+role:
+  - Desarrollo
+  - Documentación
+periodLabel: Junio de 2026
+stack:
+  - name: VS Code Extension API
+    layer: interface
+    rationale: Proveedores de hover, autocompletado y diagnósticos.
+  - name: Gramáticas TextMate
+    layer: interface
+    rationale: Resaltado de los archivos de yRest, inyectado en YAML normal y en plantillas etiquetadas de TS/JS.
+  - name: TypeScript + yaml
+    layer: runtime
+    rationale: Lógica de validación sobre el mismo parser de YAML que usa yRest.
+  - name: Vitest
+    layer: quality
+    rationale: Tests unitarios de las reglas de validación y las constantes compartidas.
+links:
+  code: https://github.com/aggiovato/yRest-vscode
+  docs: https://marketplace.visualstudio.com/items?itemName=aggiovato.yrest
+---
+
+## Problema
+
+El formato `db.yml` de yRest fue creando sus propias convenciones: relaciones (`_rel`), rutas personalizadas (`_routes`), un DSL compacto de relaciones y variables de plantilla. Sin soporte en el editor, una errata en el nombre de una colección o una clave sin su prefijo `_` sólo aparecía al arrancar el servidor.
+
+## Mi contribución
+
+Construí y publiqué la extensión por mi cuenta: gramáticas, proveedores, reglas de validación, tests y el pipeline de publicación.
+
+## Solución
+
+- **Resaltado** de claves reservadas, tipos y alias de relación, cardinalidades, el DSL de relaciones, variables de plantilla y parámetros de ruta.
+- **Documentación al pasar el ratón** para cada clave reservada, con una descripción corta y un ejemplo en YAML.
+- **Autocompletado** en diez contextos, como los nombres de colección en los destinos de una relación o los métodos HTTP en `_method`.
+- **Diagnósticos** en cada pulsación: errores de YAML con su posición exacta, relaciones que apuntan a colecciones inexistentes, tipos de relación o cardinalidades no válidos y claves de `_routes` escritas sin su prefijo `_`.
+- **La misma ayuda dentro de los tests:** el hover y los diagnósticos también funcionan en plantillas etiquetadas ``yrest`...` `` de TypeScript y JavaScript.
+
+## Decisiones técnicas
+
+{% decision
+   problem="Los errores se señalaban en la primera aparición de una palabra en cualquier parte del archivo, lo que provocaba falsos positivos."
+   decision="Limitar cada diagnóstico a su sección, buscando desde la posición de _rel: o _routes:."
+   alternatives="Resaltar la línea entera u omitir las posiciones."
+   tradeoff="El validador tiene que llevar la cuenta de dónde empieza cada sección."
+   evidence="Corregido en la v0.2.2; un campo llamado status dentro de _schema ya no se marca." /%}
+
+## Calidad
+
+45 tests unitarios cubren las reglas de validación. La CI compila, pasa el linter y empaqueta la extensión en cada push; las etiquetas de versión publican en el VS Code Marketplace.

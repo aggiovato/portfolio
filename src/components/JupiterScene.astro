@@ -1,0 +1,163 @@
+---
+/**
+ * Decorative hero scene (spec §4 «Jupiter assets», §15). Everything is aria-hidden.
+ *
+ * Geometry: the planet is a square of side --d. The static rocket and label live inside that
+ * square in % of it, so they always land on the limb whatever the width.
+ * With JS (desktop), Hero.astro hides both and animates the arrival with the same logic as the
+ * clicks; without JS they stay as a static composition.
+ *
+ * Asset: src/assets/hero/jupiter.png — disc cropped to r=546 px (the original has noise on the
+ * outline from r≈550), softened edge, limb darkened towards deep lavender and flipped
+ * horizontally so the Great Red Spot faces the left limb. Spot ≈ (38 %, 62 %).
+ */
+import { Picture } from 'astro:assets';
+import LogoMark from './LogoMark.astro';
+import jupiter from '../assets/hero/jupiter.png';
+import { resolveLocale, useTranslations } from '../i18n';
+
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+---
+
+<div class="scene" aria-hidden="true">
+  <div class="planet">
+    <Picture
+      src={jupiter}
+      formats={['avif', 'webp']}
+      fallbackFormat="webp"
+      widths={[480, 720, 1098]}
+      sizes="(min-width: 1024px) clamp(660px, 56vw, 960px), 150vw"
+      alt=""
+      loading="eager"
+      fetchpriority="high"
+      class="planet-img"
+    />
+
+    <div class="rocket" data-arrival>
+      <LogoMark size={52} />
+    </div>
+    <p class="arrival">{t('hero.arrivalPoint')}</p>
+  </div>
+</div>
+
+<style>
+  /* Fade only on the bottom band: the planet blends into the horizon instead of being cut by the
+     hero edge. The rest of the image keeps all its detail. */
+  .scene {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 120px), transparent calc(100% - 6px));
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 120px), transparent calc(100% - 6px));
+  }
+
+  @media (min-width: 1024px) {
+    .scene {
+      -webkit-mask-image: linear-gradient(
+        to bottom,
+        #000 calc(100% - 220px),
+        rgb(0 0 0 / 0.45) calc(100% - 90px),
+        transparent calc(100% - 8px)
+      );
+      mask-image: linear-gradient(
+        to bottom,
+        #000 calc(100% - 220px),
+        rgb(0 0 0 / 0.45) calc(100% - 90px),
+        transparent calc(100% - 8px)
+      );
+    }
+  }
+
+  /* ---------- Planet ---------- */
+  .planet {
+    --d: 150vw;
+    position: absolute;
+    z-index: 1;
+    width: var(--d);
+    aspect-ratio: 1;
+    /* Mobile/tablet: only the top arc, 160–200 px visible. */
+    left: calc(50% - var(--d) * 0.42);
+    top: calc(100% - clamp(160px, 48vw, 200px));
+  }
+
+  /* Atmospheric halo: only a ring (transparent centre), so no flat lavender disc shows while the
+     image loads. The disc covers ~94 % of the halo radius (inset -3 %). */
+  .planet::before {
+    content: '';
+    position: absolute;
+    inset: -3%;
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      transparent 90%,
+      rgb(198 165 255 / 0.16) 94%,
+      rgb(121 80 232 / 0.05) 97%,
+      transparent 100%
+    );
+  }
+
+  /* Slightly less saturated and bright so it does not compete with the headline (static filter, not animated). */
+  .planet :global(.planet-img) {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    filter: saturate(0.86) brightness(0.9);
+  }
+
+  .rocket,
+  .arrival {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .planet {
+      --d: 110vw;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .planet {
+      /* 660 px minimum: on ~1024 px screens the planet also sinks behind the curve. */
+      --d: clamp(660px, 56vw, 960px);
+      /* Shows ~34 % of the screen width; the spot sits at ~62 % of the hero height. */
+      left: 66%;
+      top: calc(62% - var(--d) * 0.62);
+    }
+
+    /* Arrival point on the upper-left limb: (11 %, 31 %) of the planet. */
+    .rocket {
+      display: block;
+      position: absolute;
+      left: calc(11% - 26px);
+      top: calc(31% - 26px);
+      color: var(--color-accent);
+      transform: rotate(35deg);
+      filter: drop-shadow(0 0 10px rgb(18 19 26 / 0.9)) drop-shadow(0 0 18px rgb(121 80 232 / 0.6));
+    }
+
+    .arrival {
+      display: block;
+      position: absolute;
+      left: calc(11% - 12px);
+      top: calc(31% - 62px);
+      padding: 2px var(--space-2);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      white-space: nowrap;
+      color: var(--color-text);
+      border: 1px solid var(--color-control-border);
+      border-radius: 6px;
+      background: rgb(18 19 26 / 0.78);
+    }
+  }
+
+  /* With JS the entrance flight replaces the static composition (no flash).
+     Same condition as `desktop` in the Hero.astro script. */
+  @media (min-width: 1024px) and (pointer: fine) {
+    :global(.js) .rocket,
+    :global(.js) .arrival {
+      visibility: hidden;
+    }
+  }
+</style>

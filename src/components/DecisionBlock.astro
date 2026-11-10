@@ -1,0 +1,69 @@
+---
+import { resolveLocale, useTranslations } from '../i18n';
+
+/** Technical decision with alternatives and trade-off (spec §10, decision narrative template). */
+interface Props {
+  problem: string;
+  decision: string;
+  alternatives?: string;
+  tradeoff?: string;
+  evidence?: string;
+}
+const { problem, decision, alternatives, tradeoff, evidence } = Astro.props;
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+const rows = [
+  [t('decision.problem'), problem],
+  [t('decision.decision'), decision],
+  [t('decision.alternatives'), alternatives],
+  [t('decision.tradeoff'), tradeoff],
+  [t('decision.evidence'), evidence],
+].filter((r): r is [string, string] => Boolean(r[1]));
+---
+
+<section class="decision" aria-label={t('decision.label', { decision })}>
+  <dl>
+    {rows.map(([term, value]) => (
+      <div class="row">
+        <dt>{term}</dt>
+        <dd>{value}</dd>
+      </div>
+    ))}
+  </dl>
+</section>
+
+<style>
+  .decision {
+    margin-block: var(--space-8);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  .row {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4) var(--space-6);
+  }
+  .row + .row {
+    border-top: 1px solid var(--color-border);
+  }
+  .row:nth-child(2) {
+    background: var(--color-surface);
+  }
+  dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-accent);
+  }
+  dd {
+    margin: 0;
+  }
+  @media (min-width: 640px) {
+    .row {
+      grid-template-columns: 9rem 1fr;
+      gap: var(--space-6);
+    }
+    dt {
+      padding-top: 0.2em;
+    }
+  }
+</style>

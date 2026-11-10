@@ -1,0 +1,178 @@
+version: '3'
+
+vars:
+  PORT: 4321
+  # Node pinned in .nvmrc (Astro 7 needs >= 22.23.4). Without nvm, uses the node on PATH.
+  NODE_BIN:
+    sh: |
+      if [ -s "$HOME/.nvm/nvm.sh" ]; then
+        bash -c '. "$HOME/.nvm/nvm.sh" >/dev/null && dirname "$(nvm which "$(cat .nvmrc)" 2>/dev/null)"' 2>/dev/null || dirname "$(command -v node)"
+      else
+        dirname "$(command -v node)"
+      fi
+  # Task gives the system PATH priority over `env:`, so it is prepended explicitly.
+  NODE: env PATH="{{.NODE_BIN}}:$PATH"
+
+env:
+  PATH: '{{.NODE_BIN}}:{{.PATH}}'
+
+tasks:
+  default:
+    desc: List available tasks
+    cmd: task --list
+    silent: true
+
+  # ── Setup ──────────────────────────────────────────────────────────────────
+
+  setup:
+    desc: Install dependencies (uses the Node version from .nvmrc)
+    cmds:
+      - '{{.NODE}} node -v'
+      - '{{.NODE}} npm install'
+    sources: [package.json, package-lock.json]
+    generates: [node_modules/.package-lock.json]
+
+  assets:placeholders:
+    desc: Create neutral placeholders for referenced images that are not on disk (fresh clone / CI)
+    cmd: '{{.NODE}} node scripts/placeholder-assets.mjs'
+
+  # ── Development ────────────────────────────────────────────────────────────
+
+  dev:
+    desc: Start the Astro dev server in the foreground on :{{.PORT}} (shows drafts)
+    deps: [setup]
+    cmd: '{{.NODE}} npx astro dev --port {{.PORT}} {{.CLI_ARGS}}'
+
+  dev:bg:
+    desc: Start the dev server in the background (task dev:stop / dev:logs)
+    deps: [setup]
+    cmd: '{{.NODE}} npx astro dev --background --port {{.PORT}}'
+
+  dev:stop:
+    desc: Stop the background dev server
+    cmd: '{{.NODE}} npx astro dev stop'
+
+  dev:logs:
+    desc: Show the background dev server logs
+    cmd: '{{.NODE}} npx astro dev logs'
+
+  dev:host:
+    desc: Dev server exposed on the LAN, to test on a real phone
+    deps: [setup]
+    cmd: '{{.NODE}} npx astro dev --host --port {{.PORT}}'
+
+  # ── Build ──────────────────────────────────────────────────────────────────
+
+  build:
+    desc: Production build into dist/ (published projects only)
+    deps: [setup]
+    cmd: '{{.NODE}} npx astro build'
+
+  preview:
+    desc: Build and serve the production output locally
+    deps: [build]
+    cmd: '{{.NODE}} npx astro preview --port {{.PORT}}'
+
+  verify:drafts:
+    desc: Fail if a draft project (any locale) ended up in the production build or sitemap
+    deps: [build]
+    cmd: bash scripts/verify-drafts.sh
+    silent: true
+
+  # ── Quality ────────────────────────────────────────────────────────────────
+
+  check:
+    desc: Type-check .astro/.ts files and validate content schemas
+    deps: [setup]
+    cmd: '{{.NODE}} npx astro check'
+
+  lint:
+    desc: Check code with ESLint
+    deps: [setup]
+    cmd: '{{.NODE}} npx eslint .'
+
+  lint:fix:
+    desc: Auto-fix ESLint errors
+    deps: [setup]
+    cmd: '{{.NODE}} npx eslint . --fix'
+
+  format:
+    desc: Format all files with Prettier
+    deps: [setup]
+    cmd: '{{.NODE}} npx prettier --write .'
+
+  format:check:
+    desc: Check formatting without writing
+    deps: [setup]
+    cmd: '{{.NODE}} npx prettier --check .'
+
+  # ── Tests ──────────────────────────────────────────────────────────────────
+
+  test:
+    desc: Run unit + component tests (Vitest)
+    deps: [setup]
+    cmd: '{{.NODE}} npx vitest run {{.CLI_ARGS}}'
+
+  test:watch:
+    desc: Vitest in watch mode
+    deps: [setup]
+    cmd: '{{.NODE}} npx vitest {{.CLI_ARGS}}'
+
+  test:coverage:
+    desc: Unit + component tests with coverage of src/lib and src/i18n (coverage/)
+    deps: [setup]
+    cmd: '{{.NODE}} npx vitest run --coverage'
+
+  test:e2e:
+    desc: Run Playwright e2e (smoke, i18n, axe; desktop + mobile; builds dist-e2e/ with drafts on :4322)
+    deps: [setup]
+    cmd: '{{.NODE}} npx playwright test {{.CLI_ARGS}}'
+
+  test:ui:
+    desc: Open the Playwright UI runner
+    deps: [setup]
+    cmd: '{{.NODE}} npx playwright test --ui'
+
+  test:report:
+    desc: Open the last Playwright HTML report
+    cmd: '{{.NODE}} npx playwright show-report'
+
+  # ── Preflight ──────────────────────────────────────────────────────────────
+
+  preflight:
+    desc: Full pre-push check — format, lint, types, unit, build, drafts and e2e in order (same as CI)
+    cmds:
+      - task: format:check
+      - task: lint
+      - task: check
+      - task: test
+      - task: verify:drafts
+      - task: test:e2e
+      - cmd: |
+          printf "\n\033[1;34m┌──────────────────────────────────────────┐\033[0m\n"
+          printf "\033[1;34m│\033[0m  \033[1;36m✦  aggiovato · preflight results  ✦\033[0m   \033[1;34m│\033[0m\n"
+          printf "\033[1;34m└──────────────────────────────────────────┘\033[0m\n\n"
+          printf "  \033[1;32m✓\033[0m  \033[1mformat:check\033[0m    \033[2mcode style verified\033[0m\n"
+          printf "  \033[1;32m✓\033[0m  \033[1mlint\033[0m            \033[2mno ESLint issues\033[0m\n"
+          printf "  \033[1;32m✓\033[0m  \033[1mcheck\033[0m           \033[2mtypes and content schemas clean\033[0m\n"
+          printf "  \033[1;32m✓\033[0m  \033[1mtest\033[0m            \033[2munit + component tests passed\033[0m\n"
+          printf "  \033[1;32m✓\033[0m  \033[1mbuild\033[0m           \033[2mproduction build ok, no drafts leaked\033[0m\n"
+          printf "  \033[1;32m✓\033[0m  \033[1mtest:e2e\033[0m        \033[2me2e, i18n and a11y tests passed\033[0m\n"
+          printf "\n  \033[1;32m→  All checks passed — safe to push\033[0m\n\n"
+        silent: true
+
+  # ── Housekeeping ───────────────────────────────────────────────────────────
+
+  clean:
+    desc: Remove build output, Astro cache and test artifacts
+    cmd: rm -rf dist dist-e2e .astro test-results playwright-report coverage
+
+  ports:free:
+    desc: Kill any process on the dev (:{{.PORT}}) and test (:4322) ports
+    cmds:
+      - cmd: fuser -k {{.PORT}}/tcp 2>/dev/null || true
+        silent: true
+      - cmd: fuser -k 4322/tcp 2>/dev/null || true
+        silent: true
+      - cmd: echo "Ports {{.PORT}} and 4322 released."
+        silent: true

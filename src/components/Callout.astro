@@ -1,0 +1,45 @@
+---
+import { resolveLocale, useTranslations } from '../i18n';
+
+/** Markdoc `{% callout %}` tag: constraints, learnings or editorial notes inside a case study. */
+interface Props {
+  type?: 'note' | 'constraint' | 'learning' | 'editorial';
+  title?: string;
+}
+const { type = 'note', title } = Astro.props;
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+const defaultTitle = t(`callout.${type}`);
+---
+
+<aside class:list={['callout', `callout--${type}`]}>
+  <p class="callout-title">{title ?? defaultTitle}</p>
+  <div class="callout-body">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .callout {
+    margin-block: var(--space-8);
+    padding: var(--space-4) var(--space-6);
+    border-left: 3px solid var(--color-accent);
+    background: var(--color-surface);
+    border-radius: 0 var(--radius-control) var(--radius-control) 0;
+  }
+  .callout--constraint {
+    border-left-color: var(--color-jupiter);
+  }
+  .callout--editorial {
+    border-left-color: var(--color-error);
+  }
+  .callout-title {
+    font-weight: 700;
+    margin-bottom: var(--space-1);
+  }
+  .callout-body {
+    color: var(--color-text-muted);
+  }
+  .callout-body :global(p + p) {
+    margin-top: var(--space-2);
+  }
+</style>

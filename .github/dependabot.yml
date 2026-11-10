@@ -1,0 +1,22 @@
+# Weekly dependency updates. Astro packages move together (core, integrations, check), so they
+# arrive in one PR; CI is the gate. Major versions of Astro deserve a read of the upgrade guide.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      astro:
+        patterns: ['astro', '@astrojs/*']
+      testing:
+        patterns: ['vitest', '@vitest/*', '@playwright/test', '@axe-core/*']
+      lint-format:
+        patterns:
+          ['eslint', 'eslint-*', '@typescript-eslint/*', 'typescript-eslint', 'prettier', 'prettier-*']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

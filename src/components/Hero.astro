@@ -1,0 +1,1285 @@
+---
+import JupiterScene from './JupiterScene.astro';
+import StarField from './StarField.astro';
+import LogoMark from './LogoMark.astro';
+import { site } from '../data/site';
+import { localizePath, resolveLocale, useTranslations } from '../i18n';
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+// The `mission` object, flight notes and log are decorative code: they stay in English in every locale.
+---
+
+<section class="hero" aria-labelledby="hero-title" data-launchpad>
+  <StarField />
+  <JupiterScene />
+
+  <!-- Flight layer (desktop, decorative): the script draws trails, rocket and waypoint here. -->
+  <svg class="flight-layer" aria-hidden="true">
+    <defs></defs>
+  </svg>
+  <div class="flyer" aria-hidden="true" hidden>
+    <div class="flyer-body">
+      <LogoMark size={52} />
+    </div>
+  </div>
+  <div class="waypoint" aria-hidden="true" hidden>
+    <span class="waypoint-cross"></span>
+    <span class="waypoint-coords"></span>
+    <span class="waypoint-note"></span>
+  </div>
+
+  <div class="container hero-inner">
+    <div class="copy">
+      <!-- Flight log: ruler with ticks and numbered entries (decorative). -->
+      <div class="log" aria-hidden="true">
+        <span class="log-head">log</span>
+        <ol>
+          <li>01</li>
+          <li>02</li>
+          <li>03</li>
+        </ol>
+        <span class="log-foot">sol 01</span>
+      </div>
+
+      <div class="content">
+        <p class="path-label" aria-hidden="true">
+          portfolio / <b>introduction.ts</b>
+        </p>
+
+        <h1 id="hero-title">
+          <span>{t('hero.titleLine1')}</span>
+          <span>
+            {t('hero.titleLine2')} <em class="shine">{t('hero.titleHighlight')}</em>
+          </span>
+        </h1>
+
+        <p class="identity">
+          <strong>{site.person}</strong>
+          <span>{t('hero.identity', { role: t('site.role'), focus: t('site.focus').toLowerCase() })}</span>
+        </p>
+        <p class="tagline">{t('site.tagline')}</p>
+
+        <div class="cta-row">
+          <div class="actions">
+            <a class="btn btn-primary" href={localizePath('/work/', locale)}>
+              {t('hero.primaryCta')}
+              <svg
+                class="arrow"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14M13 6l6 6-6 6"></path>
+              </svg>
+            </a>
+            <a class="link-underline" href={localizePath('/contact/', locale)}>
+              {t('hero.secondaryCta')}
+            </a>
+          </div>
+
+          <pre class="mission" aria-hidden="true"><code><span class="k">const</span> mission = {'{'}
+  craft: <span class="s" data-field="craft">'web experiences'</span>,
+  target: <span class="n" data-field="target">'jupiter'</span>,
+  status: <span class="s" data-field="status">'building'</span>,
+{'}'}; <span class="c">// click anywhere to launch</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--
+  Outside the hero on purpose: the hero isolates its stacking context (isolation) and the projects
+  section (z-index: 1) would sit above it. Fixed decorative layer for the rocket in transit + real FAB.
+-->
+<div class="sky" aria-hidden="true">
+  <svg class="sky-trail"></svg>
+  <div class="sky-rocket" hidden>
+    <LogoMark size={52} />
+  </div>
+</div>
+<button class="fab" type="button" aria-label={t('hero.backToTop')} hidden>
+  <span class="fab-icon">
+    <LogoMark size={26} />
+  </span>
+</button>
+
+<script>
+  /**
+   * Rocket flight (progressive enhancement, desktop with a fine pointer only).
+   * - Trajectory under Jupiter's gravity (src/lib/flight/gravity.ts): the curve comes from
+   *   simulating a = GM/r² and solving the initial velocity that lands on the point; the rocket
+   *   speeds up near the planet and slows down away from it. Without a clean physical solution,
+   *   a fallback Bézier is used.
+   * - Entrance: on load it takes off next to the `mission` block and lands on the planet's limb.
+   * - Click on the hero → flies to the point; solid trail that turns dotted; the rocket stays
+   *   pointing in its arrival direction; waypoint with coordinates; `mission` is rewritten.
+   * Without JS, or outside desktop, the static JupiterScene composition stays.
+   */
+  import { solveTrajectory, type Vec } from '../lib/flight/gravity';
+
+  const hero = document.querySelector<HTMLElement>('[data-launchpad]');
+  const layer = hero?.querySelector<SVGSVGElement>('.flight-layer');
+  const flyer = hero?.querySelector<HTMLElement>('.flyer');
+  const waypoint = hero?.querySelector<HTMLElement>('.waypoint');
+  const mission = hero?.querySelector<HTMLElement>('.mission');
+
+  // Must match the media query that hides the static rocket in JupiterScene.
+  const desktop = window.matchMedia('(min-width: 1024px) and (pointer: fine)');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  const NOTES = [
+    '// works on my planet',
+    '// TODO: land softly',
+    '// fix: gravity off by one',
+    '// feat: new waypoint',
+    '// LGTM, ship it',
+    '// refactor later, promise',
+    '// 0 bugs found (so far)',
+    '// deploy: green',
+  ];
+  const CRAFTS = [
+    'web experiences',
+    'design systems',
+    'reliable APIs',
+    'product decisions',
+    'developer tools',
+    'clean interfaces',
+  ];
+
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const TAIL = 140; // px of solid trail behind the rocket
+  const ROCKET = 52;
+
+  type Point = { x: number; y: number };
+  type LaunchOptions = { from?: Point; instant?: boolean; note?: string; entrance?: boolean };
+
+  if (hero && layer && flyer && waypoint) {
+    let rocket: Point | null = null; // current rocket centre, in hero coordinates
+    let rocketAngle = 0; // current hero rocket heading (for the return flight)
+    let frame = 0;
+    let flights = 0;
+    let noteIndex = Math.floor(Math.random() * NOTES.length);
+    let craftIndex = 0;
+    const typers = new Map<Element, number>();
+
+    const heroPoint = (clientX: number, clientY: number): Point => {
+      const r = hero.getBoundingClientRect();
+      return { x: clientX - r.left, y: clientY - r.top };
+    };
+
+    /** Initial arrival point: the (hidden) static rocket on the planet's limb. */
+    const arrivalPoint = (): Point | null => {
+      const el = hero.querySelector<HTMLElement>('[data-arrival]');
+      if (!el || el.offsetParent === null) return null;
+      const r = el.getBoundingClientRect();
+      return heroPoint(r.left + r.width / 2, r.top + r.height / 2);
+    };
+
+    /**
+     * Entrance take-off: above the top-right corner of the `mission` block, but never left of
+     * where the text ends (when `mission` wraps below the CTAs, at ~1024 px).
+     */
+    const launchPoint = (): Point | null => {
+      if (!mission || mission.offsetParent === null) return null;
+      const r = mission.getBoundingClientRect();
+      const textRight = Math.max(
+        ...[...hero.querySelectorAll('h1 span, .identity, .identity > *, .tagline')].map((n) => {
+          const range = document.createRange();
+          range.selectNodeContents(n);
+          return range.getBoundingClientRect().right;
+        }),
+      );
+      return heroPoint(Math.max(r.right - 24, textRight + 32), r.top - 18);
+    };
+
+    /** Jupiter in hero coordinates: the disc fills the whole image box. */
+    const planetBody = () => {
+      const el = hero.querySelector<HTMLElement>('.scene .planet');
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { c: heroPoint(r.left + r.width / 2, r.top + r.height / 2), R: r.width / 2 };
+    };
+
+    /**
+     * Text areas in hero coordinates. Measures the actual text (Range), not the paragraph box,
+     * which spans the whole column; 6 px of vertical tolerance for the line height.
+     */
+    const textRects = () => {
+      const hr = hero.getBoundingClientRect();
+      const measure = (n: Element, textOnly: boolean) => {
+        if (!textOnly) return n.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(n);
+        return range.getBoundingClientRect();
+      };
+      return [
+        ...[...hero.querySelectorAll('.path-label, h1 span, .identity > *, .tagline')].map((n) =>
+          measure(n, true),
+        ),
+        ...[...hero.querySelectorAll('.actions > *, .mission')].map((n) => measure(n, false)),
+      ].map((r) => ({
+        l: r.left - hr.left,
+        t: r.top - hr.top + 6,
+        r: r.right - hr.left,
+        b: r.bottom - hr.top - 6,
+      }));
+    };
+
+    const placeFlyer = (p: Point, angle: number) => {
+      flyer.style.transform = `translate(${p.x - ROCKET / 2}px, ${p.y - ROCKET / 2}px)`;
+      flyer.style.setProperty('--angle', `${angle}deg`);
+      rocketAngle = angle;
+    };
+
+    /**
+     * Flight curve.
+     * - 'arc' (clicks): bows upwards, proportional to the distance.
+     * - 'rise' (entrance): takes off vertically and arrives horizontally; stays away from the text.
+     */
+    const curveFor = (a: Point, b: Point, mode: 'arc' | 'rise' = 'arc'): string => {
+      if (mode === 'rise') {
+        const c1 = { x: a.x, y: a.y - Math.abs(b.y - a.y) * 0.75 };
+        const c2 = { x: a.x + (b.x - a.x) * 0.45, y: b.y };
+        return `M${a.x} ${a.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${b.x} ${b.y}`;
+      }
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const len = Math.hypot(dx, dy) || 1;
+      let nx = -dy / len;
+      let ny = dx / len;
+      if (ny > 0) {
+        nx = -nx;
+        ny = -ny;
+      }
+      const bow = Math.min(len * 0.32, 220);
+      const c1 = { x: a.x + dx * 0.25 + nx * bow, y: a.y + dy * 0.25 + ny * bow };
+      const c2 = { x: a.x + dx * 0.75 + nx * bow * 0.6, y: a.y + dy * 0.75 + ny * bow * 0.6 };
+      return `M${a.x} ${a.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${b.x} ${b.y}`;
+    };
+
+    const svgEl = <K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string>) => {
+      const node = document.createElementNS(SVG_NS, tag);
+      for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+      return node;
+    };
+
+    /** Writes a value of the `mission` object as if it were being typed. */
+    const typeField = (field: string, text: string) => {
+      const node = mission?.querySelector(`[data-field="${field}"]`);
+      if (!node || node.textContent === text) return;
+      window.clearInterval(typers.get(node));
+      if (reduced.matches) {
+        node.textContent = text;
+        return;
+      }
+      let i = 0;
+      node.textContent = '';
+      node.classList.add('is-typing');
+      const id = window.setInterval(() => {
+        i++;
+        node.textContent = text.slice(0, i);
+        if (i >= text.length) {
+          window.clearInterval(id);
+          node.classList.remove('is-typing');
+        }
+      }, 24);
+      typers.set(node, id);
+    };
+
+    /** Fades out previous trails. */
+    const fadeOldTrails = (now = false) => {
+      layer.querySelectorAll<SVGGElement>('g.trail-group').forEach((g) => {
+        g.classList.add('is-leaving');
+        window.setTimeout(() => g.remove(), now ? 0 : 900);
+      });
+      layer.querySelectorAll('defs mask').forEach((m) => window.setTimeout(() => m.remove(), now ? 0 : 900));
+    };
+
+    const showWaypoint = (p: Point, from: Point, note: string) => {
+      const coords = waypoint.querySelector('.waypoint-coords');
+      const noteEl = waypoint.querySelector('.waypoint-note');
+      if (coords) coords.textContent = `x: ${Math.round(p.x)}  y: ${Math.round(p.y)}`;
+      if (noteEl) noteEl.textContent = note;
+      waypoint.classList.remove('is-visible', 'is-flipped');
+      waypoint.hidden = false; // shown at opacity 0 so it can be measured
+      const GAP = ROCKET / 2 + 10;
+      const w = waypoint.offsetWidth;
+      const y = p.y - 30;
+      const h = waypoint.offsetHeight;
+      const right = { x: p.x + GAP, y };
+      const left = { x: p.x - GAP - w, y };
+      const fitsRight = right.x + w <= hero.clientWidth - 8;
+      const fitsLeft = left.x >= 8;
+      // Never on top of the text.
+      const rects = textRects();
+      const hitsText = (b: Point) =>
+        rects.some((r) => b.x < r.r && b.x + w > r.l && b.y < r.b && b.y + h > r.t);
+      // Prefer the side opposite the arrival (keeps the trail visible); if it does not fit or covers text, the other one.
+      const prefersLeft = from.x > p.x;
+      const order = prefersLeft ? [left, right] : [right, left];
+      const ok = (b: Point) => (b === right ? fitsRight : fitsLeft) && !hitsText(b);
+      const spot = order.find(ok) ?? (fitsRight ? right : left);
+      waypoint.classList.toggle('is-flipped', spot === left);
+      waypoint.style.transform = `translate(${spot.x}px, ${spot.y}px)`;
+      waypoint.classList.add('is-visible');
+    };
+
+    const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+    const easeSine = (t: number) => (1 - Math.cos(Math.PI * t)) / 2;
+    const toDeg = (a: Vec, b: Vec) => (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI + 90;
+
+    /**
+     * Physical trajectory towards `target`. On entrance it must also avoid the text (otherwise the
+     * 'rise' curve is used, which takes off vertically away from the reading column).
+     */
+    const physicsPath = (start: Point, target: Point, entrance: boolean): Vec[] | null => {
+      const body = planetBody();
+      if (!body) return null;
+      const traj = solveTrajectory(start, target, body);
+      if (!traj) return null;
+      if (entrance) {
+        const rects = textRects();
+        const m = 10;
+        const crosses = traj.points.some((p) =>
+          rects.some((r) => p.x > r.l - m && p.x < r.r + m && p.y > r.t - m && p.y < r.b + m),
+        );
+        if (crosses) return null;
+      }
+      return traj.points;
+    };
+
+    const launch = (target: Point, opts: LaunchOptions = {}) => {
+      const start = opts.from ?? rocket ?? arrivalPoint();
+      if (!start) return;
+      cancelAnimationFrame(frame);
+
+      flyer.hidden = false;
+      flights++;
+      layer.setAttribute('viewBox', `0 0 ${hero.clientWidth} ${hero.clientHeight}`);
+      waypoint.classList.remove('is-visible');
+      fadeOldTrails(opts.instant);
+
+      const tx = Math.round(target.x);
+      const ty = Math.round(target.y);
+      const note = opts.note ?? NOTES[noteIndex++ % NOTES.length];
+      if (!opts.entrance) typeField('craft', `'${CRAFTS[++craftIndex % CRAFTS.length]}'`);
+      typeField('target', `{ x: ${tx}, y: ${ty} }`);
+
+      const points = physicsPath(start, target, !!opts.entrance);
+      const d = points
+        ? `M${points.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' L')}`
+        : curveFor(start, target, opts.entrance ? 'rise' : 'arc');
+
+      const id = `reveal-${flights}`;
+      const maskPath = svgEl('path', { d, class: 'mask-path' });
+      const mask = svgEl('mask', { id, maskUnits: 'userSpaceOnUse' });
+      mask.append(maskPath);
+      layer.querySelector('defs')?.append(mask);
+
+      const group = svgEl('g', { class: 'trail-group' });
+      const dots = svgEl('path', { d, class: 'flight-dots', mask: `url(#${id})` });
+      const solid = svgEl('path', { d, class: 'flight-solid' });
+      group.append(dots, solid);
+      layer.append(group);
+
+      const total = solid.getTotalLength();
+      const setProgress = (head: number, tail: number) => {
+        maskPath.style.strokeDasharray = `${head} ${total + 1}`;
+        solid.style.strokeDasharray = `${tail} ${total + 1}`;
+        solid.style.strokeDashoffset = `${-(head - tail)}`;
+      };
+      setProgress(0, 0);
+
+      /**
+       * State at instant u ∈ [0, 1].
+       * - Physics: samples are evenly spaced in TIME, so the rocket's real speed (it accelerates
+       *   near Jupiter) is preserved. It is blended with a smooth curve (35/65) so take-off and
+       *   landing are not jerky.
+       * - Fallback Bézier: progress by length with easeInOut.
+       */
+      type State = { p: Point; len: number; angle: number };
+      let stateAt: (u: number) => State;
+      let approach: Point = start; // where it arrives from, to put the waypoint on the opposite side
+
+      if (points) {
+        const cum = [0];
+        for (let i = 1; i < points.length; i++) {
+          cum.push(cum[i - 1] + Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y));
+        }
+        const scale = total / (cum[cum.length - 1] || 1);
+        const last = points.length - 1;
+        approach = points[Math.max(0, last - 12)];
+        stateAt = (raw) => {
+          const u = Math.min(1, Math.max(0, raw));
+          const tau = 0.35 * u + 0.65 * easeSine(u);
+          const f = Math.min(last, tau * last);
+          const i = Math.min(last - 1, Math.floor(f));
+          const k = f - i;
+          const a = points[i];
+          const b = points[i + 1];
+          return {
+            p: { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k },
+            len: (cum[i] + (cum[i + 1] - cum[i]) * k) * scale,
+            angle: toDeg(a, b),
+          };
+        };
+      } else {
+        const angleAtLen = (len: number) =>
+          toDeg(
+            solid.getPointAtLength(Math.max(0, len - 1)),
+            solid.getPointAtLength(Math.min(total, len + 1)),
+          );
+        stateAt = (u) => {
+          const len = total * easeInOut(u);
+          const pt = solid.getPointAtLength(len);
+          return { p: { x: pt.x, y: pt.y }, len, angle: angleAtLen(len) };
+        };
+      }
+
+      const finalAngle = stateAt(1).angle;
+
+      const land = () => {
+        rocket = target;
+        placeFlyer(target, finalAngle); // keeps pointing in the flight direction
+        showWaypoint(target, approach, note);
+        typeField('status', "'landed'");
+      };
+
+      if (opts.instant || reduced.matches) {
+        setProgress(total, 0);
+        land();
+        return;
+      }
+
+      typeField('status', "'in flight'");
+      placeFlyer(start, stateAt(0).angle);
+      const duration = Math.min(2000, Math.max(800, total * 1.35));
+      const settle = 1100; // time for the solid trail to finish turning dotted
+      const t0 = performance.now();
+      let arrived = false;
+
+      const tick = (now: number) => {
+        // The rAF timestamp can precede t0 on the first frame: clamp to 0.
+        const t = Math.min(1, Math.max(0, (now - t0) / duration));
+        if (t < 1) {
+          const st = stateAt(t);
+          setProgress(st.len, Math.min(st.len, TAIL));
+          rocket = st.p;
+          placeFlyer(st.p, st.angle);
+          frame = requestAnimationFrame(tick);
+          return;
+        }
+        if (!arrived) {
+          arrived = true;
+          land();
+        }
+        const s = Math.min(1, (now - t0 - duration) / settle);
+        setProgress(total, Math.min(total, TAIL) * (1 - s));
+        if (s < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    };
+
+    /** Entrance flight: same engine as clicks, from the `mission` block to the limb. */
+    const entrance = (instant = false) => {
+      const to = arrivalPoint();
+      const from = launchPoint();
+      if (!to || !from) return;
+      rocket = null;
+      launch(to, { from, instant, entrance: true, note: '// arrival point' });
+    };
+
+    const reset = () => {
+      cancelAnimationFrame(frame);
+      rocket = null;
+      flyer.hidden = true;
+      waypoint.hidden = true;
+      layer.querySelectorAll('g.trail-group, defs mask').forEach((n) => n.remove());
+    };
+
+    /**
+     * The projects section rises over the hero with an arc (HorizonArc): a symmetric quadratic with
+     * flush edges and its top at D px, so its height at x is D·(1 − (1 − 2s)²), s = x / width.
+     * The target is lifted just enough for the rocket and waypoint not to be covered by the horizon.
+     */
+    const clampAboveHorizon = (p: Point): Point => {
+      // First sibling section after the hero (Astro may insert a <script> between them).
+      let next = hero.nextElementSibling;
+      while (next && next.tagName !== 'SECTION') next = next.nextElementSibling;
+      const horizon = next?.querySelector<HTMLElement>('.horizon');
+      const W = hero.clientWidth;
+      const s = Math.min(1, Math.max(0, p.x / W));
+      // Arc: y = top + D·(1 − 2s)² from the horizon box (measured, not assumed).
+      let surface = hero.clientHeight;
+      if (horizon) {
+        const D = horizon.offsetHeight;
+        const top = horizon.getBoundingClientRect().top - hero.getBoundingClientRect().top;
+        surface = Math.min(surface, top + D * (1 - 2 * s) ** 2);
+      }
+      const margin = ROCKET / 2 + 10;
+      return {
+        x: Math.min(W - margin, Math.max(margin, p.x)),
+        y: Math.min(p.y, surface - margin),
+      };
+    };
+
+    hero.addEventListener('click', (event) => {
+      if (!desktop.matches) return;
+      const target = event.target as Element;
+      if (target.closest('a, button, input, textarea, select, summary')) return;
+      if (window.getSelection()?.toString()) return; // do not interfere with text selection
+      launch(clampAboveHorizon(heroPoint(event.clientX, event.clientY)));
+    });
+
+    // Coordinates are hero pixels: on resize everything is repositioned without animation.
+    let resizeTimer = 0;
+    window.addEventListener('resize', () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        reset();
+        if (desktop.matches) entrance(true);
+      }, 150);
+    });
+
+    if (desktop.matches) {
+      // Short pause so the first paint is the text, not the animation (§15).
+      window.setTimeout(() => entrance(), 450);
+    }
+
+    /* ================= Rocket → «Back to top» FAB =================
+     * Scrolling down (hero < 15 % visible) the rocket leaves the hero, flies with a short dotted
+     * trail to the bottom-right corner, straightens up pointing upwards and becomes the FAB.
+     * Back at the hero (> 50 % visible) the FAB dissolves and the rocket returns to its last
+     * landing point. 15/50 hysteresis so it does not flicker at the threshold.
+     * Mobile (no rocket in the hero) or reduced motion: the FAB just appears/disappears.
+     */
+    const sky = document.querySelector<HTMLElement>('.sky');
+    const skyRocket = sky?.querySelector<HTMLElement>('.sky-rocket');
+    const skyTrail = sky?.querySelector<SVGSVGElement>('.sky-trail');
+    const fab = document.querySelector<HTMLButtonElement>('.fab');
+
+    if (sky && skyRocket && skyTrail && fab) {
+      type FabState = 'hero' | 'descending' | 'fab' | 'returning';
+      let state: FabState = 'hero';
+      let ratio = 1;
+      let skyFrame = 0;
+      const FAB_ICON = 26 / ROCKET; // rocket scale once it becomes the FAB icon
+      const DOTS = 16;
+      const dots = Array.from({ length: DOTS }, () => {
+        const c = svgEl('circle', { r: '1.6' });
+        skyTrail.append(c);
+        return c;
+      });
+      let history: Point[] = [];
+
+      const flies = () => desktop.matches && !reduced.matches;
+
+      const fabCenter = (): Point => {
+        const wasHidden = fab.hidden;
+        fab.hidden = false;
+        fab.style.visibility = 'hidden';
+        const r = fab.getBoundingClientRect();
+        fab.style.visibility = '';
+        fab.hidden = wasHidden;
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      };
+
+      /** Hero rocket centre in viewport coordinates (follows the scroll). */
+      const heroRocketViewport = (): Point | null => {
+        const p = rocket ?? arrivalPoint();
+        if (!p) return null;
+        const r = hero.getBoundingClientRect();
+        return { x: r.left + p.x, y: r.top + p.y };
+      };
+
+      const placeSky = (p: Point, angle: number, scale: number) => {
+        skyRocket.style.transform = `translate(${p.x - ROCKET / 2}px, ${p.y - ROCKET / 2}px) rotate(${angle}deg) scale(${scale})`;
+      };
+
+      const drawTrail = (p: Point | null) => {
+        if (p) history.push(p);
+        if (history.length > DOTS * 2) history = history.slice(-DOTS * 2);
+        // One dot every two frames: short dotted trail fading backwards.
+        const pts = history.filter((_, i) => (history.length - 1 - i) % 2 === 0).slice(-DOTS);
+        dots.forEach((c, i) => {
+          const pt = pts[pts.length - 1 - i];
+          if (!pt) {
+            c.setAttribute('opacity', '0');
+            return;
+          }
+          c.setAttribute('cx', pt.x.toFixed(1));
+          c.setAttribute('cy', pt.y.toFixed(1));
+          c.setAttribute('opacity', (0.55 * (1 - i / DOTS)).toFixed(2));
+        });
+      };
+
+      const fadeTrail = () => {
+        const t0 = performance.now();
+        const fade = (now: number) => {
+          const k = Math.min(1, (now - t0) / 500);
+          skyTrail.style.opacity = String(1 - k);
+          if (k < 1) requestAnimationFrame(fade);
+          else {
+            history = [];
+            drawTrail(null);
+            skyTrail.style.opacity = '';
+          }
+        };
+        requestAnimationFrame(fade);
+      };
+
+      const cubic = (a: Point, c1: Point, c2: Point, b: Point, t: number): Point => {
+        const u = 1 - t;
+        return {
+          x: u * u * u * a.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * b.x,
+          y: u * u * u * a.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * b.y,
+        };
+      };
+      const lerpAngle = (a: number, b: number, k: number) => {
+        const d = ((((b - a) % 360) + 540) % 360) - 180; // shortest way round
+        return a + d * k;
+      };
+      const smooth = (e0: number, e1: number, x: number) => {
+        const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
+        return t * t * (3 - 2 * t);
+      };
+
+      /**
+       * Flight on the fixed layer. `to` is evaluated every frame: on the way back the target (the
+       * hero) moves with the scroll and the rocket chases it.
+       */
+      const skyFlight = (o: {
+        from: Point;
+        to: () => Point;
+        fromAngle: number;
+        toAngle: number;
+        fromScale: number;
+        toScale: number;
+        duration: number;
+        lift: number;
+        done: () => void;
+      }) => {
+        cancelAnimationFrame(skyFrame);
+        history = [];
+        skyRocket.hidden = false;
+        const t0 = performance.now();
+        let prev = o.from;
+        const tick = (now: number) => {
+          const t = Math.min(1, Math.max(0, (now - t0) / o.duration));
+          const e = easeInOut(t);
+          const b = o.to();
+          const c1 = { x: o.from.x, y: o.from.y - o.lift };
+          const c2 = { x: b.x - (b.x - o.from.x) * 0.35, y: b.y - o.lift * 0.6 };
+          const p = cubic(o.from, c1, c2, b, e);
+          const tangent = (Math.atan2(p.y - prev.y, p.x - prev.x) * 180) / Math.PI + 90;
+          const moving = Math.hypot(p.x - prev.x, p.y - prev.y) > 0.3;
+          // Follows the tangent in flight; at start and end it blends with the fixed heading.
+          const flight = moving ? tangent : o.fromAngle;
+          const angle = lerpAngle(
+            lerpAngle(o.fromAngle, flight, smooth(0, 0.15, t)),
+            o.toAngle,
+            smooth(0.72, 1, t),
+          );
+          const scale = o.fromScale + (o.toScale - o.fromScale) * smooth(0.5, 1, t);
+          placeSky(p, angle, scale);
+          drawTrail(p);
+          prev = p;
+          if (t < 1) skyFrame = requestAnimationFrame(tick);
+          else o.done();
+        };
+        skyFrame = requestAnimationFrame(tick);
+      };
+
+      const showFab = (animate: boolean) => {
+        fab.hidden = false;
+        fab.classList.remove('is-entering');
+        if (animate) {
+          void fab.offsetWidth;
+          fab.classList.add('is-entering');
+        }
+      };
+
+      const hideFab = () => {
+        // If the FAB had focus, do not lose it to <body>.
+        if (document.activeElement === fab) document.getElementById('main')?.focus({ preventScroll: true });
+        fab.hidden = true;
+      };
+
+      const descend = () => {
+        const start = flyer.hidden ? null : flyer.getBoundingClientRect();
+        if (!flies() || !start || start.width === 0) {
+          // No visible rocket to move: the FAB just appears.
+          state = 'fab';
+          showFab(!reduced.matches);
+          return;
+        }
+        state = 'descending';
+        cancelAnimationFrame(frame); // a hero flight in progress stops where it is
+        // At 15 % visible the rocket is usually above the screen already: it comes in from just
+        // above the top edge, as if it came down to follow the reading.
+        const from = {
+          x: start.left + start.width / 2,
+          y: Math.max(start.top + start.height / 2, -ROCKET),
+        };
+        flyer.style.visibility = 'hidden';
+        waypoint.classList.remove('is-visible');
+        const target = fabCenter();
+        skyFlight({
+          from,
+          to: () => target,
+          fromAngle: rocketAngle,
+          toAngle: 0, // lands pointing up: «back to top»
+          fromScale: 1,
+          toScale: FAB_ICON,
+          duration: 1150,
+          lift: 90,
+          done: () => {
+            skyRocket.hidden = true;
+            fadeTrail();
+            state = 'fab';
+            showFab(false); // the icon already has the same position and size: seamless hand-over
+            if (ratio > 0.5) returnHome();
+          },
+        });
+      };
+
+      const returnHome = () => {
+        const home = heroRocketViewport();
+        hideFab();
+        if (!flies() || !home) {
+          state = 'hero';
+          if (desktop.matches && rocket) flyer.style.visibility = '';
+          return;
+        }
+        state = 'returning';
+        skyFlight({
+          from: fabCenter(),
+          to: () => heroRocketViewport() ?? home,
+          fromAngle: 0,
+          toAngle: rocketAngle,
+          fromScale: FAB_ICON,
+          toScale: 1,
+          duration: 1000,
+          lift: 160,
+          done: () => {
+            skyRocket.hidden = true;
+            fadeTrail();
+            flyer.style.visibility = '';
+            state = 'hero';
+            if (ratio < 0.15) descend();
+          },
+        });
+      };
+
+      new IntersectionObserver(
+        ([entry]) => {
+          ratio = entry.intersectionRatio;
+          if (ratio < 0.15 && state === 'hero') descend();
+          else if (ratio > 0.5 && state === 'fab') returnHome();
+        },
+        { threshold: [0, 0.1, 0.15, 0.3, 0.5, 0.6, 1] },
+      ).observe(hero);
+
+      fab.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: reduced.matches ? 'auto' : 'smooth' });
+        // Focus goes back to the start of the content (like the skip link) for keyboard users.
+        document.getElementById('main')?.focus({ preventScroll: true });
+      });
+
+      // After a resize the hero rocket is repositioned; if it was away, it stays hidden.
+      window.addEventListener('resize', () => {
+        window.setTimeout(() => {
+          if (state !== 'hero') flyer.style.visibility = 'hidden';
+        }, 200);
+      });
+    }
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    /* Mobile: bottom space for the planet arc; the Jupiter crop (160–200 px visible) comes after
+       the introduction and the CTAs (§9). */
+    padding-block: var(--space-12) calc(clamp(160px, 48vw, 200px) + var(--space-10, 2.5rem));
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  .copy {
+    display: flex;
+    gap: var(--space-6);
+  }
+
+  .log {
+    display: none;
+  }
+
+  h1 {
+    margin-top: var(--space-4);
+    font-size: clamp(2.25rem, 1.5rem + 3.4vw, 4.75rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1.04;
+  }
+
+  h1 span {
+    display: block;
+  }
+
+  /* The highlighted word in lavender with a shine that sweeps across it every few seconds. */
+  .shine {
+    font-style: normal;
+    color: var(--color-accent);
+    background: linear-gradient(
+      100deg,
+      var(--color-accent) 0%,
+      var(--color-accent) 42%,
+      #f6efff 50%,
+      var(--color-accent) 58%,
+      var(--color-accent) 100%
+    );
+    background-size: 260% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* Keeps the clip from cutting descenders (the «p» in «explore»). */
+    padding-bottom: 0.08em;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .shine {
+      animation: shine 6s ease-in-out 1.2s infinite;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .shine {
+      -webkit-text-fill-color: currentColor;
+      background: none;
+    }
+  }
+
+  @keyframes shine {
+    0% {
+      background-position: 100% 0;
+    }
+    28%,
+    100% {
+      background-position: 0% 0;
+    }
+  }
+
+  .identity,
+  .tagline {
+    max-width: 40rem;
+  }
+
+  .identity {
+    margin-top: var(--space-8);
+    font-size: var(--text-lead);
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.4em;
+  }
+
+  .identity span {
+    color: var(--color-text-muted);
+  }
+
+  .tagline {
+    margin-top: var(--space-2);
+    color: var(--color-text-muted);
+  }
+
+  /* CTAs and the `mission` block share a row when there is room; otherwise the code wraps below. */
+  .cta-row {
+    margin-top: var(--space-8);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--space-8) clamp(3rem, 5vw, 6rem);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4) var(--space-8);
+  }
+
+  .actions .btn {
+    min-width: 13.5rem;
+  }
+
+  /* ---------- `mission` object (live) ---------- */
+  .mission {
+    display: none;
+  }
+
+  .mission .k {
+    color: var(--color-accent);
+  }
+
+  .mission .s {
+    color: var(--color-jupiter);
+  }
+
+  .mission .n {
+    color: var(--color-success);
+  }
+
+  .mission .c {
+    color: var(--color-text-subtle);
+  }
+
+  .mission :global(.is-typing)::after {
+    content: '';
+    display: inline-block;
+    width: 0.55ch;
+    height: 1.1em;
+    margin-left: 1px;
+    vertical-align: -0.2em;
+    background: var(--color-accent);
+  }
+
+  /* ---------- Flight layer ---------- */
+  .flight-layer,
+  .flyer,
+  .waypoint {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+
+  .flight-layer {
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    fill: none;
+  }
+
+  .flight-layer :global(.trail-group) {
+    transition: opacity 0.8s ease;
+  }
+
+  .flight-layer :global(.trail-group.is-leaving) {
+    opacity: 0;
+  }
+
+  .flight-layer :global(.mask-path) {
+    stroke: #fff;
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+
+  .flight-layer :global(.flight-dots) {
+    stroke: rgb(245 241 250 / 0.42);
+    stroke-width: 1.75;
+    filter: drop-shadow(0 0 2px rgb(21 22 30 / 0.9));
+    stroke-dasharray: 1 9;
+    stroke-linecap: round;
+  }
+
+  .flight-layer :global(.flight-solid) {
+    stroke: rgb(198 165 255 / 0.85);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 5px rgb(198 165 255 / 0.4));
+  }
+
+  .flyer {
+    z-index: 3;
+    width: 52px;
+    height: 52px;
+    color: var(--color-accent);
+    will-change: transform;
+  }
+
+  .flyer[hidden],
+  .waypoint[hidden] {
+    display: none;
+  }
+
+  .flyer-body {
+    transform: rotate(var(--angle, 0deg));
+    filter: drop-shadow(0 0 10px rgb(18 19 26 / 0.9)) drop-shadow(0 0 18px rgb(121 80 232 / 0.6));
+  }
+
+  .waypoint {
+    z-index: 3;
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  .waypoint.is-visible {
+    opacity: 1;
+  }
+
+  .waypoint-cross {
+    position: relative;
+    width: 11px;
+    height: 11px;
+  }
+
+  .waypoint-cross::before,
+  .waypoint-cross::after {
+    content: '';
+    position: absolute;
+    background: var(--color-text);
+  }
+
+  .waypoint-cross::before {
+    left: 5px;
+    top: 0;
+    width: 1px;
+    height: 11px;
+  }
+
+  .waypoint-cross::after {
+    top: 5px;
+    left: 0;
+    width: 11px;
+    height: 1px;
+  }
+
+  /* Own background: readable on top of the planet too. */
+  .waypoint-coords,
+  .waypoint-note {
+    justify-self: start;
+    padding: 2px var(--space-2);
+    color: var(--color-text);
+    border-radius: 6px;
+    background: rgb(18 19 26 / 0.82);
+  }
+
+  .waypoint-note {
+    grid-column: 2;
+    border: 1px solid var(--color-accent);
+  }
+
+  .waypoint.is-flipped .waypoint-cross {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .waypoint.is-flipped .waypoint-coords {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .waypoint.is-flipped .waypoint-note {
+    grid-column: 1;
+    justify-self: end;
+  }
+
+  @media (min-width: 1024px) {
+    .hero {
+      /* Bottom: room for the projects horizon (HorizonArc), which rises --horizon-depth in the
+         centre, so it never covers the `mission` block or the log. The extra air drops the
+         boundary with projects lower relative to the planet and the text. */
+      padding-block: var(--space-16) calc(var(--space-24) + var(--horizon-depth));
+      /* No 100vh: tall enough for the composition without pushing the projects down. */
+      min-height: clamp(560px, 74vh, 720px);
+    }
+
+    .copy {
+      max-width: 62%;
+    }
+
+    h1 {
+      font-size: min(4.75rem, 4.4vw);
+    }
+
+    h1 span {
+      white-space: nowrap;
+    }
+
+    .mission {
+      display: block;
+      margin: var(--space-6) 0 0;
+      padding-left: var(--space-4);
+      border-left: 1px dashed var(--color-control-border);
+      font-size: 0.8125rem;
+      line-height: 1.75;
+      color: var(--color-text);
+    }
+
+    /* Log: faint vertical ruler with short ticks every 12 px and long ones every 48 px. */
+    .log {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-4);
+      width: var(--hero-log-w);
+      flex-shrink: 0;
+      padding: 0.15rem var(--space-4) 0 0;
+      border-right: 1px solid var(--color-border);
+      background:
+        repeating-linear-gradient(to bottom, rgb(150 145 168 / 0.28) 0 1px, transparent 1px 48px) right top /
+          12px 100% no-repeat,
+        repeating-linear-gradient(to bottom, rgb(150 145 168 / 0.16) 0 1px, transparent 1px 12px) right top /
+          6px 100% no-repeat;
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      color: var(--color-text-subtle);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .log ol {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-12);
+      margin: var(--space-2) 0 0;
+      padding: 0;
+      list-style: none;
+      font-size: var(--text-meta);
+    }
+
+    .log-head,
+    .log-foot {
+      white-space: nowrap;
+      opacity: 0.7;
+      letter-spacing: 0.04em;
+    }
+
+    .log-foot {
+      margin-top: auto;
+    }
+  }
+
+  @media (min-width: 1024px) and (pointer: fine) {
+    .hero {
+      cursor: crosshair;
+    }
+  }
+
+  /* ---------- Rocket in transit + «Back to top» FAB ---------- */
+  /* Below the sticky header (z 50): the rocket passes behind it, not over it. */
+  .sky {
+    position: fixed;
+    inset: 0;
+    z-index: 49;
+    pointer-events: none;
+  }
+
+  .sky-trail {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .sky-trail :global(circle) {
+    fill: var(--color-accent);
+  }
+
+  .sky-rocket {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 52px;
+    height: 52px;
+    color: var(--color-accent);
+    transform-origin: 50% 50%;
+    will-change: transform;
+    filter: drop-shadow(0 0 10px rgb(21 22 30 / 0.9)) drop-shadow(0 0 16px rgb(121 80 232 / 0.55));
+  }
+
+  .sky-rocket[hidden] {
+    display: none;
+  }
+
+  /* Dark surface with the lavender rocket: lavender stays reserved for actions without competing
+     with the hero CTAs. 56 px touch target; respects safe areas. */
+  .fab {
+    position: fixed;
+    right: max(1.5rem, calc(env(safe-area-inset-right) + 1rem));
+    bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
+    z-index: 60;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: 1px solid var(--color-card-border);
+    border-radius: 50%;
+    background: var(--color-card);
+    color: var(--color-accent);
+    cursor: pointer;
+    box-shadow:
+      0 10px 28px rgb(0 0 0 / 0.4),
+      0 0 22px rgb(121 80 232 / 0.22);
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
+  }
+
+  .fab[hidden] {
+    display: none;
+  }
+
+  .fab-icon {
+    display: grid;
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+
+  .fab:hover {
+    border-color: var(--color-accent);
+    box-shadow:
+      0 10px 28px rgb(0 0 0 / 0.4),
+      0 0 28px rgb(121 80 232 / 0.38);
+  }
+
+  .fab:hover .fab-icon {
+    transform: translateY(-2px);
+  }
+
+  .fab:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 4px;
+  }
+
+  .fab.is-entering {
+    animation: fab-in 0.35s var(--ease-out) both;
+  }
+
+  @keyframes fab-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.85);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .fab {
+      width: 52px;
+      height: 52px;
+    }
+  }
+</style>

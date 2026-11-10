@@ -1,0 +1,32 @@
+---
+/** Section heading: decorative editor-style path + the real heading. */
+interface Props {
+  path: string;
+  id: string;
+  level?: 'h1' | 'h2';
+}
+const { path, id, level: H = 'h2' } = Astro.props;
+---
+
+<header class="section-heading">
+  <p class="path-label" aria-hidden="true">
+    ~/<b>{path}</b>
+  </p>
+  <H id={id}>
+    <slot />
+  </H>
+</header>
+
+<style>
+  .section-heading {
+    margin-bottom: var(--space-12);
+  }
+  .section-heading :is(h1, h2) {
+    margin-top: var(--space-2);
+    font-size: var(--text-h2);
+    max-width: 22ch;
+  }
+  .section-heading h1 {
+    font-size: var(--text-h1-project);
+  }
+</style>

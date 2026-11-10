@@ -1,0 +1,70 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import ContactCTA from '../../components/ContactCTA.astro';
+import { site } from '../../data/site';
+import { localeParams, resolveLocale, useTranslations } from '../../i18n';
+
+export const getStaticPaths = (() => localeParams()) satisfies GetStaticPaths;
+
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+---
+
+<BaseLayout
+  title={t('about.title')}
+  description={t('about.description', {
+    person: site.person,
+    role: t('site.role').toLowerCase(),
+    focus: t('site.focus').toLowerCase(),
+  })}
+>
+  <section class="section">
+    <div class="container">
+      <SectionHeading path="about" id="page-title" level="h1">
+        {t('about.title')}
+      </SectionHeading>
+
+      <div class="prose">
+        <!-- TODO: real profile, experience and way of working (§7). -->
+        <p class="lead">{t('about.lead', { person: site.person })}</p>
+        <p>
+          {t('about.nameBefore')} <strong>{site.brand}</strong> {t('about.nameAfter')}
+        </p>
+
+        <h2>{t('about.workWith')}</h2>
+        <ul class="chip-list">
+          {site.coreStack.map((tech) => (
+            <li class="chip">{tech}</li>
+          ))}
+        </ul>
+
+        <h2>{t('about.experience')}</h2>
+        <p>{t('about.experienceSoon')}</p>
+      </div>
+    </div>
+  </section>
+  <ContactCTA />
+</BaseLayout>
+
+<style>
+  .prose {
+    max-width: var(--measure);
+  }
+  .lead {
+    font-size: var(--text-lead);
+    color: var(--color-text);
+  }
+  p {
+    margin-bottom: var(--space-4);
+    color: var(--color-text-muted);
+  }
+  strong {
+    color: var(--color-text);
+  }
+  h2 {
+    margin-top: var(--space-12);
+    margin-bottom: var(--space-4);
+    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
+  }
+</style>

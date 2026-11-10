@@ -1,0 +1,66 @@
+---
+import type { Project } from '../lib/content/projects';
+import { resolveLocale, useTranslations } from '../i18n';
+
+interface Props {
+  stack: Project['data']['stack'];
+}
+const { stack } = Astro.props;
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+---
+
+{stack.length > 0 && (
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">{t('stack.layer')}</th>
+          <th scope="col">{t('stack.technology')}</th>
+          <th scope="col">{t('stack.why')}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stack.map((s) => (
+          <tr>
+            <td class="layer">{t(`stack.layer.${s.layer}`)}</td>
+            <td>
+              <strong>{s.name}</strong>
+              {s.usage !== 'production' && <span class="usage"> · {t(`stack.usage.${s.usage}`)}</span>}
+            </td>
+            <td class="why">{s.rationale ?? '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
+<style>
+  .table-wrap {
+    overflow-x: auto;
+    margin-block: var(--space-6);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: var(--space-3) var(--space-4) var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+  th,
+  .layer {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    font-weight: 500;
+    color: var(--color-text-subtle);
+  }
+  .usage,
+  .why {
+    color: var(--color-text-muted);
+  }
+</style>

@@ -1,0 +1,136 @@
+---
+slug: yrest
+title: yRest
+summary: A YAML-powered alternative to json-server. Point it at a db.yml file and get a full REST API mock with CRUD, relations, filters and snapshots, so frontend work doesn't wait for the backend.
+tagline: A mock API. One YAML file.
+publicationStatus: draft
+projectStatus: active
+projectType: open-source
+featured: true
+featuredOrder: 1
+categories:
+  - Open source
+  - Node.js
+  - Developer tools
+role:
+  - Product design
+  - Development
+  - Documentation
+periodLabel: June 2026 – present
+stack:
+  - name: TypeScript
+    layer: runtime
+    rationale: Typed core, public API and generated types for consumers (yrest types).
+  - name: Fastify
+    layer: api
+    rationale: Fast startup and low overhead for a CLI launched with npx; good TypeScript support.
+  - name: Commander
+    layer: tooling
+    rationale: The init, serve, openapi and types commands.
+  - name: yaml + Zod
+    layer: data
+    rationale: Read and write db.yml; validate config and options before the server starts.
+  - name: Vitest
+    layer: quality
+    rationale: Unit, end-to-end and security tests, run in CI on Node 20 and 22.
+  - name: tsup
+    layer: tooling
+    rationale: Builds the npm package (ESM + CJS + type declarations).
+  - name: Astro Starlight
+    layer: interface
+    rationale: Documentation site with search, translations and the interactive playground.
+cover:
+  caption: Screenshot of the yRest playground — edit db.yml, the ER diagram updates as you type.
+  src: ../../../assets/projects/yrest/playground.png
+  alt: The yRest playground. On the left, a db.yml file with users, posts, tags and a post_tags pivot collection; on the right, the entity-relationship diagram generated from it, with posts linked to users by userId and to tags through post_tags.
+gallery:
+  - src: ../../../assets/projects/yrest/playground-full.png
+    alt: Full view of the yRest playground with the complete db.yml example and its ER diagram, plus the Reset, Copy and Clear actions.
+    caption: Playground — edit db.yml and the ER diagram updates in real time; relations are validated as you type.
+  - src: ../../../assets/projects/yrest/docs-home.png
+    alt: Home page of the yRest documentation site, with the tagline "Zero-config REST API mock server from a single YAML file" and Quick Start and GitHub buttons.
+    caption: Documentation site, built with Astro Starlight.
+links:
+  demo: https://yrest-docs.netlify.app/playground/
+  code: https://github.com/aggiovato/yRest
+  docs: https://yrest-docs.netlify.app
+---
+
+## Problem
+
+Frontend work often blocks on an API that doesn't exist yet. The usual workaround, `json-server`, is quick to start but stays shallow: data lives in JSON, relations are limited, and as soon as a screen needs a custom endpoint, a slow response or an error case, you end up writing a small backend anyway.
+
+I wanted the mock to be as easy to edit as a config file and still cover the cases a real interface runs into.
+
+## The idea
+
+One `db.yml` file is the whole API:
+
+```yaml
+users:
+  - id: 1
+    name: Ana
+    email: ana@test.com
+
+posts:
+  - id: 1
+    title: First post
+    userId: 1
+```
+
+```bash
+npx @yrest/cli serve db.yml
+```
+
+Every top-level collection becomes a full CRUD resource (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) on `http://localhost:3070`. The default port is a small joke: Y + A + M + L in ASCII adds up to 307.
+
+## My contribution
+
+I designed and built yRest on my own: product scope, CLI, server, the `db.yml` format, tests, the documentation site and the release pipeline.
+
+## Solution
+
+The project grew in phases, each one closing a gap I hit while using it in real frontends:
+
+- **Querying:** field operators (`_gte`, `_like`, `_regex`…), full-text search, sorting, pagination with an optional envelope response and field projection.
+- **Relations:** many-to-one, one-to-one and many-to-many, nested routes and automatic embedding, with a compact syntax for declaring them.
+- **Custom routes:** static responses, template variables, conditional scenarios, per-route delay and error injection for the endpoints that aren't plain CRUD.
+- **Logic when it's needed:** handler functions in JavaScript or TypeScript, plus Server-Sent Events streams.
+- **Server modes:** watch, readonly, delay and snapshot.
+- **Interoperability:** OpenAPI 3.0 export and TypeScript type generation from `db.yml`.
+- **Tests as a first-class use case:** a programmatic API (`createYrestServer`) to start a mock inside Vitest or Playwright on a random port, with typed access to the data.
+
+## Technical decisions
+
+{% decision
+   problem="The tool runs through npx: every start has to feel instant."
+   decision="A lightweight stack on Fastify, Commander, yaml and Zod instead of a framework like NestJS."
+   alternatives="NestJS, with modules, dependency injection and decorators."
+   tradeoff="Less built-in structure, so module boundaries (cli, storage, server, router, config) are kept by convention."
+   evidence="NestJS stays an option if yRest grows into a web panel or a plugin system." /%}
+
+{% decision
+   problem="Writes go straight to the user's db.yml; an interrupted process could leave it corrupted."
+   decision="Atomic writes: write to a temporary file, then rename it over the original."
+   alternatives="Writing in place, or keeping changes only in memory."
+   tradeoff="One extra file operation per write, which is negligible for a development tool."
+   evidence="POST, PUT, PATCH and DELETE persist to db.yml without partial files." /%}
+
+{% decision
+   problem="Some endpoints in a real frontend aren't CRUD, and some should hit a real API."
+   decision="Ship custom routes first and defer the proxy fallback."
+   alternatives="A hybrid proxy that forwards unknown routes to a real backend."
+   tradeoff="Mixing mocked and real routes is not possible yet."
+   evidence="Custom routes cover the most common case without depending on an HTTP proxy." /%}
+
+## Quality
+
+The suite runs with Vitest on Node 20 and 22 in CI: unit, end-to-end and dedicated security tests for XSS, ReDoS and handler functions. Releases are published from a version tag with npm provenance.
+
+{% callout type="constraint" title="Limits" %}
+yRest is a development and testing tool, not a backend. Data lives in a YAML file; there is no authentication or request validation yet, WebSocket channels are still on the roadmap and the proxy fallback is deferred.
+{% /callout %}
+
+## What's next
+
+The roadmap includes a visual panel, a Docker image, request validation with JSON Schema, WebSocket mock channels and a VS Code extension with YAML snippets.

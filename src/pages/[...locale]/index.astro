@@ -1,0 +1,178 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import ProjectCarousel from '../../components/ProjectCarousel.astro';
+import ContactCTA from '../../components/ContactCTA.astro';
+import HorizonArc from '../../components/HorizonArc.astro';
+import { getFeaturedProjects } from '../../lib/content/projects';
+import { site } from '../../data/site';
+import { localeParams, localizePath, resolveLocale, useTranslations } from '../../i18n';
+
+export const getStaticPaths = (() => localeParams()) satisfies GetStaticPaths;
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const featured = await getFeaturedProjects(locale, 8);
+
+// TODO: replace with concrete examples from real work (§8.4).
+const process = [
+  { title: t('home.process1Title'), body: t('home.process1Body') },
+  { title: t('home.process2Title'), body: t('home.process2Body') },
+  { title: t('home.process3Title'), body: t('home.process3Body') },
+];
+---
+
+<BaseLayout>
+  <Hero />
+
+  <section class="section section--projects work" aria-labelledby="work-title">
+    <HorizonArc />
+    {featured.length > 0 ? (
+      <ProjectCarousel projects={featured}>
+        <SectionHeading slot="heading" path="work" id="work-title">
+          {t('home.workTitle')}
+        </SectionHeading>
+        <a slot="footer" class="link-underline" href={localizePath('/work/', locale)}>
+          {t('home.seeAllProjects')}
+        </a>
+      </ProjectCarousel>
+    ) : (
+      <div class="container">
+        <SectionHeading path="work" id="work-title">
+          {t('home.workTitle')}
+        </SectionHeading>
+        <p class="empty">
+          {t('home.workEmpty')}{' '}
+          <a class="link-underline" href={site.links.github}>
+            GitHub
+          </a>
+          .
+        </p>
+      </div>
+    )}
+  </section>
+
+  <section class="section" aria-labelledby="process-title">
+    <div class="container">
+      <SectionHeading path="process" id="process-title">
+        {t('home.processTitle')}
+      </SectionHeading>
+      <ol class="process">
+        {process.map((step, i) => (
+          <li>
+            <span class="step" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h3>{step.title}</h3>
+            <p>{step.body}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="about-title">
+    <div class="container about">
+      <SectionHeading path="about" id="about-title">
+        {t('home.aboutTitle')}
+      </SectionHeading>
+      <div class="about-body">
+        <!-- TODO: real 80–120 word summary (§8.5). -->
+        <p>{t('home.aboutBody', { person: site.person })}</p>
+        <ul class="chip-list" aria-label={t('home.coreStack')}>
+          {site.coreStack.map((tech) => (
+            <li class="chip">{tech}</li>
+          ))}
+        </ul>
+        <a class="link-underline" href={localizePath('/about/', locale)}>
+          {t('home.moreAboutMe')}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <ContactCTA />
+</BaseLayout>
+
+<style>
+  /* Horizon → section heading: ~47 px on mobile, ~93 px on desktop. */
+  .work {
+    padding-top: 1.25rem;
+    padding-bottom: clamp(var(--space-16), 8vw, var(--space-24));
+  }
+
+  @media (min-width: 1024px) {
+    .work {
+      padding-top: var(--space-16);
+    }
+
+    /* Same left edge as the hero text (after the log). */
+    .work > :global(.container) {
+      padding-left: calc(max(var(--gutter), env(safe-area-inset-left)) + var(--hero-indent));
+    }
+  }
+
+  .empty {
+    color: var(--color-text-muted);
+  }
+
+  .process {
+    display: grid;
+    gap: var(--space-12);
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+  }
+
+  .process li {
+    max-width: 36ch;
+  }
+
+  .step {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-jupiter);
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .process h3 {
+    font-size: var(--text-h3);
+    margin-bottom: var(--space-2);
+  }
+
+  .process p {
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 900px) {
+    .process {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-8);
+    }
+  }
+
+  .about-body {
+    display: grid;
+    gap: var(--space-6);
+    justify-items: start;
+    max-width: var(--measure);
+  }
+
+  .about-body p {
+    font-size: var(--text-lead);
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 1024px) {
+    .about {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: var(--space-16);
+    }
+  }
+</style>

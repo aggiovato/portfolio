@@ -1,0 +1,53 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SectionHeading from '../../../components/SectionHeading.astro';
+import ProjectCard from '../../../components/ProjectCard.astro';
+import { getPublicProjects } from '../../../lib/content/projects';
+import { localeParams, resolveLocale, useTranslations } from '../../../i18n';
+
+export const getStaticPaths = (() => localeParams()) satisfies GetStaticPaths;
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const projects = await getPublicProjects(locale);
+---
+
+<BaseLayout title={t('work.title')} description={t('work.description')}>
+  <section class="section">
+    <div class="container">
+      <SectionHeading path="work" id="page-title" level="h1">
+        {t('work.title')}
+      </SectionHeading>
+      <p class="intro">{t('work.intro')}</p>
+
+      {projects.length > 0 ? (
+        <ul class="list">
+          {projects.map((p, i) => (
+            <li>
+              <ProjectCard project={p} headingLevel="h2" priority={i === 0} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="intro">{t('work.empty')}</p>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro {
+    margin-top: calc(var(--space-8) * -1);
+    margin-bottom: var(--space-16);
+    max-width: 52ch;
+    font-size: var(--text-lead);
+    color: var(--color-text-muted);
+  }
+  .list {
+    display: grid;
+    gap: var(--space-16);
+    padding: 0;
+    list-style: none;
+  }
+</style>
