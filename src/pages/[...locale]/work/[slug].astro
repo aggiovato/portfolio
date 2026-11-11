@@ -6,6 +6,8 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import ProjectMeta from '../../../components/ProjectMeta.astro';
 import TechList from '../../../components/TechList.astro';
 import ContactCTA from '../../../components/ContactCTA.astro';
+import StarField from '../../../components/StarField.astro';
+import HorizonArc from '../../../components/HorizonArc.astro';
 import {
   getNextProject,
   getProjectAlternates,
@@ -57,56 +59,66 @@ const links = [
   alternates={alternates}
 >
   <article>
-    <header class="container head">
-      <p class="path-label">
-        <a href={localizePath('/work/', locale)}>~/work</a>/<b>{data.slug}</b>
-      </p>
-      <h1 style={`view-transition-name: title-${data.slug}`}>{data.title}</h1>
-      {data.tagline && <p class="lead">{data.tagline}</p>}
-      <p class="summary">{data.summary}</p>
-      {links.length > 0 && (
-        <ul class="links">
-          {links.map((l) => (
-            <li>
-              <a class="link-underline" href={l.href} rel="noopener" target="_blank">
-                {l.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-    </header>
+    <!-- Header in the hero's sky (§3); the stars stay clear of the text and are hidden on phones. -->
+    <div class="approach">
+      <StarField count={90} seed={11} />
+      <header class="container head">
+        <p class="path-label">
+          portfolio / <a href={localizePath('/work/', locale)}>work</a> / <b>{data.slug}.mdoc</b>
+        </p>
+        <h1 style={`view-transition-name: title-${data.slug}`}>{data.title}</h1>
+        {data.tagline && <p class="lead">{data.tagline}</p>}
+        <p class="summary">{data.summary}</p>
+        {links.length > 0 && (
+          <ul class="links">
+            {links.map((l) => (
+              <li>
+                <a class="link-underline" href={l.href} rel="noopener" target="_blank">
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </header>
+    </div>
 
-    <!-- Desktop: cover with the fact sheet beside it; mobile: stacked. -->
-    <div class:list={['container', 'intro', data.cover && 'has-cover']}>
-      {data.cover && (
-        <figure class="cover">
-          <Image
-            style={`view-transition-name: cover-${data.slug}`}
-            src={data.cover.src}
-            alt={data.cover.alt}
-            widths={[640, 1024, 1440, 1920, 2560]}
-            sizes="(min-width: 1360px) 920px, (min-width: 1024px) 66vw, 94vw"
-            loading="eager"
-            fetchpriority="high"
-          />
-          {(data.cover.caption || data.links.demo) && (
-            <figcaption>
-              {data.cover.caption}
-              {data.links.demo && (
-                <>
-                  {data.cover.caption && ' '}
-                  <a href={data.links.demo} rel="noopener" target="_blank">
-                    {t('project.tryItLive')}
-                  </a>
-                </>
-              )}
-            </figcaption>
-          )}
-        </figure>
-      )}
+    <!--
+      Same horizon and plum surface as the home's projects: the card's screenshot lands on the
+      ground it left (view transition). Desktop: cover with the fact sheet beside it.
+    -->
+    <div class="landing section--projects">
+      <HorizonArc />
+      <div class:list={['container', 'intro', data.cover && 'has-cover']}>
+        {data.cover && (
+          <figure class="cover">
+            <Image
+              style={`view-transition-name: cover-${data.slug}`}
+              src={data.cover.src}
+              alt={data.cover.alt}
+              widths={[640, 1024, 1440, 1920, 2560]}
+              sizes="(min-width: 1360px) 920px, (min-width: 1024px) 66vw, 94vw"
+              loading="eager"
+              fetchpriority="high"
+            />
+            {(data.cover.caption || data.links.demo) && (
+              <figcaption>
+                {data.cover.caption}
+                {data.links.demo && (
+                  <>
+                    {data.cover.caption && ' '}
+                    <a href={data.links.demo} rel="noopener" target="_blank">
+                      {t('project.tryItLive')}
+                    </a>
+                  </>
+                )}
+              </figcaption>
+            )}
+          </figure>
+        )}
 
-      <ProjectMeta data={data} />
+        <ProjectMeta data={data} />
+      </div>
     </div>
 
     <div class="container layout">
@@ -124,7 +136,7 @@ const links = [
           </details>
           <div class="toc-full">
             <p class="toc-title">{t('project.onThisPage')}</p>
-            <ol>
+            <ol class="trail" data-toc-trail>
               {toc.map((h) => (
                 <li>
                   <a href={`#${h.slug}`}>{h.text}</a>
@@ -176,7 +188,51 @@ const links = [
   <ContactCTA />
 </BaseLayout>
 
+<script>
+  /**
+   * Desktop index as a trajectory: marks the section being read with aria-current="location"
+   * (the ◆ on the dotted line). Without JS the index is a plain list of anchors.
+   */
+  const trail = document.querySelector<HTMLElement>('[data-toc-trail]');
+  const links = [...(trail?.querySelectorAll<HTMLAnchorElement>('a') ?? [])];
+  const targets = links
+    .map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))))
+    .filter((el): el is HTMLElement => el !== null);
+
+  if (targets.length > 0) {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      // The section being read is the last heading above the top quarter of the viewport.
+      const line = innerHeight * 0.25;
+      const current = targets.filter((el) => el.getBoundingClientRect().top <= line).pop();
+      links.forEach((a) => {
+        if (current && a.hash === `#${current.id}`) a.setAttribute('aria-current', 'location');
+        else a.removeAttribute('aria-current');
+      });
+    };
+    addEventListener('scroll', () => (frame ||= requestAnimationFrame(update)), { passive: true });
+    update();
+  }
+</script>
+
 <style>
+  .approach {
+    position: relative;
+    isolation: isolate;
+  }
+  /* Stars only on the right, fading towards the title and the horizon (room for the planet's limb). */
+  .approach :global(.starfield) {
+    z-index: -1;
+    mask-image:
+      linear-gradient(to right, transparent 25%, black 65%), linear-gradient(to top, transparent, black 40%);
+    mask-composite: intersect;
+  }
+  @media (max-width: 767px) {
+    .approach :global(.starfield) {
+      display: none;
+    }
+  }
   .head {
     padding-top: var(--space-16);
     padding-bottom: var(--space-12);
@@ -220,7 +276,11 @@ const links = [
   }
 
   .head {
-    padding-bottom: var(--space-8);
+    /* Room for the horizon, which rises --horizon-depth into the header. */
+    padding-bottom: calc(var(--space-12) + var(--horizon-depth));
+  }
+  .landing {
+    padding-block: var(--space-8) var(--space-16);
   }
   .cover :global(img) {
     width: 100%;
@@ -310,8 +370,38 @@ const links = [
       font-size: var(--text-meta);
       color: var(--color-text-subtle);
     }
-    .toc-full ol {
-      padding-bottom: 0;
+    /* The rocket's dotted trail from the hero; ◆ marks the section being read. */
+    .trail {
+      position: relative;
+      padding: 0 0 0 var(--space-6);
+      list-style: none;
+    }
+    .trail::before {
+      content: '';
+      position: absolute;
+      inset-block: var(--space-2);
+      left: 3px;
+      width: 2px;
+      background-image: radial-gradient(circle, var(--color-text-subtle) 0.9px, transparent 1.2px);
+      background-size: 2px 7px;
+      opacity: 0.7;
+    }
+    .trail a {
+      position: relative;
+      transition: color var(--duration-fast) var(--ease-out);
+    }
+    .trail a[aria-current='location'] {
+      color: var(--color-text);
+    }
+    .trail a[aria-current='location']::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: calc(-1 * var(--space-6) + 0.5px);
+      width: 7px;
+      height: 7px;
+      background: var(--color-accent);
+      transform: translateY(-50%) rotate(45deg);
     }
     .prose {
       grid-column: 2;
