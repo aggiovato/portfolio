@@ -87,7 +87,21 @@ const projects = (locale: Locale) =>
     entryLayout: isPhone ? 'form' : 'content',
     columns: ['title', 'publicationStatus'],
     schema: {
-      slug: fields.slug({ name: { label: 'Slug', description: 'Same value in every locale.' } }),
+      // fields.slug writes `name` to the frontmatter `slug` (the public URL) and its generated slug
+      // to the file name. Holding `name` to the Astro pattern keeps both equal.
+      slug: fields.slug({
+        name: {
+          label: 'Slug',
+          description: 'Public URL, e.g. "my-project". Same value in every locale.',
+          validation: {
+            pattern: {
+              regex: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+              message: 'Use lowercase letters, numbers and hyphens, e.g. "my-project".',
+            },
+          },
+        },
+        slug: { label: 'File name', description: 'Generated from the slug.' },
+      }),
       title: fields.text({ label: 'Title', validation: { length: { min: 1 } } }),
       // Right after the title: on phones (form layout) the article is reachable without scrolling
       // past every field. The desktop content layout moves it to the main area regardless.
