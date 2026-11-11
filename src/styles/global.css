@@ -223,9 +223,10 @@ samp {
 }
 
 /*
- * Projects section: plum background (#211B2E) with the horizon on top (HorizonArc).
- * At the bottom it blends into the page background with a gradient: no second wave, no seam.
- * Contrast: text #F5F1FA 15:1 · secondary #BCB5CA 8.5:1 · lavender 8.2:1.
+ * Projects section: the page ground continues under the dotted horizon (HorizonArc) and turns
+ * plum over a long distance, with no shape or edge (a sky darkening, not a band). At the bottom it
+ * returns to the page background the same way.
+ * Contrast on plum: text #F5F1FA 15:1 · secondary #BCB5CA 8.5:1 · lavender 8.2:1.
  */
 .section--projects {
   --color-border: var(--color-card-border);
@@ -233,14 +234,14 @@ samp {
   z-index: 1;
   background: linear-gradient(
     to bottom,
-    var(--color-bg-projects) 0,
+    var(--color-bg) 0,
+    var(--color-bg-projects) min(55vh, 28rem),
     var(--color-bg-projects) calc(100% - 10rem),
     var(--color-bg) 100%
   );
 }
 
-/* Content goes above the horizon: the arc fill extends below its box (to avoid a dark band)
-   and, being positioned, it would otherwise cover the start of the section. */
+/* Content goes above the horizon, which is positioned and would otherwise paint over it. */
 .section--projects > :not(.horizon) {
   position: relative;
 }

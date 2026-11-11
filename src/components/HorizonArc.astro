@@ -2,28 +2,17 @@
 /**
  * Horizon between the hero and the projects section (decorative, aria-hidden).
  *
- * A single wide, shallow convex arc painted with the background of its section
- * (--color-bg-projects). The transition must stay LIGHT:
- * - Blurred arc edge (no sharp line, no glowing rim).
- * - A very faint plum haze just above it brings the hero colour closer to the projects colour
- *   before the arc, so the background change is gradual.
- * - An almost imperceptible violet glow along the whole edge.
- * The blur is a screen-space CSS filter (it is not distorted by the stretched viewBox).
+ * A single fine, dotted arc — the same trail the hero's rocket leaves — marks the chapter break.
+ * No fills and no blur: the page ground is continuous, so there is no edge to blend and nothing
+ * to show a seam. The section below changes tone over a long distance instead (.section--projects).
  * Place it as the first child of a section with position: relative.
  */
 const ARC = 'M0 100 Q 720 -100 1440 100';
 ---
 
 <div class="horizon" aria-hidden="true">
-  <span class="horizon-haze"></span>
-  <svg class="horizon-glow" viewBox="0 0 1440 100" preserveAspectRatio="none" focusable="false">
+  <svg viewBox="0 0 1440 100" preserveAspectRatio="none" focusable="false">
     <path d={ARC}></path>
-  </svg>
-  <svg class="horizon-arc" viewBox="0 0 1440 100" preserveAspectRatio="none" focusable="false">
-    <!-- Edges at y=100, top at y=0: the quadratic with its control at y=-100 passes through (720, 0). -->
-    <!-- The fill continues 100 units below the box (overflow visible) so the blur only softens the
-         curved edge; below it there is solid colour and no straight dark band appears. -->
-    <path d={`${ARC} L1440 200 L0 200 Z`}></path>
   </svg>
 </div>
 
@@ -32,69 +21,28 @@ const ARC = 'M0 100 Q 720 -100 1440 100';
     position: absolute;
     left: 0;
     right: 0;
-    top: 1px;
+    top: 0;
     height: var(--horizon-depth);
     transform: translateY(-100%);
     pointer-events: none;
   }
 
-  .horizon svg {
-    position: absolute;
-    top: 0;
-    bottom: 0;
+  svg {
     display: block;
+    width: 100%;
     height: 100%;
     overflow: visible;
   }
 
-  /* The arc extends past the sides and below the box: the blur only acts on the curved edge,
-     with no light columns at the sides and no dark band at the bottom. */
-  .horizon-arc {
-    left: -24px;
-    width: calc(100% + 48px);
-    filter: blur(7px);
-  }
-
-  .horizon-arc path {
-    fill: var(--color-bg-projects);
-  }
-
-  /* Haze: soft gradient towards the projects colour just above the horizon. */
-  .horizon-haze {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: calc(var(--horizon-depth) * 1.6);
-    background: linear-gradient(to bottom, transparent, rgb(33 27 46 / 0.45));
-  }
-
-  /* Almost imperceptible glow along the whole edge; clipped below. */
-  .horizon-glow {
-    left: 0;
-    width: 100%;
-    filter: blur(22px);
-    clip-path: inset(-100px 0 0 0);
-  }
-
-  .horizon-glow path {
+  /* Same dots as the rocket's trail (tokens). non-scaling-stroke keeps them round and evenly spaced
+     although the viewBox is stretched. */
+  path {
     fill: none;
-    stroke: rgb(121 80 232 / 0.08);
-    stroke-width: 36;
+    stroke: var(--trail-dot-color);
+    stroke-width: var(--trail-dot-size);
+    stroke-linecap: round;
+    stroke-dasharray: 1 var(--trail-dot-gap);
     vector-effect: non-scaling-stroke;
-  }
-
-  @media (max-width: 767px) {
-    .horizon-arc {
-      filter: blur(4px);
-    }
-
-    .horizon-glow {
-      filter: blur(12px);
-    }
-
-    .horizon-glow path {
-      stroke-width: 20;
-    }
+    filter: drop-shadow(0 0 2px rgb(21 22 30 / 0.9));
   }
 </style>
