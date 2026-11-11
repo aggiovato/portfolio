@@ -48,8 +48,21 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     inset: 0;
     pointer-events: none;
     overflow: hidden;
-    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 120px), transparent calc(100% - 6px));
-    mask-image: linear-gradient(to bottom, #000 calc(100% - 120px), transparent calc(100% - 6px));
+    /*
+     * Phones/tablets: the fade follows the dotted horizon (HorizonArc), which rises --horizon-depth
+     * into the hero. Its curve is the top of a wide ellipse centred below the hero: 75 % of the
+     * width across, passing through the arc's ends and its crest (b = 3.92·depth, centre 2.92·depth
+     * below; within ~3 % of the quadratic arc). Transparent inside it, so the planet sets behind
+     * the line; fully visible ~1.2·b above it.
+     */
+    --fade: radial-gradient(
+      ellipse 75% calc(var(--horizon-depth) * 3.92) at 50% calc(100% + var(--horizon-depth) * 2.92),
+      transparent 100%,
+      rgb(0 0 0 / 0.45) 150%,
+      #000 220%
+    );
+    -webkit-mask-image: var(--fade);
+    mask-image: var(--fade);
   }
 
   @media (min-width: 1024px) {
@@ -76,8 +89,9 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     z-index: 1;
     width: var(--d);
     aspect-ratio: 1;
-    /* Mobile/tablet: only the top arc, 160–200 px visible. */
-    left: calc(50% - var(--d) * 0.42);
+    /* Mobile/tablet: only the top arc, 160–200 px visible. Slightly right of centre (3 % of --d):
+       exactly centred, the lit, cropped disc reads as leaning left. */
+    left: calc(50% - var(--d) * 0.47);
     top: calc(100% - clamp(160px, 48vw, 200px));
   }
 
