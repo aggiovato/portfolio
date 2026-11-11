@@ -8,6 +8,15 @@
   /* Colour — reference palette (refinement brief, Nov 2026). Always reuse these variables. */
   --color-bg: #15161e; /* hero and page background */
   --color-bg-projects: #211b2e; /* plum background of the projects section and its horizon */
+
+  /* Code blocks (case studies): the hero's `mission` palette, used by src/styles/code-theme.mjs. */
+  --code-bg: var(--color-surface);
+  --code-text: var(--color-text);
+  --code-keyword: var(--color-accent);
+  --code-string: var(--color-jupiter);
+  --code-value: var(--color-success);
+  --code-comment: var(--color-text-subtle);
+  --code-punctuation: var(--color-text-muted);
   --color-card: #2a2339; /* card surface */
   --color-card-border: #443653; /* subtle card border */
   --color-text: #f5f1fa;
