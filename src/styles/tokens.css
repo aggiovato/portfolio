@@ -9,6 +9,11 @@
   --color-bg: #15161e; /* hero and page background */
   --color-bg-projects: #211b2e; /* plum background of the projects section and its horizon */
 
+  /* Dotted trail of the hero rocket, reused wherever a «trajectory» is drawn (horizon, index). */
+  --trail-dot-color: rgb(245 241 250 / 0.42);
+  --trail-dot-size: 1.75px;
+  --trail-dot-gap: 9px;
+
   /* Code blocks (case studies): the hero's `mission` palette, used by src/styles/code-theme.mjs. */
   --code-bg: var(--color-surface);
   --code-text: var(--color-text);

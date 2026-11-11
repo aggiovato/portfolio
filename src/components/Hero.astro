@@ -995,10 +995,10 @@ const t = useTranslations(locale);
   }
 
   .flight-layer :global(.flight-dots) {
-    stroke: rgb(245 241 250 / 0.42);
-    stroke-width: 1.75;
+    stroke: var(--trail-dot-color);
+    stroke-width: var(--trail-dot-size);
     filter: drop-shadow(0 0 2px rgb(21 22 30 / 0.9));
-    stroke-dasharray: 1 9;
+    stroke-dasharray: 1 var(--trail-dot-gap);
     stroke-linecap: round;
   }
 
