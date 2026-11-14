@@ -13,6 +13,8 @@ export const en = {
   'site.defaultTitle': '{person} — {role} · {brand}',
 
   // Layout and navigation
+  'og.defaultAlt':
+    'Alejandro Lugo, full-stack developer: “Grounded in code. Built to explore.” beside the planet Jupiter.',
   'a11y.newTab': '(opens in a new tab)',
   'a11y.skipToContent': 'Skip to content',
   'nav.label': 'Main',

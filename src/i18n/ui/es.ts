@@ -11,6 +11,8 @@ export const es: UiDictionary = {
   'site.defaultTitle': '{person} — {role} · {brand}',
 
   // Layout and navigation
+  'og.defaultAlt':
+    'Alejandro Lugo, desarrollador full-stack: «Anclado en el código. Hecho para explorar.» junto al planeta Júpiter.',
   'a11y.newTab': '(se abre en una pestaña nueva)',
   'a11y.skipToContent': 'Saltar al contenido',
   'nav.label': 'Principal',

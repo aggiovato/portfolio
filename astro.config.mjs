@@ -36,8 +36,9 @@ const keystaticTrailingSlash = {
   },
 };
 
-// TODO: replace with the final domain before deploying.
-const SITE_URL = 'https://aggiovato.dev';
+// Production URL: canonical links, hreflang, sitemap, share images and the notes feeds are built
+// from it. Change it here (and in Netlify) when a custom domain is added.
+const SITE_URL = 'https://aggiovato.netlify.app';
 
 export default defineConfig({
   site: SITE_URL,
