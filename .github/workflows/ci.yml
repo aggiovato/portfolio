@@ -138,17 +138,17 @@ jobs:
           else
             echo "::notice::Netlify secrets not available for this run; skipping deploy."
           fi
-      - uses: actions/download-artifact@v7
-        if: steps.creds.outputs.ok == 'true'
-        with:
-          name: dist
-          path: dist/
-      # Only .nvmrc is needed here (the site comes from the dist artifact).
+      # Only .nvmrc is needed here ; checkout runs first because it cleans the workspace.
       - uses: actions/checkout@v7
         if: steps.creds.outputs.ok == 'true'
         with:
           sparse-checkout: .nvmrc
           sparse-checkout-cone-mode: false
+      - uses: actions/download-artifact@v7
+        if: steps.creds.outputs.ok == 'true'
+        with:
+          name: dist
+          path: dist/
       - uses: actions/setup-node@v7
         if: steps.creds.outputs.ok == 'true'
         with:
