@@ -35,6 +35,3 @@ coverage/
 # Local-only working docs: product spec and design references (mockup, logo design system).
 docs/
 
-# Non-final example screenshots of the case studies. CI and fresh clones get neutral
-# placeholders for the referenced ones from scripts/placeholder-assets.mjs.
-src/assets/projects/
