@@ -33,9 +33,11 @@ test.describe('newsletter', () => {
     await page.goto('/es/notes/rxjs-fundamentals/');
     const form = page.locator('[aria-labelledby="note-newsletter-title"] form');
     const spanish = await form.getAttribute('action');
-    await expect(form.locator('input[name="locale"]')).toHaveValue('es');
-    await form.getByRole('combobox', { name: 'Idioma' }).selectOption('it');
-    await expect(form.locator('input[name="locale"]')).toHaveValue('it');
+    await expect(form.locator('input[name="locale"]:checked')).toHaveValue('es');
+    const group = form.getByRole('group', { name: 'Idioma' });
+    await expect(group.getByRole('radio', { name: /Español/ })).toBeChecked();
+    await group.getByRole('radio', { name: /Italiano/ }).check();
+    await expect(form.locator('input[name="locale"]:checked')).toHaveValue('it');
     await expect(form).not.toHaveAttribute('action', spanish ?? '');
     await expect(form).toHaveAttribute('action', /sibforms\.com/);
   });
@@ -50,7 +52,7 @@ test.describe('newsletter', () => {
       await expect(page.locator('[data-newsletter-lang]').first()).toBeHidden();
       const form = page.locator('[aria-labelledby="note-newsletter-title"] form');
       await expect(form).toHaveAttribute('action', /sibforms\.com/);
-      await expect(form.locator('input[name="locale"]')).toHaveValue('en');
+      await expect(form.locator('input[name="locale"]:checked')).toHaveValue('en');
     });
   });
 });

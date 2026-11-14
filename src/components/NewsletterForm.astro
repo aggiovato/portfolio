@@ -3,7 +3,8 @@
  * Newsletter subscription (Brevo, double opt-in). A plain HTML form posted straight to the Brevo
  * form of a language (src/data/site.ts `newsletter`); Brevo redirects to /newsletter/pending/ and,
  * once the email link is clicked, to /newsletter/confirmed/. Works without JavaScript in the page's
- * language; with JS a language select appears and retargets the form to that language's list.
+ * language; with JS a language choice (EN · ES · IT) appears and retargets the form to that
+ * language's list.
  *
  * - `full`: heading, text and form (end of a note).
  * - `compact`: one line and the form (footer).
@@ -52,18 +53,25 @@ const targets = Object.fromEntries(available.map((l) => [l, newsletter[l]]));
             spellcheck="false"
           />
         </label>
-        {available.length > 1 && (
-          <label class="field field--lang" hidden data-newsletter-lang>
-            <span class="label">{t('newsletter.language')}</span>
-            <select>
-              {available.map((l) => (
-                <option value={l} selected={l === initial} lang={l}>
-                  {localeNames[l]}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+        {/*
+          Language as a segmented radio group (three options need no drop-down, and native option
+          lists cannot be styled). The radios are the `locale` field Brevo reads; without JS the
+          group stays hidden but the checked radio (the page's language) is still submitted.
+        */}
+        <fieldset class="field field--lang" hidden data-newsletter-lang>
+          <legend class="label">{t('newsletter.language')}</legend>
+          <div class="segments">
+            {available.map((l) => (
+              <label class="segment" title={localeNames[l]}>
+                <input type="radio" name="locale" value={l} checked={l === initial} />
+                <span aria-hidden="true">{l.toUpperCase()}</span>
+                <span class="visually-hidden" lang={l}>
+                  {l.toUpperCase()} {localeNames[l]}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <button class="btn btn-primary" type="submit">
           {t('newsletter.submit')}
         </button>
@@ -73,26 +81,21 @@ const targets = Object.fromEntries(available.map((l) => [l, newsletter[l]]));
       <div class="trap" aria-hidden="true">
         <input type="text" name="email_address_check" value="" tabindex="-1" autocomplete="off" />
       </div>
-      <input type="hidden" name="locale" value={initial} data-newsletter-locale />
       <input type="hidden" name="html_type" value="simple" />
     </form>
   </section>
 )}
 
 <script>
-  // Progressive enhancement: show the language select and point the form at that language's list.
+  // Progressive enhancement: show the language choice and point the form at that language's list.
   document.querySelectorAll<HTMLFormElement>('form[data-newsletter]').forEach((form) => {
     const targets = JSON.parse(form.dataset.newsletter ?? '{}') as Record<string, string>;
-    const wrapper = form.querySelector<HTMLElement>('[data-newsletter-lang]');
-    const select = wrapper?.querySelector('select');
-    const localeField = form.querySelector<HTMLInputElement>('[data-newsletter-locale]');
-    if (!wrapper || !select || !localeField) return;
-    wrapper.hidden = false;
-    select.addEventListener('change', () => {
-      const target = targets[select.value];
-      if (!target) return;
-      form.action = target;
-      localeField.value = select.value;
+    const group = form.querySelector<HTMLFieldSetElement>('[data-newsletter-lang]');
+    if (!group || Object.keys(targets).length < 2) return;
+    group.hidden = false;
+    group.addEventListener('change', (event) => {
+      const target = targets[(event.target as HTMLInputElement).value];
+      if (target) form.action = target;
     });
   });
 </script>
@@ -137,18 +140,68 @@ const targets = Object.fromEntries(available.map((l) => [l, newsletter[l]]));
     flex: 1 1 14rem;
   }
   .field--lang {
-    flex: 0 1 9rem;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
   }
   .field[hidden] {
     display: none;
+  }
+  .field--lang legend {
+    padding: 0;
+    margin-bottom: var(--space-1);
+  }
+  /* Segmented control: one outlined pill, the chosen language raised and outlined in lavender. */
+  .segments {
+    display: flex;
+    min-height: 48px;
+    padding: 3px;
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-control);
+    background: var(--color-bg);
+  }
+  .segment {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    padding: 0 var(--space-3);
+    border: 1px solid transparent;
+    border-radius: calc(var(--radius-control) - 4px);
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      background-color var(--duration-fast) var(--ease-out);
+  }
+  .segment:hover {
+    color: var(--color-text);
+  }
+  .segment input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .segment:has(input:checked) {
+    background: var(--color-surface-raised);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+  .segment:has(input:focus-visible) {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
   }
   .label {
     font-family: var(--font-mono);
     font-size: var(--text-meta);
     color: var(--color-text-subtle);
   }
-  input,
-  select {
+  input[type='email'] {
     min-height: 48px;
     width: 100%;
     padding: 0 var(--space-4);
@@ -158,8 +211,7 @@ const targets = Object.fromEntries(available.map((l) => [l, newsletter[l]]));
     color: var(--color-text);
     font: inherit;
   }
-  input:hover,
-  select:hover {
+  input[type='email']:hover {
     border-color: var(--color-text-muted);
   }
   input:user-invalid {
