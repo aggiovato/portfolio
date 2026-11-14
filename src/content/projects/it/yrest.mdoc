@@ -1,0 +1,148 @@
+---
+slug: yrest
+title: yRest
+summary: Un'alternativa a json-server basata su YAML. Gli passi un file db.yml e ottieni un mock REST completo con CRUD, relazioni, filtri e snapshot, così il frontend non aspetta il backend.
+tagline: Un'API mock. Un solo file YAML.
+publicationStatus: published
+publishedAt: 2026-11-14
+projectStatus: active
+projectType: open-source
+featured: true
+featuredOrder: 1
+categories:
+  - Open source
+  - Node.js
+  - Strumenti per sviluppatori
+role:
+  - Design di prodotto
+  - Sviluppo
+  - Documentazione
+periodLabel: Giugno 2026 – oggi
+glance:
+  problem: "Il frontend si blocca su API che non esistono ancora, e json-server resta troppo limitato per schermate reali."
+  contribution: "L'ho progettato e costruito da solo: ambito del prodotto, CLI, server, formato db.yml, test, documentazione e release."
+  outcome:
+    - "Pubblicato su npm come @yrest/cli, con release dai tag di versione e npm provenance."
+    - "Un sito di documentazione con un playground interattivo."
+    - "Test unitari, end-to-end e di sicurezza in CI su Node 20 e 22."
+stack:
+  - name: TypeScript
+    layer: runtime
+    rationale: Core tipizzato, API pubblica e tipi generati per chi lo usa (yrest types).
+  - name: Fastify
+    layer: api
+    rationale: Avvio rapido e poco overhead per una CLI lanciata con npx; buon supporto a TypeScript.
+  - name: Commander
+    layer: tooling
+    rationale: I comandi init, serve, openapi e types.
+  - name: yaml + Zod
+    layer: data
+    rationale: Leggere e scrivere db.yml; validare configurazione e opzioni prima che il server parta.
+  - name: Vitest
+    layer: quality
+    rationale: Test unitari, end-to-end e di sicurezza, eseguiti in CI su Node 20 e 22.
+  - name: tsup
+    layer: tooling
+    rationale: Genera il pacchetto npm (ESM + CJS + dichiarazioni di tipo).
+  - name: Astro Starlight
+    layer: interface
+    rationale: Sito di documentazione con ricerca, traduzioni e il playground interattivo.
+cover:
+  src: ../../../assets/projects/yrest/cover.webp
+  alt: "Composizione di yRest: l'editor db.yml del playground, il diagramma entità-relazione che genera e un terminale che esegue npx @yrest/cli serve db.yml con l'output reale del server su http://localhost:3070."
+  caption: "Un file db.yml, il suo diagramma delle relazioni e il server che avvia."
+gallery:
+  - src: ../../../assets/projects/yrest/playground.webp
+    alt: "Il playground di yRest: a sinistra un db.yml con users, posts, tags e una tabella ponte post_tags, a destra il diagramma entità-relazione generato."
+    caption: "Playground — modifica db.yml e il diagramma si aggiorna mentre scrivi."
+  - src: ../../../assets/projects/yrest/docs-home.webp
+    alt: "Home del sito di documentazione di yRest: il logo, lo slogan «Zero-config REST API mock server from a single YAML file» e le icone delle funzionalità in orbita attorno al logo."
+    caption: "Sito di documentazione, realizzato con Astro Starlight."
+  - src: ../../../assets/projects/yrest/docs-quick-start.webp
+    alt: "La pagina Quick Start della documentazione di yRest: quattro passi — installa, definisci db.yml, avvia su localhost:3070 e usa gli endpoint CRUD."
+    caption: "Documentazione — da zero a un'API funzionante in quattro passi."
+  - src: ../../../assets/projects/yrest/docs-relations.webp
+    alt: "La pagina Relations della documentazione di yRest, che spiega many2one, one2one e many2many con un esempio di _rel."
+    caption: "Documentazione — relazioni: tre tipi e un DSL compatto."
+links:
+  demo: https://yrest-docs.netlify.app/playground/
+  code: https://github.com/aggiovato/yRest
+  docs: https://yrest-docs.netlify.app
+---
+
+## Problema
+
+Il lavoro di frontend si blocca spesso su un'API che ancora non esiste. La soluzione abituale, `json-server`, si avvia in fretta ma resta superficiale: i dati vivono in JSON, le relazioni sono limitate e, appena una schermata ha bisogno di un endpoint personalizzato, di una risposta lenta o di un caso di errore, finisci comunque per scrivere un piccolo backend.
+
+Volevo che il mock fosse facile da modificare come un file di configurazione e che coprisse comunque i casi in cui si imbatte un'interfaccia reale.
+
+## L'idea
+
+Un solo file `db.yml` è tutta l'API:
+
+```yaml
+users:
+  - id: 1
+    name: Ana
+    email: ana@test.com
+
+posts:
+  - id: 1
+    title: First post
+    userId: 1
+```
+
+```bash
+npx @yrest/cli serve db.yml
+```
+
+Ogni collezione di primo livello diventa una risorsa CRUD completa (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) su `http://localhost:3070`. La porta predefinita è un piccolo scherzo: Y + A + M + L in ASCII fa 307.
+
+## Soluzione
+
+Il progetto è cresciuto per fasi, e ognuna ha chiuso una lacuna che ho incontrato usandolo in frontend reali:
+
+- **Query:** operatori sui campi (`_gte`, `_like`, `_regex`…), ricerca full-text, ordinamento, paginazione con una risposta a envelope opzionale e proiezione dei campi.
+- **Relazioni:** molti-a-uno, uno-a-uno e molti-a-molti, rotte annidate e inclusione automatica, con una sintassi compatta per dichiararle.
+- **Rotte personalizzate:** risposte statiche, variabili di template, scenari condizionali, ritardo per rotta e iniezione di errori per gli endpoint che non sono semplice CRUD.
+- **Logica quando serve:** funzioni handler in JavaScript o TypeScript, più stream di Server-Sent Events.
+- **Modalità del server:** watch, readonly, delay e snapshot.
+- **Interoperabilità:** esportazione OpenAPI 3.0 e generazione di tipi TypeScript da `db.yml`.
+- **I test come caso d'uso di primo piano:** un'API programmatica (`createYrestServer`) per avviare un mock dentro Vitest o Playwright su una porta casuale, con accesso tipizzato ai dati.
+
+## Decisioni tecniche
+
+{% decision
+   title="Fastify invece di NestJS"
+   problem="Lo strumento si esegue con npx: ogni avvio deve sembrare istantaneo."
+   decision="Uno stack leggero con Fastify, Commander, yaml e Zod invece di un framework come NestJS."
+   alternatives="NestJS, con moduli, dependency injection e decorator."
+   tradeoff="Meno struttura già pronta, quindi i confini tra moduli (cli, storage, server, router, config) si mantengono per convenzione."
+   outlook="NestJS resta un'opzione se yRest diventa un pannello web o un sistema di plugin." /%}
+
+{% decision
+   title="Scritture atomiche"
+   problem="Le scritture vanno direttamente nel db.yml dell'utente; un processo interrotto potrebbe lasciarlo corrotto."
+   decision="Scritture atomiche: scrivere in un file temporaneo e poi rinominarlo sopra l'originale."
+   alternatives="Scrivere sul posto, oppure tenere le modifiche solo in memoria."
+   tradeoff="Un'operazione su file in più per ogni scrittura, trascurabile per uno strumento di sviluppo."
+   evidence="POST, PUT, PATCH e DELETE salvano in db.yml senza lasciare file parziali." /%}
+
+{% decision
+   title="Rotte personalizzate prima del proxy"
+   problem="Alcuni endpoint di un frontend reale non sono CRUD, e altri dovrebbero chiamare un'API reale."
+   decision="Rilasciare prima le rotte personalizzate e rimandare il fallback al proxy."
+   alternatives="Un proxy ibrido che inoltra le rotte sconosciute a un backend reale."
+   tradeoff="Per ora non si possono mescolare rotte simulate e reali." /%}
+
+## Qualità
+
+La suite gira con Vitest su Node 20 e 22 in CI: test unitari, end-to-end e test di sicurezza dedicati a XSS, ReDoS e funzioni handler. Le release si pubblicano da un tag di versione con npm provenance.
+
+{% callout type="constraint" title="Limiti" %}
+yRest è uno strumento di sviluppo e di test, non un backend. I dati vivono in un file YAML; non ci sono ancora autenticazione né validazione delle richieste, i canali WebSocket sono ancora nella roadmap e il fallback al proxy è rimandato.
+{% /callout %}
+
+## Prossimi passi
+
+La roadmap include un pannello visuale, un'immagine Docker, la validazione delle richieste con JSON Schema, canali mock WebSocket e snippet YAML per l'editor. Il supporto per l'editor è già uscito come progetto a parte, yRest for VS Code.

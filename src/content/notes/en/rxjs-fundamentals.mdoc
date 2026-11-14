@@ -1,0 +1,101 @@
+---
+slug: rxjs-fundamentals
+title: Understand the stream, then the operator
+summary: >-
+  A visual guide to RxJS fundamentals: Observables versus Promises, how to read a stream diagram,
+  pipe() and subscribe(), and the first three operators: map, filter and tap.
+publicationStatus: published
+publishedAt: 2026-11-14
+tags:
+  - RxJS
+  - Angular
+cover:
+  src: ../../../assets/notes/rxjs-fundamentals/cover.webp
+  alt: 'Marble diagram: the values 1, 2 and 3 go through map(n => n * 10) and come out as 10, 20 and 30.'
+---
+
+Stop memorizing operator names. Follow what happens to each value instead: once you can read one
+value through a pipe, every operator is just a rule about what it does to that value.
+
+## One result, or a stream of values
+
+A **Promise** settles once: one fulfillment value or one rejection, at most. `new Promise(executor)`
+runs the executor immediately, and its `.then()` callbacks always run asynchronously. It has no
+built-in cancellation method.
+
+An **Observable** delivers zero to many values, and may complete or error. A cold source starts a
+new execution for each subscription; a hot source can share a producer that is already running.
+Emissions can be synchronous or asynchronous.
+
+`unsubscribe()` stops your subscription, not necessarily the source.
+
+| | Promise | Observable |
+| --- | --- | --- |
+| Values | One, or a rejection | Zero to many |
+| Starts | Immediately, on creation | On subscribe (cold) or already running (hot) |
+| Timing | Callbacks always asynchronous | Synchronous or asynchronous |
+| Cancel | No built-in method | `unsubscribe()` stops your subscription |
+
+## Reading the diagram
+
+Time moves from left to right. Each dot is a value; each line is a stream.
+
+![A stream diagram: the values A and B on a line that runs from earlier to later, then a vertical bar for completion.](../../../assets/notes/rxjs-fundamentals/reading-a-diagram.webp "Two values, then completion.")
+
+- `next(A)`: a value is emitted.
+- `|` complete: the stream ends normally.
+- `X` error: the stream ends with a failure.
+
+No more values arrive after complete or error. These lines are not execution threads: they only
+show when values happen.
+
+## pipe() composes, subscribe() connects
+
+```ts
+const doubled$ = source$.pipe(map((n) => n * 2));
+
+doubled$.subscribe(console.log);
+```
+
+`pipe()` builds a new Observable from `source$` and its operators; nothing runs yet. `subscribe()`
+connects a consumer and starts the work. With Angular's `HttpClient`, each subscription sends a
+request. Angular's `async` pipe can manage the subscription for you.
+
+## map changes the value, filter decides what passes
+
+![Marble diagram: map(n => n * 10) turns 1, 2 and 3 into 10, 20 and 30.](../../../assets/notes/rxjs-fundamentals/map.webp "map changes every value.")
+
+![Marble diagram: filter(n => n >= 20) receives 10, 20 and 30 and lets only 20 and 30 through.](../../../assets/notes/rxjs-fundamentals/filter.webp "filter drops the values that fail the test.")
+
+`filter` drops emissions; it does not emit `true` or `false`.
+
+## tap observes without transforming
+
+![Marble diagram: 20 and 30 enter tap, the console logs 20 and then 30, and the same 20 and 30 come out unchanged.](../../../assets/notes/rxjs-fundamentals/tap.webp "tap logs each value; the stream carries on unchanged.")
+
+Returning a value from `tap` does not change the emitted value. Use it to observe; avoid mutating
+objects inside it.
+
+## Putting it together
+
+Follow one value and read the whole pipe:
+
+```ts
+source$
+  .pipe(
+    map((n) => n * 10),
+    filter((n) => n >= 20),
+    tap((n) => console.log(n)),
+  )
+  .subscribe(render);
+```
+
+| Input | After map | Output |
+| --- | --- | --- |
+| 1, 2, 3 | 10, 20, 30 | 20, 30 |
+
+`2` becomes `20`. It passes the filter. `tap` logs `20`, and the subscriber receives `20`.
+
+**map** transforms, **filter** selects, **tap** observes.
+
+Sources: the RxJS documentation on Observables and operators, and Angular's `HttpClient` guide.

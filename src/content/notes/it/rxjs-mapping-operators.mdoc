@@ -1,0 +1,95 @@
+---
+slug: rxjs-mapping-operators
+title: switchMap, concatMap, mergeMap o exhaustMap?
+summary: >-
+  Un nuovo evento, quattro risposte possibili. Lo stesso esperimento con i quattro operatori di
+  mapping di RxJS mostra che ognuno codifica una politica di concorrenza, non una trasformazione.
+publicationStatus: published
+publishedAt: 2026-11-14
+tags:
+  - RxJS
+  - Angular
+cover:
+  src: ../../../assets/notes/rxjs-mapping-operators/cover.webp
+  alt: "I quattro operatori: switchMap passa all'ultimo, concatMap mette in coda e mantiene l'ordine, mergeMap lascia sovrapporre le operazioni ed exhaustMap ignora i nuovi eventi mentre è occupato."
+---
+
+Cosa dovrebbe succedere quando arriva un'altra richiesta prima che finisca quella in corso? I
+quattro operatori di mapping di ordine superiore rispondono a questa domanda in quattro modi
+diversi:
+
+- **switchMap**: passa all'ultima.
+- **concatMap**: la mette in coda e mantiene l'ordine.
+- **mergeMap**: lascia che le operazioni si sovrappongano.
+- **exhaustMap**: la ignora mentre è occupato.
+
+Stessi ingressi, stesse durate. Cambia solo l'operatore.
+
+## L'esperimento
+
+Tre eventi, tre flussi interni. Ogni evento può avviare un Observable di richiesta freddo;
+l'operatore decide quando sottoscriverlo, o se farlo.
+
+| Evento | Arriva a | La richiesta dura |
+| --- | --- | --- |
+| A | 0 s | 5 s |
+| B | 1 s | 3 s |
+| C | 2 s | 1 s |
+
+Ogni richiesta emette una risposta e poi si completa. In questo esempio non ci sono errori, e tutte
+le linee del tempo usano la stessa scala.
+
+```ts
+events$.pipe(operator((id) => request$(id)));
+```
+
+## switchMap: segui l'ultimo
+
+Un nuovo evento annulla la sottoscrizione al flusso interno precedente.
+
+![Linea del tempo di switchMap: A parte a 0 s e viene annullato a 1 s, B parte a 1 s e viene annullato a 2 s, C parte a 2 s e risponde a 3 s.](../../../assets/notes/rxjs-mapping-operators/switchmap.webp "Le barre sono sottoscrizioni attive; Out mostra le risposte.")
+
+A si ferma a 1 s, B a 2 s, e risponde solo C, a 3 s. Usalo per i risultati di ricerca che devono
+seguire l'ultima query. Annullare la sottoscrizione non annulla le modifiche lato server.
+
+## concatMap: aspetta il tuo turno
+
+I nuovi valori aspettano in coda; ognuno parte quando il precedente si completa.
+
+![Linea del tempo di concatMap: A va da 0 s e risponde a 5 s; B aspetta in coda e va da 5 s a 8 s; C aspetta e va da 8 s a 9 s.](../../../assets/notes/rxjs-mapping-operators/concatmap.webp "Le linee tratteggiate sono eventi in attesa nella coda.")
+
+A risponde a 5 s, poi B a 8 s e C a 9 s. Usalo per salvataggi ordinati che devono essere eseguiti
+tutti. Se un flusso interno non si completa mai, la coda si blocca.
+
+## mergeMap: lascia sovrapporre il lavoro
+
+Sottoscrive man mano che arrivano gli eventi e inoltra le risposte man mano che arrivano.
+
+![Linea del tempo di mergeMap: A, B e C partono all'arrivo e si sovrappongono; le risposte escono C a 3 s, B a 4 s e A a 5 s.](../../../assets/notes/rxjs-mapping-operators/mergemap.webp "Le tre richieste girano insieme; le risposte arrivano nell'ordine in cui finiscono.")
+
+Le risposte arrivano C, B, A: l'ordine di ingresso non è preservato. Usalo per richieste
+indipendenti che possono sovrapporsi. La concorrenza è illimitata per impostazione predefinita;
+passa un limite se ti serve.
+
+## exhaustMap: occupato? Ignoralo
+
+I nuovi eventi vengono ignorati finché il flusso interno attivo non si completa.
+
+![Linea del tempo di exhaustMap: A parte a 0 s e risponde a 5 s; B e C arrivano mentre A è in corso e vengono ignorati.](../../../assets/notes/rxjs-mapping-operators/exhaustmap.webp "B e C vengono scartati, non messi in coda.")
+
+Parte solo A. B e C vengono scartati, non messi in coda. Dopo che A si completa, un evento futuro
+può avviare una nuova richiesta. Usalo per ignorare i clic ripetuti mentre si invia un modulo.
+
+## Scegli il comportamento
+
+| Cosa deve fare un nuovo evento? | Operatore | Risposte |
+| --- | --- | --- |
+| Sostituire il lavoro in corso | `switchMap` | C a 3 s |
+| Aspettare e mantenere l'ordine | `concatMap` | A 5 s, B 8 s, C 9 s |
+| Girare insieme al lavoro in corso | `mergeMap` | C 3 s, B 4 s, A 5 s |
+| Essere ignorato se occupato | `exhaustMap` | A a 5 s |
+
+L'operatore codifica la tua politica di concorrenza: sceglilo in base al comportamento che serve
+alla tua interfaccia. Sono operatori di RxJS, usati anche dentro gli effect di NgRx.
+
+Fonti: l'API degli operatori di RxJS e la guida di `HttpClient` di Angular.

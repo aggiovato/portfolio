@@ -1,0 +1,86 @@
+---
+slug: yrest-vscode
+title: yRest for VS Code
+summary: Un'estensione di VS Code per i file di yRest — evidenziazione della sintassi, documentazione al passaggio del mouse, autocompletamento contestuale e diagnostica per db.yml e *.yrest.yml, anche nei template yrest.
+tagline: Scrivi db.yml con un editor che lo capisce.
+publicationStatus: published
+publishedAt: 2026-11-14
+projectStatus: active
+projectType: open-source
+featured: true
+featuredOrder: 3
+categories:
+  - VS Code
+  - TypeScript
+  - Strumenti per sviluppatori
+role:
+  - Sviluppo
+  - Documentazione
+periodLabel: Giugno 2026
+glance:
+  problem: "Gli errori sulle convenzioni di db.yml, come una collezione mancante o una chiave senza il suo _, emergevano solo all'avvio del server."
+  contribution: "L'ho costruita e pubblicata da solo: grammatiche, provider, regole di validazione, test e pipeline di release."
+  outcome:
+    - "Pubblicata sul VS Code Marketplace, dai tag di versione."
+    - "Evidenziazione, documentazione al passaggio, autocompletamento e diagnostica, anche nei template yrest."
+    - "45 test unitari coprono le regole di validazione."
+stack:
+  - name: VS Code Extension API
+    layer: interface
+    rationale: Provider di hover, completamento e diagnostica.
+  - name: TextMate grammars
+    layer: interface
+    rationale: Evidenziazione dei file yRest, iniettata nel YAML semplice e nei template taggati di TS/JS.
+  - name: TypeScript + yaml
+    layer: runtime
+    rationale: Logica di validazione sopra lo stesso parser YAML usato da yRest.
+  - name: Vitest
+    layer: quality
+    rationale: Test unitari per le regole di validazione e le costanti condivise.
+cover:
+  src: ../../../assets/projects/yrest-vscode/cover.webp
+  alt: "Ricostruzione di VS Code che modifica un db.yml di yRest: un errore sottolinea la collezione sconosciuta «reviews», con accanto la documentazione al passaggio di _rel, i suggerimenti dei tipi di relazione e l'icona dell'estensione."
+  caption: "Ricostruzione con la grammatica, i messaggi e la documentazione reali dell'estensione."
+gallery:
+  - src: ../../../assets/projects/yrest-vscode/highlighting.webp
+    alt: "db.yml in VS Code con l'evidenziazione dell'estensione: chiavi riservate, il DSL delle relazioni, le cardinalità e le variabili di template nei loro colori."
+    caption: "Evidenziazione di chiavi riservate, DSL delle relazioni e variabili di template (ricostruzione)."
+  - src: ../../../assets/projects/yrest-vscode/hover.webp
+    alt: "Scheda al passaggio del mouse su _rel con la sua documentazione e un esempio YAML."
+    caption: "Documentazione al passaggio per ogni chiave riservata (ricostruzione)."
+  - src: ../../../assets/projects/yrest-vscode/completion.webp
+    alt: "Elenco di autocompletamento dentro una stringa del DSL delle relazioni che propone m2o, m2m, many2one, many2many e one2many."
+    caption: "Autocompletamento dei tipi di relazione e dei loro alias (ricostruzione)."
+  - src: ../../../assets/projects/yrest-vscode/diagnostics.webp
+    alt: "Un errore sottolinea «reviews» con il messaggio “\"reviews\" is not a root collection in this file.”, ripetuto nel pannello Problems."
+    caption: "Diagnostica a ogni battitura (ricostruzione)."
+links:
+  code: https://github.com/aggiovato/yRest-vscode
+  docs: https://marketplace.visualstudio.com/items?itemName=aggiovato.yrest
+---
+
+## Problema
+
+Il formato `db.yml` di yRest ha sviluppato convenzioni proprie: relazioni (`_rel`), rotte personalizzate (`_routes`), un DSL compatto per le relazioni e variabili di template. Senza supporto nell'editor, un refuso nel nome di una collezione o una chiave senza il prefisso `_` emergevano solo all'avvio del server.
+
+## Soluzione
+
+- **Evidenziazione** di chiavi riservate, tipi di relazione e alias, cardinalità, DSL delle relazioni, variabili di template e parametri di percorso.
+- **Documentazione al passaggio del mouse** per ogni chiave riservata, con una breve descrizione e un esempio YAML.
+- **Autocompletamento** in dieci contesti, come i nomi delle collezioni per le destinazioni delle relazioni o i metodi HTTP per `_method`.
+- **Diagnostica** a ogni battitura: errori YAML con la posizione esatta, relazioni che puntano a collezioni inesistenti, tipi di relazione o cardinalità non validi e chiavi di `_routes` scritte senza il prefisso `_`.
+- **Lo stesso aiuto nei test:** hover e diagnostica funzionano anche nei template taggati ``yrest`...` `` in TypeScript e JavaScript.
+
+## Decisioni tecniche
+
+{% decision
+   title="Diagnostica limitata alla sua sezione"
+   problem="Gli errori venivano segnalati sulla prima occorrenza di una parola in qualsiasi punto del file, con falsi positivi."
+   decision="Limitare ogni diagnostica alla sua sezione, cercando a partire dalla posizione di _rel: o _routes:."
+   alternatives="Evidenziare l'intera riga, oppure non indicare posizioni."
+   tradeoff="Il validatore deve tenere traccia della posizione di ogni sezione."
+   evidence="Corretto nella v0.2.2; un campo chiamato status dentro _schema non viene più segnalato." /%}
+
+## Qualità
+
+45 test unitari coprono le regole di validazione. La CI compila, esegue il lint e impacchetta l'estensione a ogni push; i tag la pubblicano sul VS Code Marketplace.

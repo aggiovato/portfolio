@@ -1,0 +1,93 @@
+---
+slug: rxjs-mapping-operators
+title: switchMap, concatMap, mergeMap or exhaustMap?
+summary: >-
+  One new event, four possible choices. The same experiment run through the four RxJS mapping
+  operators shows that each one encodes a concurrency policy, not a transformation.
+publicationStatus: published
+publishedAt: 2026-11-14
+tags:
+  - RxJS
+  - Angular
+cover:
+  src: ../../../assets/notes/rxjs-mapping-operators/cover.webp
+  alt: 'The four operators: switchMap switches to the latest, concatMap queues and keeps the order, mergeMap lets operations overlap, exhaustMap ignores new events while busy.'
+---
+
+What should happen when another request arrives before the current one finishes? The four
+higher-order mapping operators answer that question in four different ways:
+
+- **switchMap**: switch to the latest.
+- **concatMap**: queue it and keep the order.
+- **mergeMap**: let operations overlap.
+- **exhaustMap**: ignore it while busy.
+
+Same inputs, same durations. Only the operator changes.
+
+## The experiment
+
+Three events, three inner streams. Each event can start a cold request Observable; the operator
+decides when, or whether, it is subscribed.
+
+| Event | Arrives at | Request takes |
+| --- | --- | --- |
+| A | 0s | 5s |
+| B | 1s | 3s |
+| C | 2s | 1s |
+
+Each request emits one response, then completes. There are no errors in this example, and every
+timeline uses the same scale.
+
+```ts
+events$.pipe(operator((id) => request$(id)));
+```
+
+## switchMap: follow the latest
+
+A new event unsubscribes the previous inner stream.
+
+![Timeline for switchMap: A starts at 0s and is cancelled at 1s, B starts at 1s and is cancelled at 2s, C starts at 2s and responds at 3s.](../../../assets/notes/rxjs-mapping-operators/switchmap.webp "Bars are active subscriptions; Out shows the responses.")
+
+A stops at 1s, B stops at 2s, and only C responds, at 3s. Use it for search results that must
+follow the latest query. Unsubscribing does not undo server-side changes.
+
+## concatMap: wait your turn
+
+New values wait in a queue; each starts after the previous one completes.
+
+![Timeline for concatMap: A runs from 0s and responds at 5s; B waits in the queue and runs from 5s to 8s; C waits and runs from 8s to 9s.](../../../assets/notes/rxjs-mapping-operators/concatmap.webp "The dotted lines are events waiting in the queue.")
+
+A responds at 5s, then B at 8s, then C at 9s. Use it for ordered saves that must all run. If an
+inner stream never completes, the queue stalls.
+
+## mergeMap: let work overlap
+
+Subscribe as events arrive and forward responses as they arrive.
+
+![Timeline for mergeMap: A, B and C start as they arrive and overlap; responses come out C at 3s, B at 4s and A at 5s.](../../../assets/notes/rxjs-mapping-operators/mergemap.webp "All three requests run at once; responses arrive in the order they finish.")
+
+Responses arrive C, B, A: input order is not preserved. Use it for independent requests that can
+overlap. Concurrency is unlimited by default; pass a limit if you need one.
+
+## exhaustMap: busy? Ignore it
+
+New events are ignored until the active inner stream completes.
+
+![Timeline for exhaustMap: A starts at 0s and responds at 5s; B and C arrive while A is running and are ignored.](../../../assets/notes/rxjs-mapping-operators/exhaustmap.webp "B and C are dropped, not queued.")
+
+Only A starts. B and C are dropped, not queued. After A completes, a future event can start a new
+request. Use it to ignore repeated clicks while a form is submitting.
+
+## Choose the behaviour
+
+| What should a new event do? | Operator | Responses |
+| --- | --- | --- |
+| Replace the current work | `switchMap` | C at 3s |
+| Wait and preserve order | `concatMap` | A 5s, B 8s, C 9s |
+| Run alongside current work | `mergeMap` | C 3s, B 4s, A 5s |
+| Be ignored while busy | `exhaustMap` | A at 5s |
+
+The operator encodes your concurrency policy: choose it from the behaviour your UI needs. These are
+RxJS operators, also used inside NgRx effects.
+
+Sources: the RxJS operator API and Angular's `HttpClient` guide.
