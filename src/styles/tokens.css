@@ -43,10 +43,6 @@
   /* Typography */
   --font-sans: 'Manrope Variable', 'Manrope', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
-  /* Japanese: Manrope and JetBrains Mono have no CJK glyphs. System Japanese fonts take over for
-     kana/kanji (no multi-megabyte web font); Latin text keeps Manrope. */
-  --font-ja:
-    'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic UI', 'Yu Gothic', Meiryo;
 
   --text-meta: clamp(0.75rem, 0.72rem + 0.12vw, 0.875rem);
   --text-code: clamp(0.8125rem, 0.79rem + 0.1vw, 0.9375rem);
