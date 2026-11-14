@@ -80,4 +80,39 @@ const projects = defineCollection({
       }),
 });
 
-export const collections = { projects };
+/**
+ * Note contract (spec §7 «/notes/», §12 «notes»): short technical articles. Same file model as
+ * projects: `src/content/notes/<locale>/<name>.mdoc`, English original, optional translations with
+ * the same file name and slug. Published notes need a date: it orders the index and dates the feed.
+ */
+const notes = defineCollection({
+  loader: glob({
+    pattern: '**/*.mdoc',
+    base: './src/content/notes',
+    generateId: ({ entry }) => entry.replace(/\.mdoc$/, ''),
+  }),
+  schema: ({ image }) =>
+    z
+      .object({
+        slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug: lowercase letters, numbers and hyphens'),
+        title: z.string().min(1),
+        summary: z.string().min(1).max(220),
+        publicationStatus: z.enum(['draft', 'published', 'archived']),
+        publishedAt: z.coerce.date().optional(),
+        updatedAt: z.coerce.date().optional(),
+        /** Technologies or topics, shown as chips; written as they are named (RxJS, Angular). */
+        tags: z.array(z.string().min(1)).max(4).default([]),
+        /** Lead image: the index thumbnail and the figure under the article header. */
+        cover: z.preprocess(
+          withoutEmptyMedia,
+          z.object({ src: image(), alt: z.string().min(1), caption: z.string().optional() }).optional(),
+        ),
+        seo: z.object({ title: z.string().optional(), description: z.string().optional() }).optional(),
+      })
+      .refine((n) => n.publicationStatus !== 'published' || n.publishedAt, {
+        message: 'publishedAt is required to publish',
+        path: ['publishedAt'],
+      }),
+});
+
+export const collections = { projects, notes };

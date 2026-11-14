@@ -225,9 +225,6 @@ codes, labels. It is never used for sentences.
 **The No Eyebrow Caps Rule.** Section eyebrows are lowercase code paths (`~/work`,
 `portfolio / work / yrest.mdoc`), never tracked uppercase labels.
 
-Japanese pages keep Manrope for Latin text and fall back to the system's Japanese fonts for
-kana and kanji, with strict line breaking and no negative tracking on headings.
-
 ## Layout
 
 A centred container (max 1360px) with fluid gutters from 20–24px on phones to 72px on desktop
@@ -354,6 +351,18 @@ pan, rotation, previous/next, tooltips, keys hint on desktop). The orbit turns s
 its round toggle, under the pointer and off-screen; a dragged moon bends its ring and springs back.
 On phones, without JavaScript or with reduced motion it is a grid of real images. Stack follows the
 gallery.
+
+### Notes (reading)
+
+The blog of the log: a Read surface, so ambition shows as rhythm and restraint. The index lists every note with the same weight: text first
+(date and reading time, title, summary, topics) and a small cover on the right from 640px, under
+the text on phones, rows separated by hairlines. The feed has no visible link: pages announce it in
+the head for feed readers. Date and reading time are mono
+marginalia. A note's header, cover and closing links start on the reading column's edge, so title,
+picture and text share one left line; the body reads in the 56ch column at 1.7 leading. Images are
+figures (`![alt](path "Caption")`): the image framed by a hairline at the control radius, the caption
+in mono-size Starlight Subtle beneath. Notebook diagrams keep their light paper; they are content,
+not decoration.
 
 ## Do's and Don'ts
 

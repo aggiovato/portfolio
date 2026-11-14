@@ -58,7 +58,7 @@ describe('assertUniqueSlugs', () => {
 
   it('blocks a duplicated slug inside one locale', () => {
     expect(() => assertUniqueSlugs([aProject('en/a'), aProject('en/b', { slug: 'a' })])).toThrow(
-      /Duplicated project slug "a" in en/,
+      /Duplicated slug "a" in en/,
     );
   });
 });

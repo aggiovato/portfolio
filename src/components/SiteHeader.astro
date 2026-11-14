@@ -1,6 +1,6 @@
 ---
 import LogoMark from './LogoMark.astro';
-import { nav, site } from '../data/site';
+import { site, type NavItem } from '../data/site';
 import {
   localeNames,
   localizePath,
@@ -14,23 +14,23 @@ import {
 interface Props {
   /** URL of the current page in each locale where it exists. */
   alternates: Partial<Record<Locale, string>>;
+  /** Menu entries, already filtered to the sections that have content (BaseLayout). */
+  nav: readonly NavItem[];
 }
 
-const { alternates } = Astro.props;
+const { alternates, nav } = Astro.props;
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 const current = stripLocale(Astro.url.pathname);
 const isActive = (href: string) => current.startsWith(href);
 
-// Keep the reader on the equivalent page; an untranslated case study falls back to that locale's work index.
+// Keep the reader on the equivalent page; an untranslated case study or note falls back to that locale's index.
+const sectionIndex = ['/work/', '/notes/'].find((s) => current.startsWith(s)) ?? '/';
 const languages = locales.map((l) => ({
   locale: l,
   name: localeNames[l],
   code: l.toUpperCase(),
-  href:
-    l === locale
-      ? Astro.url.pathname
-      : (alternates[l] ?? localizePath(current.startsWith('/work/') ? '/work/' : '/', l)),
+  href: l === locale ? Astro.url.pathname : (alternates[l] ?? localizePath(sectionIndex, l)),
 }));
 ---
 

@@ -14,8 +14,9 @@ const PAGES = [
   '/es/',
   '/es/work/',
   '/it/',
-  '/ja/',
-  '/ja/work/',
+  '/notes/',
+  '/notes/rxjs-mapping-operators/',
+  '/es/notes/',
   '/404/',
 ];
 

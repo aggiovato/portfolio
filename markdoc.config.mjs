@@ -1,4 +1,4 @@
-import { defineMarkdocConfig, component } from '@astrojs/markdoc/config';
+import { defineMarkdocConfig, component, nodes } from '@astrojs/markdoc/config';
 import shiki from '@astrojs/markdoc/shiki';
 import codeTheme from './src/styles/code-theme.mjs';
 
@@ -6,6 +6,13 @@ import codeTheme from './src/styles/code-theme.mjs';
 export default defineMarkdocConfig({
   // Highlighted at build time (no client JS) with the hero's code palette.
   extends: [shiki({ theme: codeTheme, wrap: false })],
+  nodes: {
+    // ![alt](./image.webp "Caption") becomes an optimised figure with a caption (notes, case studies).
+    image: {
+      ...nodes.image,
+      render: component('./src/components/Figure.astro'),
+    },
+  },
   tags: {
     callout: {
       render: component('./src/components/Callout.astro'),

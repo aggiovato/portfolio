@@ -2,7 +2,17 @@ import { expect, test } from '@playwright/test';
 
 // Widths required by §21: no horizontal overflow.
 const WIDTHS = [320, 375, 768, 1024, 1440];
-const PATHS = ['/', '/work/', '/about/', '/contact/', '/es/', '/es/work/', '/it/', '/ja/', '/ja/work/'];
+const PATHS = [
+  '/',
+  '/work/',
+  '/about/',
+  '/contact/',
+  '/es/',
+  '/es/work/',
+  '/it/',
+  '/notes/',
+  '/notes/rxjs-mapping-operators/',
+];
 
 test.describe('no horizontal overflow', () => {
   test.skip(({ isMobile }) => isMobile, 'Viewport set explicitly; runs once on desktop');

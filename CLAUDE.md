@@ -1,11 +1,11 @@
 # aggiovato — portfolio
 
 Personal portfolio of Alejandro Lugo. Astro 7 · TypeScript strict · Content Collections + Markdoc ·
-CSS tokens · static output · English (default) + Spanish (`/es/`).
+CSS tokens · static output · English (default) + Spanish (`/es/`) + Italian (`/it/`).
 
 - **Spec:** `docs/especificacion.md` (Spanish, **local only**, gitignored like all of `docs/`). Design and
   content decisions come from it; cite sections (§n). Never commit it.
-- **Language:** site copy in English and Spanish via `src/i18n/`; **all code comments in English**;
+- **Language:** site copy in English, Spanish and Italian via `src/i18n/`; **all code comments in English**;
   `.claude/` and README in English; the local spec in Spanish.
 - Logo and planet are provisional assets; do not treat them as final.
 - Case study images (`src/assets/projects/<slug>/`), Jupiter (`src/assets/hero/`) and the logo are
@@ -39,7 +39,9 @@ production, and gets a GitHub Release when it is minor or major. Netlify never b
 
 ## Key invariants
 
-- Projects are read only through `src/lib/content/projects.ts` (draft filter). Never `getCollection('projects')` in pages.
+- Projects are read only through `src/lib/content/projects.ts`, notes only through `src/lib/content/notes.ts`
+  (draft filter). Never `getCollection('projects' | 'notes')` in pages. The Notes menu entry and `/notes/`
+  only exist once a note is visible (§7).
 - Pages live in `src/pages/[...locale]/` and use `localeParams()`; no hard-coded copy or internal links.
 - Case study translations share file name and `slug` across `src/content/projects/<locale>/`.
 - Verify Astro APIs against the installed version (types in `node_modules/astro`, docs.astro.build).

@@ -12,6 +12,19 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- **Notes:** a blog of short technical articles at `/notes/`, with covers, figures with captions, a reading index, reading time, topics and an RSS feed per language. Two RxJS notes, in English, Spanish and Italian.
+- **Italian case studies:** yRest, yRest for VS Code and UQuiz are now written in Italian too.
+
+### Changed
+
+- Long-form reading has more line height and paragraph space, and the case study's Stack heading aligns with the text column.
+
+### Removed
+
+- **Japanese:** the interface was a test and is gone; `/ja/` addresses no longer exist.
+
 ---
 
 ## [1.0.0] — 2026-11-14

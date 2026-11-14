@@ -43,9 +43,9 @@ reasoning behind each decision.
 - Case studies follow a fixed editorial structure: problem, contribution, solution, technical
   decisions with trade-offs, quality, what's next.
 - Content is authored as Markdoc files in Git; Keystatic is a local editor over the same files.
-- The site is in English by default, with Spanish, Italian and Japanese interfaces. Case studies
-  exist in English and Spanish; the other locales fall back to English. Italian and Japanese are
-  personal reach, not target markets.
+- The site is in English by default, with Spanish and Italian. Case studies and notes are written
+  in all three; a missing translation falls back to the English original. Italian is personal
+  reach, not a target market.
 
 ## Capabilities and Constraints
 
