@@ -23,21 +23,6 @@ html {
   scroll-padding-top: calc(var(--header-h) + var(--space-4));
 }
 
-/*
- * Japanese pages: Japanese system fonts after Manrope (Latin glyphs stay Manrope), stricter line
- * breaking, phrase-aware wrapping where supported, and no negative tracking, which crowds kana.
- */
-:lang(ja) {
-  --font-sans: 'Manrope Variable', 'Manrope', var(--font-ja), system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', var(--font-ja), ui-monospace, monospace;
-  line-break: strict;
-  word-break: auto-phrase;
-}
-
-:lang(ja) :is(h1, h2, h3) {
-  letter-spacing: 0;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;

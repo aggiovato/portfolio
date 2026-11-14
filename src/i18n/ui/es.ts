@@ -17,6 +17,7 @@ export const es: UiDictionary = {
   'nav.menu': 'Menú',
   'nav.home': '{brand} — inicio',
   'nav.work': 'Proyectos',
+  'nav.notes': 'Notas',
   'nav.about': 'Sobre mí',
   'nav.contact': 'Contacto',
   'nav.language': 'Idioma',
@@ -65,6 +66,15 @@ export const es: UiDictionary = {
   'card.inDefaultLanguage': 'En inglés',
 
   // Work
+  'notes.title': 'Notas',
+  'notes.description': 'Notas técnicas breves: cómo funciona algo, un valor cada vez.',
+  'notes.intro': 'Notas técnicas breves sobre lo que uso a diario, dibujadas como yo lo entiendo.',
+  'notes.feed': 'Feed RSS',
+  'note.published': 'Publicada el {date}',
+  'note.updated': 'Actualizada el {date}',
+  'note.readingTime': '{minutes} min de lectura',
+  'note.all': 'Todas las notas',
+  'note.tags': 'Temas',
   'work.title': 'Proyectos',
   'work.description': 'Casos de estudio: el problema, mi parte, las decisiones y lo que aprendí.',
   'work.intro':
@@ -165,7 +175,7 @@ export const es: UiDictionary = {
   'notFound.heading': 'Esta órbita está vacía.',
   'notFound.body':
     'La página que buscas no existe o se ha movido. Revisa la dirección o vuelve a terreno conocido.',
-  'notFound.englishOnly': 'Este caso de estudio solo está disponible en inglés.',
+  'notFound.englishOnly': 'Esta página solo está disponible en inglés.',
   'notFound.readInEnglish': 'Leerlo en inglés',
   'notFound.home': 'Ir al inicio',
   'notFound.projects': 'Ver proyectos',

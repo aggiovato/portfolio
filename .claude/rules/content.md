@@ -29,6 +29,10 @@ time; Keystatic will edit the same files later (§13), so keep the format editor
   (`getPublicProjects`, `getProjectsInLocale`, `getFeaturedProjects`, `projectPath`,
   `getProjectAlternates`). Never `getCollection('projects')` elsewhere: it would bypass the draft filter.
 - Logic that does not need `astro:content` goes to `project-utils.ts` with a unit test.
+- Notes (`src/content/notes/<locale>/`) follow the same model: English original, optional
+  translations with the same file name and slug, read only through `src/lib/content/notes.ts`
+  (`getPublicNotes`, `getNotesInLocale`, `notePath`, `getNoteAlternates`, `hasNotes`). Published
+  notes need `publishedAt`. `verify:drafts` also fails if `/notes/` ships without a published note.
 
 ## Drafts (§13, §21)
 

@@ -1,0 +1,46 @@
+---
+/**
+ * Markdoc image node (`![alt](./image.webp "Caption")`) for notes and case studies: an optimised
+ * image in a <figure>, with the Markdown title as its visible caption. Local images arrive as
+ * ImageMetadata (resolved by @astrojs/markdoc); remote or /public ones as a plain string.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface Props {
+  src: ImageMetadata | string;
+  alt: string;
+  title?: string;
+}
+
+const { src, alt, title } = Astro.props;
+---
+
+<figure class="figure">
+  {typeof src === 'string' ? (
+    <img src={src} alt={alt} loading="lazy" decoding="async" />
+  ) : (
+    <Image src={src} alt={alt} widths={[640, 960, 1280, 1600]} sizes="(min-width: 1024px) 40rem, 92vw" />
+  )}
+  {title && <figcaption>{title}</figcaption>}
+</figure>
+
+<style>
+  .figure {
+    margin-block: var(--space-8);
+  }
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-border);
+  }
+  figcaption {
+    margin-top: var(--space-3);
+    font-size: var(--text-meta);
+    line-height: 1.5;
+    color: var(--color-text-subtle);
+    text-wrap: pretty;
+  }
+</style>

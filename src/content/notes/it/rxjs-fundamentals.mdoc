@@ -1,0 +1,102 @@
+---
+slug: rxjs-fundamentals
+title: Capisci il flusso, poi l'operatore
+summary: >-
+  Una guida visuale ai fondamenti di RxJS: Observable e Promise a confronto, come leggere un
+  diagramma dei flussi, pipe() e subscribe(), e i primi tre operatori: map, filter e tap.
+publicationStatus: published
+publishedAt: 2026-11-14
+tags:
+  - RxJS
+  - Angular
+cover:
+  src: ../../../assets/notes/rxjs-fundamentals/cover.webp
+  alt: 'Diagramma a biglie: i valori 1, 2 e 3 passano per map(n => n * 10) ed escono come 10, 20 e 30.'
+---
+
+Smetti di memorizzare i nomi degli operatori. Segui quello che succede a ogni valore: quando sai
+leggere un valore attraverso una pipe, ogni operatore è solo una regola su cosa fa a quel valore.
+
+## Un risultato, o un flusso di valori
+
+Una **Promise** si risolve una volta sola: al massimo un valore di adempimento o un rifiuto.
+`new Promise(executor)` esegue subito l'executor, e le sue callback di `.then()` vengono sempre
+eseguite in modo asincrono. Non ha un metodo di annullamento proprio.
+
+Un **Observable** consegna da zero a molti valori, e può completarsi o andare in errore. Una
+sorgente fredda avvia una nuova esecuzione per ogni sottoscrizione; una sorgente calda può
+condividere un produttore già in funzione. Le emissioni possono essere sincrone o asincrone.
+
+`unsubscribe()` ferma la tua sottoscrizione, non necessariamente la sorgente.
+
+| | Promise | Observable |
+| --- | --- | --- |
+| Valori | Uno, o un rifiuto | Da zero a molti |
+| Parte | Subito, alla creazione | Alla sottoscrizione (fredda) o già in funzione (calda) |
+| Tempi | Callback sempre asincrone | Sincrono o asincrono |
+| Annullare | Nessun metodo proprio | `unsubscribe()` ferma la tua sottoscrizione |
+
+## Leggere il diagramma
+
+Il tempo scorre da sinistra a destra. Ogni punto è un valore; ogni linea è un flusso.
+
+![Un diagramma di flusso: i valori A e B su una linea che va da prima a dopo, poi una barra verticale che segna il completamento.](../../../assets/notes/rxjs-fundamentals/reading-a-diagram.webp "Due valori, poi il completamento.")
+
+- `next(A)`: viene emesso un valore.
+- `|` complete: il flusso termina normalmente.
+- `X` error: il flusso termina con un errore.
+
+Dopo complete o error non arrivano più valori. Queste linee non sono thread di esecuzione: mostrano
+solo quando arrivano i valori.
+
+## pipe() compone, subscribe() collega
+
+```ts
+const doubled$ = source$.pipe(map((n) => n * 2));
+
+doubled$.subscribe(console.log);
+```
+
+`pipe()` costruisce un nuovo Observable a partire da `source$` e dai suoi operatori; non si esegue
+ancora nulla. `subscribe()` collega un consumatore e avvia il lavoro. Con l'`HttpClient` di Angular,
+ogni sottoscrizione invia una richiesta. La pipe `async` di Angular può gestire la sottoscrizione
+al posto tuo.
+
+## map cambia il valore, filter decide cosa passa
+
+![Diagramma a biglie: map(n => n * 10) trasforma 1, 2 e 3 in 10, 20 e 30.](../../../assets/notes/rxjs-fundamentals/map.webp "map cambia ogni valore.")
+
+![Diagramma a biglie: filter(n => n >= 20) riceve 10, 20 e 30 e lascia passare solo 20 e 30.](../../../assets/notes/rxjs-fundamentals/filter.webp "filter scarta i valori che non superano la prova.")
+
+`filter` scarta le emissioni; non emette `true` o `false`.
+
+## tap osserva senza trasformare
+
+![Diagramma a biglie: 20 e 30 entrano in tap, la console registra 20 e poi 30, e gli stessi 20 e 30 escono invariati.](../../../assets/notes/rxjs-fundamentals/tap.webp "tap registra ogni valore; il flusso prosegue invariato.")
+
+Restituire un valore da `tap` non cambia il valore emesso. Usalo per osservare; evita di modificare
+oggetti al suo interno.
+
+## Tutto insieme
+
+Segui un valore e leggi l'intera pipe:
+
+```ts
+source$
+  .pipe(
+    map((n) => n * 10),
+    filter((n) => n >= 20),
+    tap((n) => console.log(n)),
+  )
+  .subscribe(render);
+```
+
+| Ingresso | Dopo map | Uscita |
+| --- | --- | --- |
+| 1, 2, 3 | 10, 20, 30 | 20, 30 |
+
+`2` diventa `20`. Supera il filtro. `tap` registra `20` e il sottoscrittore riceve `20`.
+
+**map** trasforma, **filter** seleziona, **tap** osserva.
+
+Fonti: la documentazione di RxJS su Observable e operatori, e la guida di `HttpClient` di Angular.

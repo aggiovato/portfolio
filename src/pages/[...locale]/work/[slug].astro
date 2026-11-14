@@ -10,6 +10,7 @@ import ContactCTA from '../../../components/ContactCTA.astro';
 import StarField from '../../../components/StarField.astro';
 import ProjectGallery from '../../../components/ProjectGallery.astro';
 import HorizonArc from '../../../components/HorizonArc.astro';
+import ArticleBody from '../../../components/ArticleBody.astro';
 import {
   getNextProject,
   getProjectAlternates,
@@ -148,36 +149,9 @@ const links = [
       </div>
     </div>
 
-    <div class="container layout">
-      {toc.length > 2 && (
-        <nav class="toc" aria-label={t('project.onThisPage')}>
-          <details class="toc-compact">
-            <summary>{t('project.onThisPage')}</summary>
-            <ol>
-              {toc.map((h) => (
-                <li>
-                  <a href={`#${h.slug}`}>{h.text}</a>
-                </li>
-              ))}
-            </ol>
-          </details>
-          <div class="toc-full">
-            <p class="toc-title">{t('project.onThisPage')}</p>
-            <ol class="trail" data-toc-trail>
-              {toc.map((h) => (
-                <li>
-                  <a href={`#${h.slug}`}>{h.text}</a>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </nav>
-      )}
-
-      <div class="prose">
-        <Content />
-      </div>
-    </div>
+    <ArticleBody toc={toc}>
+      <Content />
+    </ArticleBody>
 
     {data.gallery.length > 0 && (
       <section class="container gallery-band" aria-labelledby="gallery">
@@ -223,34 +197,6 @@ const links = [
 
   <ContactCTA />
 </BaseLayout>
-
-<script>
-  /**
-   * Desktop index as a trajectory: marks the section being read with aria-current="location"
-   * (the ◆ on the dotted line). Without JS the index is a plain list of anchors.
-   */
-  const trail = document.querySelector<HTMLElement>('[data-toc-trail]');
-  const links = [...(trail?.querySelectorAll<HTMLAnchorElement>('a') ?? [])];
-  const targets = links
-    .map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))))
-    .filter((el): el is HTMLElement => el !== null);
-
-  if (targets.length > 0) {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      // The section being read is the last heading above the top quarter of the viewport.
-      const line = innerHeight * 0.25;
-      const current = targets.filter((el) => el.getBoundingClientRect().top <= line).pop();
-      links.forEach((a) => {
-        if (current && a.hash === `#${current.id}`) a.setAttribute('aria-current', 'location');
-        else a.removeAttribute('aria-current');
-      });
-    };
-    addEventListener('scroll', () => (frame ||= requestAnimationFrame(update)), { passive: true });
-    update();
-  }
-</script>
 
 <style>
   .approach {
@@ -392,166 +338,6 @@ const links = [
     }
   }
 
-  .layout {
-    display: grid;
-    gap: var(--space-8);
-    padding-block: var(--space-8) var(--space-24);
-  }
-
-  .toc-full {
-    display: none;
-  }
-  .toc details {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-control);
-    padding: 0 var(--space-4);
-  }
-  .toc summary {
-    min-height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    font-weight: 650;
-    list-style: none;
-  }
-  .toc summary::-webkit-details-marker {
-    display: none;
-  }
-  /* Disclosure chevron: says the box opens, turns when it does. */
-  .toc summary::after {
-    content: '';
-    width: 8px;
-    height: 8px;
-    margin-right: var(--space-1);
-    border-right: 2px solid var(--color-text-muted);
-    border-bottom: 2px solid var(--color-text-muted);
-    transform: translateY(-2px) rotate(45deg);
-    transition: transform var(--duration-fast) var(--ease-out);
-  }
-  .toc details[open] summary::after {
-    transform: translateY(2px) rotate(-135deg);
-  }
-  .toc ol {
-    margin: 0;
-    padding: 0 0 var(--space-3) 1.25rem;
-    color: var(--color-text-subtle);
-  }
-  .toc a {
-    display: inline-block;
-    padding-block: var(--space-1);
-    color: var(--color-text-muted);
-    text-decoration: none;
-  }
-  .toc a:hover {
-    color: var(--color-text);
-  }
-
-  @media (min-width: 1024px) {
-    .layout {
-      grid-template-columns: 14rem minmax(0, var(--measure));
-      gap: var(--space-16);
-      padding-top: var(--space-12);
-    }
-    .toc {
-      position: sticky;
-      top: calc(var(--header-h) + var(--space-8));
-      align-self: start;
-    }
-    .toc-compact {
-      display: none;
-    }
-    .toc-full {
-      display: block;
-    }
-    .toc-title {
-      margin-bottom: var(--space-2);
-      font-family: var(--font-mono);
-      font-size: var(--text-meta);
-      color: var(--color-text-subtle);
-    }
-    /* The rocket's dotted trail from the hero; ◆ marks the section being read. */
-    .trail {
-      position: relative;
-      padding: 0 0 0 var(--space-6);
-      list-style: none;
-    }
-    .trail::before {
-      content: '';
-      position: absolute;
-      inset-block: var(--space-2);
-      left: 2.5px;
-      width: 3px;
-      /* Same dots as the rocket's trail: one every 1 + gap px (a 1px dash with round caps). */
-      background-image: radial-gradient(circle, var(--trail-dot-color) 1.1px, transparent 1.5px);
-      background-size: 3px calc(1px + var(--trail-dot-gap));
-    }
-    .trail a {
-      position: relative;
-      transition: color var(--duration-fast) var(--ease-out);
-    }
-    .trail a[aria-current='location'] {
-      color: var(--color-text);
-    }
-    .trail a[aria-current='location']::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: calc(-1 * var(--space-6) + 0.5px);
-      width: 7px;
-      height: 7px;
-      background: var(--color-accent);
-      transform: translateY(-50%) rotate(45deg);
-    }
-    .prose {
-      grid-column: 2;
-    }
-  }
-
-  /* ---------- Case study prose ---------- */
-  .prose {
-    max-width: var(--measure);
-  }
-  .prose :global(h2) {
-    margin-top: var(--space-16);
-    margin-bottom: var(--space-4);
-    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
-  }
-  .prose :global(h3) {
-    margin-top: var(--space-8);
-    margin-bottom: var(--space-2);
-    font-size: 1.25rem;
-  }
-  .prose :global(> :first-child) {
-    margin-top: 0;
-  }
-  .prose :global(p),
-  .prose :global(ul),
-  .prose :global(ol) {
-    margin-bottom: var(--space-4);
-    color: var(--color-text-muted);
-  }
-  .prose :global(strong) {
-    color: var(--color-text);
-  }
-  .prose :global(a) {
-    color: var(--color-accent);
-    text-underline-offset: 3px;
-  }
-  .prose :global(:not(pre) > code) {
-    padding: 0.1em 0.35em;
-    border-radius: var(--radius-inline);
-    background: var(--color-surface-raised);
-    color: var(--color-text);
-  }
-  .prose :global(pre) {
-    margin-block: var(--space-6);
-    padding: var(--space-4) var(--space-6);
-    border-radius: var(--radius-control);
-    border: 1px solid var(--color-border);
-    overflow-x: auto;
-  }
-
   .next {
     padding-bottom: var(--space-16);
   }
@@ -602,7 +388,7 @@ const links = [
   @media (min-width: 1024px) {
     /* The gallery spans the container (the system starts at its edge); Stack follows the text. */
     .band--column {
-      padding-left: calc(14rem + var(--space-16));
+      padding-left: calc(var(--gutter) + 14rem + var(--space-16));
     }
     .band--column > :global(*) {
       max-width: var(--measure);

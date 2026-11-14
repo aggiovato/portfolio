@@ -1,0 +1,111 @@
+---
+slug: uquiz
+title: UQuiz
+summary: Un'app di quiz per Android offline-first, in Kotlin e Jetpack Compose, con una modalità Studio per ripassare con calma e una modalità Gioco con timer adattivi, punteggio e una classifica personale.
+tagline: Studia con calma, o sfida il tempo.
+publicationStatus: published
+publishedAt: 2026-11-14
+projectStatus: completed
+projectType: personal
+featured: true
+featuredOrder: 2
+categories:
+  - Android
+  - Kotlin
+  - Jetpack Compose
+role:
+  - Design di prodotto
+  - Sviluppo Android
+periodLabel: Gennaio – maggio 2026
+glance:
+  problem: "Per studiare argomenti tecnici con le mie domande serviva uno strumento offline, sia per ripassare con calma sia per mettermi alla prova sotto pressione."
+  contribution: "Un progetto personale dall'inizio alla fine: idea di prodotto, schermate, architettura, regole di gioco e test."
+  outcome:
+    - "Un'app Android offline completata, con le modalità Studio e Gioco."
+    - "Timer adattivi per domanda e una classifica personale con nove livelli."
+    - "Le regole di punteggio e di tempo sono coperte da test unitari."
+stack:
+  - name: Kotlin + Jetpack Compose
+    layer: interface
+    rationale: Interfaccia dichiarativa con un piccolo design system interno (token e componenti base).
+  - name: Room
+    layer: data
+    rationale: Archiviazione SQLite locale, così contenuti e progressi funzionano del tutto offline.
+  - name: DataStore
+    layer: data
+    rationale: Preferenze dell'utente come tema e lingua.
+  - name: Coroutines + Flow
+    layer: runtime
+    rationale: Letture reattive dai repository ai ViewModel.
+  - name: Kotlinx Serialization
+    layer: tooling
+    rationale: Importazione ed esportazione dei pacchetti di domande come file JSON .uquiz.
+  - name: JUnit 4 + MockK
+    layer: quality
+    rationale: Test unitari per la logica di punteggio, di tempo e le utilità di gioco.
+cover:
+  src: ../../../assets/projects/uquiz/cover.webp
+  alt: "Tre telefoni con UQuiz: l'introduzione di una sessione di studio del pacchetto Tech Mix, la home con serie di giorni, XP totali e progresso di livello, e un riepilogo di partita con +136 punti."
+  caption: "Modalità Studio, home e riepilogo di una partita, dagli screenshot ufficiali dell'app."
+gallery:
+  - src: ../../../assets/projects/uquiz/home.jpg
+    alt: "Home di UQuiz: saluto, la mascotte U-ADEPT, serie di giorni, XP totali, punteggio con il progresso verso il livello successivo e le schede Random Play e Random Study."
+    caption: "Home — serie, XP e progresso verso il livello successivo."
+  - src: ../../../assets/projects/uquiz/library.jpg
+    alt: "Libreria con cartelle come Frontend, Java, UNIVERSAE e 日本語 e un campo di ricerca per i pacchetti."
+    caption: "Libreria — domande organizzate in cartelle e pacchetti."
+  - src: ../../../assets/projects/uquiz/pack_details.jpg
+    alt: "Dettaglio del pacchetto «Angular 20 – RxJS»: 20 domande, i pulsanti Study e Play e l'elenco delle domande con la loro difficoltà."
+    caption: "Dettaglio del pacchetto — domande, difficoltà ed entrambe le modalità."
+  - src: ../../../assets/projects/uquiz/study_session.jpg
+    alt: "Introduzione della modalità Studio per il pacchetto Tech Mix, con 40 domande e difficoltà media."
+    caption: "Modalità Studio — ripasso domanda per domanda con spiegazioni."
+  - src: ../../../assets/projects/uquiz/game_session.jpg
+    alt: "Introduzione della modalità Gioco per il pacchetto Tech Mix, con 40 domande, difficoltà media e un tempo stimato di circa 19 minuti e 59 secondi."
+    caption: "Modalità Gioco — il tempo a disposizione si stima per pacchetto."
+  - src: ../../../assets/projects/uquiz/game_summary.jpg
+    alt: "Riepilogo di partita con +136 punti al livello Adept, 305 MMR al livello successivo, 10 risposte corrette e precisione del 100%."
+    caption: "Riepilogo di partita — punteggio, livello e MMR al gradino successivo."
+  - src: ../../../assets/projects/uquiz/stats.jpg
+    alt: "Statistiche personali: sessioni, domande risposte, precisione, tempo totale e precisione per modalità."
+    caption: "Statistiche — rendimento in studio e in gioco a confronto."
+links:
+  code: https://github.com/aggiovato/uquiz
+---
+
+## Problema
+
+Volevo allenare conoscenze tecniche (Angular, RxJS, Java…) con domande mie, offline, e in due stati d'animo: ripasso tranquillo mentre imparo e pressione quando mi metto alla prova.
+
+## Soluzione
+
+- **Contenuti:** cartelle, pacchetti e domande a scelta multipla con 2–6 opzioni, difficoltà e una spiegazione facoltativa. I pacchetti si condividono come file JSON `.uquiz`.
+- **Modalità Studio:** ripasso sequenziale con riscontro immediato e livelli di padronanza per domanda (New → Learning → Familiar → Mastered).
+- **Modalità Gioco:** ogni domanda ha il suo conto alla rovescia, poi un tempo supplementare in cui le risposte valgono ancora ma costano di più.
+- **Classifica:** un MMR personale smussato con una media mobile ponderata esponenzialmente, con nove livelli da Initiate a Paragon e un'isteresi perché il livello non oscilli ai confini.
+
+## Decisioni tecniche
+
+{% decision
+   title="Un tempo a disposizione adattivo"
+   problem="Un timer fisso è ingiusto: le domande lunghe richiedono più tempo di lettura di quelle brevi."
+   decision="Un tempo adattivo per domanda: un tempo base per difficoltà più un bonus per lunghezza del testo, combinato con lo storico dell'utente e limitato tra 5 e 60 secondi."
+   alternatives="Un timer fisso per domanda o per difficoltà."
+   tradeoff="La regola è più difficile da spiegare a chi gioca, quindi è documentata e coperta da test."
+   evidence="Test unitari per i tempi base, il bonus di lunghezza, il suo tetto, la combinazione con lo storico e il limite." /%}
+
+{% decision
+   title="Clean Architecture con Room"
+   problem="L'app deve funzionare senza connessione e restare manutenibile man mano che crescono le funzionalità."
+   decision="Clean Architecture con fette di dominio (contenuti, tentativi, statistiche, classifica, utente, importazione/esportazione) e Room come unica fonte di verità."
+   alternatives="Un unico livello di schermate che parlano direttamente con il database."
+   tradeoff="Più file e codice di mappatura per ogni funzionalità."
+   evidence="Il livello di dominio non ha dipendenze da Android, quindi la logica di punteggio e di tempo si testa senza dispositivi." /%}
+
+## Qualità
+
+I test unitari coprono la logica di business pura: il punteggio di gioco (ogni ramo), il calcolo del tempo a disposizione e le utilità di gioco.
+
+## Cosa ho imparato
+
+Le regole di gioco vanno scritte come formule prima di programmarle; questo ha reso molto più semplice regolare il punteggio e i timer.

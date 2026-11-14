@@ -12,11 +12,14 @@ const select = <T extends string>(label: string, values: readonly T[], defaultVa
   fields.select({ label, options: values.map((v) => ({ label: v, value: v })), defaultValue });
 
 // Stored next to the existing screenshots: src/assets/projects/<slug>/<field>.<ext>.
-const image = (label: string, isRequired: boolean) =>
+/** Images live in `src/assets/<collection>/`, three levels above `src/content/<collection>/<locale>/`. */
+type AssetFolder = 'projects' | 'notes';
+
+const image = (label: string, isRequired: boolean, folder: AssetFolder = 'projects') =>
   fields.image({
     label,
-    directory: 'src/assets/projects',
-    publicPath: '../../../assets/projects/',
+    directory: `src/assets/${folder}`,
+    publicPath: `../../../assets/${folder}/`,
     validation: { isRequired },
   });
 
@@ -26,10 +29,13 @@ const image = (label: string, isRequired: boolean) =>
  * alt text is not enforced here; the Astro schema drops a cover without image (withoutEmptyMedia)
  * and still fails the build when an image has no alt text.
  */
-const media = (label: string, { optional = false } = {}): ComponentSchema =>
+const media = (
+  label: string,
+  { optional = false, folder = 'projects' as AssetFolder } = {},
+): ComponentSchema =>
   fields.object(
     {
-      src: image(label, !optional),
+      src: image(label, !optional, folder),
       alt: fields.text({
         label: 'Alt text',
         description: optional ? 'Required when an image is set.' : undefined,
@@ -77,6 +83,33 @@ const link = (label: string) =>
     },
   });
 
+/** Markdoc tags of markdoc.config.mjs, shared by case studies and notes. */
+const editorialTags = {
+  callout: wrapper({
+    label: 'Callout',
+    schema: {
+      type: select('Type', ['note', 'constraint', 'learning', 'editorial'], 'note'),
+      title: fields.text({ label: 'Title' }),
+    },
+  }),
+  decision: block({
+    label: 'Decision',
+    schema: {
+      title: fields.text({ label: 'Title', description: 'Short name, e.g. "Fastify over NestJS".' }),
+      problem: fields.text({ label: 'Problem', multiline: true }),
+      decision: fields.text({ label: 'Decision', multiline: true }),
+      alternatives: fields.text({ label: 'Alternatives', multiline: true }),
+      tradeoff: fields.text({ label: 'Trade-off', multiline: true }),
+      evidence: fields.text({
+        label: 'Evidence',
+        description: 'A verifiable fact. Put a forecast in Outlook instead.',
+        multiline: true,
+      }),
+      outlook: fields.text({ label: 'Outlook', multiline: true }),
+    },
+  }),
+};
+
 const projects = (locale: Locale) =>
   collection({
     label: `Projects (${locale})`,
@@ -110,31 +143,7 @@ const projects = (locale: Locale) =>
         extension: 'mdoc',
         options: { image: { directory: 'src/assets/projects', publicPath: '../../../assets/projects/' } },
         // Mirrors the tags in markdoc.config.mjs so they can be edited instead of shown as raw blocks.
-        components: {
-          callout: wrapper({
-            label: 'Callout',
-            schema: {
-              type: select('Type', ['note', 'constraint', 'learning', 'editorial'], 'note'),
-              title: fields.text({ label: 'Title' }),
-            },
-          }),
-          decision: block({
-            label: 'Decision',
-            schema: {
-              title: fields.text({ label: 'Title', description: 'Short name, e.g. "Fastify over NestJS".' }),
-              problem: fields.text({ label: 'Problem', multiline: true }),
-              decision: fields.text({ label: 'Decision', multiline: true }),
-              alternatives: fields.text({ label: 'Alternatives', multiline: true }),
-              tradeoff: fields.text({ label: 'Trade-off', multiline: true }),
-              evidence: fields.text({
-                label: 'Evidence',
-                description: 'A verifiable fact. Put a forecast in Outlook instead.',
-                multiline: true,
-              }),
-              outlook: fields.text({ label: 'Outlook', multiline: true }),
-            },
-          }),
-        },
+        components: editorialTags,
       }),
       summary: fields.text({
         label: 'Summary',
@@ -211,8 +220,61 @@ const projects = (locale: Locale) =>
     },
   });
 
+/** Notes (src/content.config.ts «notes»): a short technical article in Markdoc. */
+const notes = (locale: Locale) =>
+  collection({
+    label: `Notes (${locale})`,
+    path: `src/content/notes/${locale}/*`,
+    slugField: 'slug',
+    format: { contentField: 'content' },
+    entryLayout: isPhone ? 'form' : 'content',
+    columns: ['title', 'publicationStatus'],
+    schema: {
+      slug: fields.slug({
+        name: {
+          label: 'Slug',
+          description: 'Public URL, e.g. "rxjs-mapping-operators". Same value in every locale.',
+          validation: {
+            pattern: {
+              regex: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+              message: 'Use lowercase letters, numbers and hyphens, e.g. "my-note".',
+            },
+          },
+        },
+        slug: { label: 'File name', description: 'Generated from the slug.' },
+      }),
+      title: fields.text({ label: 'Title', validation: { length: { min: 1 } } }),
+      content: fields.markdoc({
+        label: 'Note',
+        extension: 'mdoc',
+        // ![alt](… "Caption"): the title becomes the figure caption (Figure.astro).
+        options: { image: { directory: 'src/assets/notes', publicPath: '../../../assets/notes/' } },
+        components: editorialTags,
+      }),
+      summary: fields.text({
+        label: 'Summary',
+        multiline: true,
+        validation: { length: { min: 1, max: 220 } },
+      }),
+      publicationStatus: select('Publication status', ['draft', 'published', 'archived'], 'draft'),
+      publishedAt: fields.date({ label: 'Published at', description: 'Required to publish.' }),
+      updatedAt: fields.date({ label: 'Updated at' }),
+      cover: media('Cover', { optional: true, folder: 'notes' }),
+      tags: fields.array(requiredText('Topic'), {
+        label: 'Topics',
+        itemLabel: (p) => p.value,
+        validation: { length: { max: 4 } },
+      }),
+    },
+  });
+
 export default config({
   storage: { kind: 'local' },
   ui: { brand: { name: 'aggiovato' } },
-  collections: Object.fromEntries(locales.map((l) => [`projects_${l}`, projects(l)])),
+  collections: Object.fromEntries(
+    locales.flatMap((l) => [
+      [`projects_${l}`, projects(l)],
+      [`notes_${l}`, notes(l)],
+    ]),
+  ),
 });

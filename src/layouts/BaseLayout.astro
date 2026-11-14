@@ -2,10 +2,12 @@
 import '../styles/global.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
-import { site } from '../data/site';
+import { nav, site } from '../data/site';
+import { hasNotes } from '../lib/content/notes';
 import {
   alternatesFor,
   defaultLocale,
+  localizePath,
   ogLocales,
   resolveLocale,
   useTranslations,
@@ -36,6 +38,9 @@ const {
 const fullTitle = title
   ? `${title} — ${site.brand}`
   : t('site.defaultTitle', { person: site.person, role: t('site.role'), brand: site.brand });
+// Sections without content stay out of the menu (§7).
+const notesOpen = await hasNotes();
+const navItems = nav.filter((item) => !('requires' in item) || notesOpen);
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
 const hreflangs = Object.entries(alternates).map(([lang, path]) => ({
@@ -60,6 +65,15 @@ const xDefault = alternates[defaultLocale];
     {!noindex &&
       hreflangs.length > 1 &&
       hreflangs.map((h) => <link rel="alternate" hreflang={h.lang} href={h.href} />)}
+    {/* Feed autodiscovery: readers find the notes feed from any page (no visible link). */}
+    {notesOpen && (
+      <link
+        rel="alternate"
+        type="application/rss+xml"
+        title={`${t('notes.title')} — ${site.brand}`}
+        href={new URL(localizePath('/notes/rss.xml', locale), Astro.site).href}
+      />
+    )}
     {!noindex && hreflangs.length > 1 && xDefault && (
       <link rel="alternate" hreflang="x-default" href={new URL(xDefault, Astro.site).href} />
     )}
@@ -92,10 +106,10 @@ const xDefault = alternates[defaultLocale];
     <a class="skip-link" href="#main">
       {t('a11y.skipToContent')}
     </a>
-    <SiteHeader alternates={alternates} />
+    <SiteHeader alternates={alternates} nav={navItems} />
     <main id="main" tabindex="-1">
       <slot />
     </main>
-    <SiteFooter />
+    <SiteFooter nav={navItems} />
   </body>
 </html>

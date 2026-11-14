@@ -1,0 +1,138 @@
+---
+/**
+ * One note in the notes index, read like a blog entry: date and reading time (mono, as the log's
+ * marginalia), title (the link), summary, topics and the cover. Every note has the same weight:
+ * text first, with the cover on the right from 640px (under the text on phones).
+ * An untranslated note (shown in another locale's index) keeps its own language: `lang` on its
+ * text and `hreflang` on the link, plus an «In English» note, like project cards.
+ */
+import { Image } from 'astro:assets';
+import { notePath, noteLocale, type Note } from '../lib/content/notes';
+import { readingMinutes } from '../lib/content/note-utils';
+import { resolveLocale, useTranslations } from '../i18n';
+
+interface Props {
+  note: Note;
+  /** The first image of the index is the page's largest paint. */
+  priority?: boolean;
+}
+
+const { note, priority = false } = Astro.props;
+const { data } = note;
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const contentLocale = noteLocale(note);
+const isFallback = contentLocale !== locale;
+const lang = isFallback ? contentLocale : undefined;
+const href = notePath(note);
+const date = data.publishedAt;
+---
+
+<article class:list={['note', data.cover && 'has-cover']}>
+  <div class="text">
+    <p class="meta">
+      {date && (
+        <time datetime={date.toISOString().slice(0, 10)}>
+          {new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(date)}
+        </time>
+      )}
+      <span>{t('note.readingTime', { minutes: String(readingMinutes(note.body ?? '')) })}</span>
+      {isFallback && <span>{t('card.inDefaultLanguage')}</span>}
+      {data.publicationStatus === 'draft' && <span class="draft">{t('card.draftDevOnly')}</span>}
+    </p>
+    <h2 lang={lang}>
+      <a href={href} hreflang={lang}>
+        {data.title}
+      </a>
+    </h2>
+    <p class="summary" lang={lang}>
+      {data.summary}
+    </p>
+    {data.tags.length > 0 && (
+      <ul class="chip-list" aria-label={t('note.tags')}>
+        {data.tags.map((tag) => (
+          <li class="chip">{tag}</li>
+        ))}
+      </ul>
+    )}
+  </div>
+  <!-- The cover repeats the title's link: hidden from assistive technology and the tab order. -->
+  {data.cover && (
+    <a class="cover" href={href} tabindex="-1" aria-hidden="true">
+      <Image
+        src={data.cover.src}
+        alt=""
+        widths={[320, 480, 640, 960]}
+        sizes="(min-width: 640px) 14rem, 92vw"
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : undefined}
+      />
+    </a>
+  )}
+</article>
+
+<style>
+  .note {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .text {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    max-width: var(--measure);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-text-subtle);
+  }
+  .draft {
+    color: var(--color-jupiter);
+  }
+  h2 {
+    font-size: var(--text-h3);
+    text-wrap: balance;
+  }
+  h2 a {
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+  h2 a:hover {
+    color: var(--color-accent-hover);
+  }
+  .summary {
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+  }
+
+  /* Covers are notebook diagrams: always shown whole (never cropped), framed by a hairline. */
+  .cover {
+    display: block;
+    border-radius: var(--radius-control);
+  }
+  .cover :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-border);
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+  .note:has(h2 a:hover) .cover :global(img),
+  .cover:hover :global(img) {
+    border-color: var(--color-accent);
+  }
+
+  @media (min-width: 640px) {
+    .note.has-cover {
+      grid-template-columns: minmax(0, 1fr) 14rem;
+      gap: var(--space-8);
+      align-items: start;
+    }
+  }
+</style>

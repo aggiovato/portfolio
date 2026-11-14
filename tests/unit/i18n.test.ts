@@ -57,7 +57,6 @@ describe('alternatesFor', () => {
       en: '/about/',
       es: '/es/about/',
       it: '/it/about/',
-      ja: '/ja/about/',
     });
   });
 });
@@ -68,7 +67,6 @@ describe('localeParams', () => {
       { params: { locale: undefined } },
       { params: { locale: 'es' } },
       { params: { locale: 'it' } },
-      { params: { locale: 'ja' } },
     ]);
   });
 });
@@ -99,7 +97,10 @@ describe('translations', () => {
 describe('caseStudyFallback', () => {
   it('points an untranslated case study address to the default-locale original', () => {
     expect(caseStudyFallback('/it/work/yrest/')).toEqual({ locale: 'it', href: '/work/yrest/' });
-    expect(caseStudyFallback('/ja/work/yrest-vscode')).toEqual({ locale: 'ja', href: '/work/yrest-vscode/' });
+    expect(caseStudyFallback('/es/notes/rxjs-mapping-operators/')).toEqual({
+      locale: 'es',
+      href: '/notes/rxjs-mapping-operators/',
+    });
   });
 
   it('ignores default-locale, unknown-locale and non-case-study paths', () => {

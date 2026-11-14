@@ -1,8 +1,14 @@
 ---
 import LogoMark from './LogoMark.astro';
-import { nav, site } from '../data/site';
+import { site, type NavItem } from '../data/site';
 import { localizePath, resolveLocale, useTranslations } from '../i18n';
 
+interface Props {
+  /** Menu entries, already filtered to the sections that have content (BaseLayout). */
+  nav: readonly NavItem[];
+}
+
+const { nav } = Astro.props;
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 

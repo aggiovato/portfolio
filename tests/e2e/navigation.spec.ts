@@ -42,6 +42,43 @@ test.describe('work', () => {
   });
 });
 
+test.describe('notes', () => {
+  test('the menu links to notes and a note opens its own URL with an index', async ({ page, isMobile }) => {
+    await page.goto('/notes/');
+    await expect(page.locator('h1')).toHaveText('Notes');
+    if (!isMobile) {
+      await expect(
+        page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Notes' }),
+      ).toHaveAttribute('aria-current', 'page');
+    }
+    await page.getByRole('link', { name: 'switchMap, concatMap, mergeMap or exhaustMap?' }).click();
+    await expect(page).toHaveURL(/\/notes\/rxjs-mapping-operators\/$/);
+    await expect(page.locator('h1')).toHaveCount(1);
+    await expect(page.getByText(/\d+ min read/)).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'On this page' })).toBeVisible();
+    await expect(page.locator('table').first()).toBeVisible();
+  });
+
+  test('pages announce the feed in the head, not with a visible link', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('link[rel="alternate"][type="application/rss+xml"]')).toHaveAttribute(
+      'href',
+      /\/notes\/rss\.xml$/,
+    );
+    await page.goto('/notes/');
+    await expect(page.getByRole('link', { name: 'RSS feed' })).toHaveCount(0);
+  });
+
+  test('the RSS feed lists the notes with absolute links', async ({ request }) => {
+    const response = await request.get('/notes/rss.xml');
+    expect(response.ok()).toBe(true);
+    expect(response.headers()['content-type']).toContain('xml');
+    const xml = await response.text();
+    expect(xml).toContain('<rss version="2.0"');
+    expect(xml).toMatch(/<channel>[\s\S]*<title>Notes — aggiovato<\/title>/);
+  });
+});
+
 test.describe('static pages', () => {
   for (const path of ['/about/', '/contact/']) {
     test(`${path} renders with a single h1`, async ({ page }) => {

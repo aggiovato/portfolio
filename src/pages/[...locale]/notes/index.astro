@@ -1,0 +1,58 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SectionHeading from '../../../components/SectionHeading.astro';
+import NoteCard from '../../../components/NoteCard.astro';
+import { getPublicNotes, hasNotes } from '../../../lib/content/notes';
+import { localeParams, resolveLocale, useTranslations } from '../../../i18n';
+
+// No notes, no section (§7): the index is not generated until one exists.
+export const getStaticPaths = (async () =>
+  (await hasNotes()) ? localeParams() : []) satisfies GetStaticPaths;
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const notes = await getPublicNotes(locale);
+---
+
+<BaseLayout title={t('notes.title')} description={t('notes.description')}>
+  <section class="section">
+    <div class="container">
+      <SectionHeading path="notes" id="page-title" level="h1">
+        {t('notes.title')}
+      </SectionHeading>
+      <p class="intro">{t('notes.intro')}</p>
+      <ol class="list" reversed>
+        {notes.map((note, i) => (
+          <li>
+            <NoteCard note={note} priority={i === 0} />
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro {
+    margin-top: calc(var(--space-8) * -1);
+    margin-bottom: var(--space-16);
+    max-width: 52ch;
+    font-size: var(--text-lead);
+    color: var(--color-text-muted);
+  }
+  .list {
+    display: grid;
+    gap: var(--space-12);
+    padding: 0;
+    list-style: none;
+  }
+  /* Notes read as a log: one entry per row, separated by hairlines. */
+  .list > li + li {
+    padding-top: var(--space-12);
+    border-top: 1px solid var(--color-border);
+  }
+  .list > li {
+    max-width: 60rem;
+  }
+</style>

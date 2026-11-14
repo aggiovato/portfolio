@@ -19,6 +19,7 @@ export const en = {
   'nav.menu': 'Menu',
   'nav.home': '{brand} — home',
   'nav.work': 'Work',
+  'nav.notes': 'Notes',
   'nav.about': 'About',
   'nav.contact': 'Contact',
   'nav.language': 'Language',
@@ -67,6 +68,15 @@ export const en = {
   'card.inDefaultLanguage': 'In English',
 
   // Work
+  'notes.title': 'Notes',
+  'notes.description': 'Short technical notes: how something works, read one value at a time.',
+  'notes.intro': 'Short technical notes on what I use every day, drawn as I understand it.',
+  'notes.feed': 'RSS feed',
+  'note.published': 'Published {date}',
+  'note.updated': 'Updated {date}',
+  'note.readingTime': '{minutes} min read',
+  'note.all': 'All notes',
+  'note.tags': 'Topics',
   'work.title': 'Work',
   'work.description': 'Case studies: the problem, my part, the decisions and what I learned.',
   'work.intro':
@@ -167,7 +177,7 @@ export const en = {
   'notFound.heading': 'This orbit is empty.',
   'notFound.body':
     'The page you’re looking for doesn’t exist or has moved. Check the address, or go back to familiar ground.',
-  'notFound.englishOnly': 'This case study is only available in English.',
+  'notFound.englishOnly': 'This page is only available in English.',
   'notFound.readInEnglish': 'Read it in English',
   'notFound.home': 'Go to home',
   'notFound.projects': 'See projects',

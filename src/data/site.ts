@@ -17,9 +17,16 @@ export const site = {
   coreStack: ['Angular', 'React', 'TypeScript', 'Spring Boot', 'PostgreSQL'],
 } as const;
 
-/** Main navigation, written for the default locale (`localizePath` adds the prefix). Lab stays hidden until it has content (§7). */
+/**
+ * Main navigation, written for the default locale (`localizePath` adds the prefix). Sections that
+ * may be empty name what they need (`requires`) and stay out of the menu until it exists (§7); Lab
+ * stays out until it has content.
+ */
 export const nav = [
   { href: '/work/', label: 'nav.work' },
+  { href: '/notes/', label: 'nav.notes', requires: 'notes' },
   { href: '/about/', label: 'nav.about' },
   { href: '/contact/', label: 'nav.contact' },
-] as const satisfies readonly { href: string; label: UiKey }[];
+] as const satisfies readonly { href: string; label: UiKey; requires?: 'notes' }[];
+
+export type NavItem = (typeof nav)[number];
