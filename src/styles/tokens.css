@@ -43,6 +43,10 @@
   /* Typography */
   --font-sans: 'Manrope Variable', 'Manrope', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+  /* Japanese: Manrope and JetBrains Mono have no CJK glyphs. System Japanese fonts take over for
+     kana/kanji (no multi-megabyte web font); Latin text keeps Manrope. */
+  --font-ja:
+    'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic UI', 'Yu Gothic', Meiryo;
 
   --text-meta: clamp(0.75rem, 0.72rem + 0.12vw, 0.875rem);
   --text-code: clamp(0.8125rem, 0.79rem + 0.1vw, 0.9375rem);
@@ -71,6 +75,7 @@
   /* Shape */
   --radius-control: 12px;
   --radius-card: 20px;
+  --radius-inline: 6px; /* inline code in running text */
 
   /* Layout */
   /* Shared container for hero and sections (max 1360 px). Gutters: 20–24 px on mobile,
@@ -83,7 +88,9 @@
   --hero-log-w: 3.75rem;
   --hero-indent: calc(var(--hero-log-w) + var(--space-6));
   --header-h: 64px;
-  --measure: 68ch;
+  /* Reading measure. `ch` is the width of «0», wider than an average Manrope letter: 56ch ≈ 74
+     characters per line, inside the comfortable 65–75 (68ch measured ~90). */
+  --measure: 56ch;
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);

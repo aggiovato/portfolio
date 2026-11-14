@@ -23,6 +23,21 @@ html {
   scroll-padding-top: calc(var(--header-h) + var(--space-4));
 }
 
+/*
+ * Japanese pages: Japanese system fonts after Manrope (Latin glyphs stay Manrope), stricter line
+ * breaking, phrase-aware wrapping where supported, and no negative tracking, which crowds kana.
+ */
+:lang(ja) {
+  --font-sans: 'Manrope Variable', 'Manrope', var(--font-ja), system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', var(--font-ja), ui-monospace, monospace;
+  line-break: strict;
+  word-break: auto-phrase;
+}
+
+:lang(ja) :is(h1, h2, h3) {
+  letter-spacing: 0;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
@@ -62,7 +77,9 @@ h4 {
   text-wrap: balance;
 }
 
-p {
+p,
+dd,
+li {
   text-wrap: pretty;
 }
 
@@ -264,9 +281,9 @@ samp {
 
 /*
  * Page transitions (native cross-document View Transitions, no JavaScript).
- * - Short page cross-fade. The header is identical on every page, so the cross-fade leaves it
- *   still; it has no view-transition-name of its own because that would make it a backdrop root
- *   and the mobile menu's glass could not blur the page behind it.
+ * - Sequential, not a cross-fade: the old page fades out first, then the new one fades in with a
+ *   small rise. Two text-heavy pages overlapping for 200 ms read as a smeared double exposure.
+ * - The header (site-header, see SiteHeader.astro) is its own layer and stays still.
  * - Elements with the same view-transition-name on both pages «fly» from one to the other:
  *   card screenshot → case study cover (cover-<slug>) and title → h1 (title-<slug>).
  * - Browsers without support: normal navigation. Reduced motion: no transition.
@@ -276,14 +293,47 @@ samp {
     navigation: auto;
   }
 
-  /* Short and aligned: shared elements land together with the cross-fade instead of trailing it. */
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 220ms;
+  @keyframes vt-out {
+    to {
+      opacity: 0;
+    }
   }
 
+  @keyframes vt-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  /* Strictly in sequence: the new page starts when the old one is gone. */
+  ::view-transition-old(root) {
+    animation: 120ms ease-in both vt-out;
+  }
+
+  ::view-transition-new(root) {
+    animation: 260ms var(--ease-out) 120ms both vt-in;
+  }
+
+  /*
+   * A named element present on only one of the two pages (e.g. a case study title when going to
+   * About) would otherwise fade over the slower shared-element timing and linger over the new page.
+   */
+  ::view-transition-old(*):only-child {
+    animation: 120ms ease-in both vt-out;
+  }
+
+  ::view-transition-new(*):only-child {
+    animation: 260ms var(--ease-out) 120ms both vt-in;
+  }
+
+  /* Shared elements land as the new page arrives. */
   ::view-transition-group(*) {
-    animation-duration: 300ms;
+    animation-duration: 340ms;
     animation-timing-function: var(--ease-out);
+  }
+
+  ::view-transition-group(site-header) {
+    animation: none;
   }
 }
