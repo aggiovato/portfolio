@@ -1,7 +1,9 @@
 # aggiovato — portfolio
 
-Personal portfolio of Alejandro Lugo, built with Astro 7, TypeScript and Markdoc. Static output,
-English and Spanish (`/es/`).
+[![Netlify Status](https://api.netlify.com/api/v1/badges/9ba6ae1c-eda2-4597-87db-d3a33bfd853f/deploy-status)](https://app.netlify.com/projects/aggiovato/deploys)
+
+Personal portfolio of Alejandro Lugo, built with Astro 7, TypeScript and Markdoc. Static output in
+English, Spanish (`/es/`), Italian (`/it/`) and Japanese (`/ja/`).
 
 ## Getting started
 
@@ -10,7 +12,7 @@ Requires Node ≥ 22.23.4 (`.nvmrc` pins Node 24).
 ```sh
 nvm use
 npm install
-npm run assets:placeholders  # placeholders for images that are kept out of the repo
+npm run assets:placeholders  # placeholders for any referenced image that is missing
 npm run dev                  # http://localhost:4321 (drafts visible)
 ```
 
