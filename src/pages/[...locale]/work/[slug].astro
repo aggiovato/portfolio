@@ -4,9 +4,11 @@ import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import ProjectMeta from '../../../components/ProjectMeta.astro';
+import ProjectGlance from '../../../components/ProjectGlance.astro';
 import TechList from '../../../components/TechList.astro';
 import ContactCTA from '../../../components/ContactCTA.astro';
 import StarField from '../../../components/StarField.astro';
+import ProjectGallery from '../../../components/ProjectGallery.astro';
 import HorizonArc from '../../../components/HorizonArc.astro';
 import {
   getNextProject,
@@ -43,7 +45,12 @@ const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 const alternates = await getProjectAlternates(project);
 const { Content, headings } = await render(project);
-const toc = headings.filter((h) => h.depth === 2);
+// Gallery and Stack (in page order) are rendered by the page, not by the Markdoc body, so add them by hand.
+const toc = [
+  ...headings.filter((h) => h.depth === 2),
+  ...(data.gallery.length > 0 ? [{ depth: 2, slug: 'gallery', text: t('project.gallery') }] : []),
+  ...(data.stack.length > 0 ? [{ depth: 2, slug: 'stack', text: t('project.stack') }] : []),
+];
 const links = [
   data.links.demo && { href: data.links.demo, label: t('project.liveDemo') },
   data.links.code && { href: data.links.code, label: t('project.sourceCode') },
@@ -63,23 +70,42 @@ const links = [
     <div class="approach">
       <StarField count={90} seed={11} />
       <header class="container head">
-        <p class="path-label">
-          portfolio / <a href={localizePath('/work/', locale)}>work</a> / <b>{data.slug}.mdoc</b>
-        </p>
-        <h1 style={`view-transition-name: title-${data.slug}`}>{data.title}</h1>
-        {data.tagline && <p class="lead">{data.tagline}</p>}
-        <p class="summary">{data.summary}</p>
-        {links.length > 0 && (
-          <ul class="links">
-            {links.map((l) => (
-              <li>
-                <a class="link-underline" href={l.href} rel="noopener" target="_blank">
-                  {l.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
+        <div class="head-main">
+          <p class="path-label">
+            portfolio / <a href={localizePath('/work/', locale)}>work</a> / <b>{data.slug}.mdoc</b>
+          </p>
+          <h1 style={`view-transition-name: title-${data.slug}`}>{data.title}</h1>
+          {data.tagline && <p class="lead">{data.tagline}</p>}
+          <p class="summary">{data.summary}</p>
+          {links.length > 0 && (
+            <ul class="links">
+              {links.map((l) => (
+                <li>
+                  <a class="link-underline external" href={l.href} rel="noopener" target="_blank">
+                    {l.label}
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M7 17 17 7M9 7h8v8"></path>
+                    </svg>
+                    <span class="visually-hidden">{t('a11y.newTab')}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div class="head-glance">
+          <ProjectGlance glance={data.glance} />
+        </div>
       </header>
     </div>
 
@@ -109,6 +135,7 @@ const links = [
                     {data.cover.caption && ' '}
                     <a href={data.links.demo} rel="noopener" target="_blank">
                       {t('project.tryItLive')}
+                      <span class="visually-hidden">{t('a11y.newTab')}</span>
                     </a>
                   </>
                 )}
@@ -149,36 +176,45 @@ const links = [
 
       <div class="prose">
         <Content />
-        {data.stack.length > 0 && (
-          <>
-            <h2 id="stack">{t('project.stack')}</h2>
-            <TechList stack={data.stack} />
-          </>
-        )}
-        {data.gallery.length > 0 && (
-          <>
-            <h2 id="gallery">{t('project.gallery')}</h2>
-            {data.gallery.map((g) => (
-              <figure class="shot">
-                <Image
-                  src={g.src}
-                  alt={g.alt}
-                  widths={[640, 1024, 1600, 2000]}
-                  sizes="(min-width: 1024px) 760px, 94vw"
-                />
-                {g.caption && <figcaption>{g.caption}</figcaption>}
-              </figure>
-            ))}
-          </>
-        )}
       </div>
     </div>
+
+    {data.gallery.length > 0 && (
+      <section class="container gallery-band" aria-labelledby="gallery">
+        <h2 id="gallery">{t('project.gallery')}</h2>
+        <ProjectGallery images={data.gallery} />
+      </section>
+    )}
+
+    <!-- Reference material closes the article: the screenshots come right after the story. -->
+    {data.stack.length > 0 && (
+      <section class="container band band--column" aria-labelledby="stack">
+        <h2 id="stack">{t('project.stack')}</h2>
+        <TechList stack={data.stack} />
+      </section>
+    )}
 
     {next && (
       <nav class="container next" aria-label={t('project.next')}>
         <p class="path-label">{t('project.next')}</p>
         <a href={projectPath(next)}>
-          <span class="next-title">{next.data.title}</span>
+          <span class="next-title">
+            {next.data.title}
+            <svg
+              class="next-arrow"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
+          </span>
           <span class="next-summary">{next.data.summary}</span>
         </a>
       </nav>
@@ -237,12 +273,19 @@ const links = [
     padding-top: var(--space-16);
     padding-bottom: var(--space-12);
   }
+  /* The path's one link: a quiet underline so it reads as a link, lavender on hover. */
   .head .path-label a {
-    color: inherit;
-    text-decoration: none;
+    color: var(--color-text-muted);
+    text-decoration: underline;
+    text-decoration-color: var(--color-control-border);
+    text-underline-offset: 3px;
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      text-decoration-color var(--duration-fast) var(--ease-out);
   }
   .head .path-label a:hover {
     color: var(--color-text);
+    text-decoration-color: var(--color-accent);
   }
   h1 {
     margin-top: var(--space-4);
@@ -266,6 +309,13 @@ const links = [
     max-width: 56ch;
     color: var(--color-text-muted);
   }
+  /* ↗ marks a link that leaves the site in a new tab (the text is announced, see a11y.newTab). */
+  .external {
+    gap: var(--space-1);
+  }
+  .external svg {
+    color: var(--color-text-subtle);
+  }
   .links {
     display: flex;
     flex-wrap: wrap;
@@ -279,8 +329,38 @@ const links = [
     /* Room for the horizon, which rises --horizon-depth into the header. */
     padding-bottom: calc(var(--space-12) + var(--horizon-depth));
   }
+  /*
+   * First screen = the log entry: title and summary on the left, the one-minute layer (problem,
+   * part, outcome) in the header's right half on desktop, above the horizon. On phones it follows
+   * the links, before the cover. PRODUCT.md: understood without reading the whole article.
+   */
+  .head {
+    display: grid;
+    gap: var(--space-12);
+  }
+  .head-glance {
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+  }
+  @media (min-width: 1024px) {
+    .head {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      gap: var(--space-16);
+      align-items: start;
+    }
+    .head-glance {
+      padding: var(--space-2) 0 0 var(--space-12);
+      border-top: 0;
+      border-left: 1px solid var(--color-border);
+    }
+  }
   .landing {
-    padding-block: var(--space-8) var(--space-16);
+    padding-block: var(--space-8);
+  }
+  @media (min-width: 1024px) {
+    .landing {
+      padding-bottom: var(--space-16);
+    }
   }
   .cover :global(img) {
     width: 100%;
@@ -315,7 +395,7 @@ const links = [
   .layout {
     display: grid;
     gap: var(--space-8);
-    padding-block: var(--space-12) var(--space-24);
+    padding-block: var(--space-8) var(--space-24);
   }
 
   .toc-full {
@@ -330,8 +410,27 @@ const links = [
     min-height: 48px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     cursor: pointer;
     font-weight: 650;
+    list-style: none;
+  }
+  .toc summary::-webkit-details-marker {
+    display: none;
+  }
+  /* Disclosure chevron: says the box opens, turns when it does. */
+  .toc summary::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    margin-right: var(--space-1);
+    border-right: 2px solid var(--color-text-muted);
+    border-bottom: 2px solid var(--color-text-muted);
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+  .toc details[open] summary::after {
+    transform: translateY(2px) rotate(-135deg);
   }
   .toc ol {
     margin: 0;
@@ -352,6 +451,7 @@ const links = [
     .layout {
       grid-template-columns: 14rem minmax(0, var(--measure));
       gap: var(--space-16);
+      padding-top: var(--space-12);
     }
     .toc {
       position: sticky;
@@ -440,7 +540,7 @@ const links = [
   }
   .prose :global(:not(pre) > code) {
     padding: 0.1em 0.35em;
-    border-radius: 6px;
+    border-radius: var(--radius-inline);
     background: var(--color-surface-raised);
     color: var(--color-text);
   }
@@ -473,21 +573,39 @@ const links = [
     font-weight: 750;
     letter-spacing: -0.02em;
   }
+  .next-title {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .next-arrow {
+    color: var(--color-accent);
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+  .next a:hover .next-arrow {
+    transform: translateX(4px);
+  }
   .next-summary {
     color: var(--color-text-muted);
   }
 
-  .shot {
-    margin-block: var(--space-6) var(--space-8);
+  .gallery-band,
+  .band {
+    padding-bottom: var(--space-24);
   }
-  .shot :global(img) {
-    width: 100%;
-    border-radius: var(--radius-control);
-    border: 1px solid var(--color-card-border);
+  .gallery-band h2,
+  .band h2 {
+    margin-bottom: var(--space-8);
+    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
   }
-  .shot figcaption {
-    margin-top: var(--space-2);
-    font-size: var(--text-meta);
-    color: var(--color-text-subtle);
+  /* Desktop: band headings (and Stack) start on the reading column's edge, past the index. */
+  @media (min-width: 1024px) {
+    /* The gallery spans the container (the system starts at its edge); Stack follows the text. */
+    .band--column {
+      padding-left: calc(14rem + var(--space-16));
+    }
+    .band--column > :global(*) {
+      max-width: var(--measure);
+    }
   }
 </style>

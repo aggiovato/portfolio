@@ -1,0 +1,1072 @@
+---
+/**
+ * Case study gallery as a «system map» (spec §10, §15, §19 «orbital map: experimental, offer an
+ * equivalent list»; DESIGN.md «Orbital Gallery»).
+ *
+ * - Baseline (phones, no JS, reduced motion): a grid of real images with their captions, each a
+ *   link to the full-resolution image (the viewer opens it when JS is on).
+ * - Orbit mode (JS, ≥768px, motion allowed): Jupiter at the centre and one small moon per image
+ *   on one or two tilted rings drawn with the rocket's dotted trail. A moon is a sphere textured
+ *   with its own image, blurred: it carries the screen's colours, not its unreadable UI. Back moons
+ *   pass behind the planet. The selected moon wears a lavender ring and a dotted trail links it to
+ *   the preview, where the image is shown whole. The selection changes only when the visitor
+ *   chooses (a moon, or a caption in the list); the orbit keeps turning slowly and pauses with its
+ *   toggle, under the pointer and off-screen (WCAG 2.2.2). Dragging a moon bends its ring and a
+ *   spring brings it back (maths in src/lib/gallery/orbit.ts).
+ * - The caption list is the accessible selector; the preview opens the <dialog> viewer: zoom
+ *   (wheel, pinch, buttons, double-click), pan, 90° rotation, previous/next. Keys: ← → + − R 0.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image, getImage } from 'astro:assets';
+import jupiter from '../assets/hero/jupiter.png';
+import { resolveLocale, useTranslations } from '../i18n';
+
+interface Props {
+  images: { src: ImageMetadata; alt: string; caption?: string }[];
+}
+
+const { images } = Astro.props;
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+const total = String(images.length);
+const variants = await Promise.all(
+  images.map(async (g) => ({
+    // Viewer and no-JS link target.
+    full: await getImage({ src: g.src, width: Math.min(g.src.width, 2560), format: 'webp' }),
+    // Preview beside the orbit.
+    preview: await getImage({ src: g.src, width: Math.min(g.src.width, 1280), format: 'webp' }),
+    // Moon surface: tiny on purpose, it is blurred anyway.
+    texture: await getImage({ src: g.src, width: 96, format: 'webp' }),
+  })),
+);
+const items = images.map((g, i) => {
+  const n = String(i + 1);
+  const caption = g.caption ?? g.alt;
+  return {
+    ...g,
+    caption,
+    ...variants[i],
+    openLabel: t('gallery.open', { n, total, caption }),
+    showLabel: t('gallery.show', { n, total, caption }),
+  };
+});
+---
+
+<div class="gallery" data-gallery>
+  <div class="system-layout">
+    <!-- Orbit mode only (the script unhides it). Purely visual: the caption list is the selector. -->
+    <div class="system" data-system hidden>
+      <div class="stage" data-stage>
+        <svg class="rings rings-back" aria-hidden="true" data-rings-back></svg>
+        <div class="planet" aria-hidden="true">
+          <Image src={jupiter} alt="" width={480} loading="lazy" />
+        </div>
+        <svg class="rings rings-front" aria-hidden="true" data-rings-front></svg>
+        <div class="moons" aria-hidden="true">
+          {items.map((g) => (
+            <span class="moon" data-moon style={`--tex: url("${g.texture.src}")`}>
+              <span class="moon-surface" />
+            </span>
+          ))}
+        </div>
+      </div>
+      <button
+        class="orbit-toggle"
+        type="button"
+        aria-pressed="false"
+        aria-label={t('gallery.pause')}
+        title={t('gallery.pause')}
+        data-orbit-toggle
+      >
+        <svg class="i-pause" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 5h3v14H7zM14 5h3v14h-3z" fill="currentColor"></path>
+        </svg>
+        <svg class="i-play" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 5v14l11-7z" fill="currentColor"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="side">
+      <!-- Orbit mode only: the selected image, whole. Opens the viewer. -->
+      <figure class="preview" data-preview hidden>
+        <button class="preview-open" type="button" data-preview-open>
+          <img alt="" data-preview-img />
+        </button>
+        <figcaption data-preview-caption></figcaption>
+      </figure>
+
+      <ul class="shots" role="list" data-shots>
+        {items.map((g) => (
+          <li class:list={['shot', g.src.height > g.src.width && 'is-portrait']}>
+            <a
+              href={g.full.src}
+              data-full={g.full.src}
+              data-preview-src={g.preview.src}
+              data-caption={g.caption}
+              data-open-label={g.openLabel}
+              data-show-label={g.showLabel}
+              aria-label={g.openLabel}
+            >
+              <Image
+                src={g.src}
+                alt={g.alt}
+                widths={[320, 480, 720]}
+                sizes="(min-width: 768px) 30vw, 92vw"
+                loading="lazy"
+              />
+              <span class="shot-caption">{g.caption}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Orbit mode, wide screens: the dotted trail from the selected moon to the preview. -->
+  <svg class="landing-trail" aria-hidden="true" data-landing-trail>
+    <path></path>
+  </svg>
+
+  <dialog class="viewer" aria-label={t('viewer.label')} data-viewer>
+    <div class="viewer-canvas" data-canvas>
+      <img data-viewer-img alt="" draggable="false" />
+    </div>
+    <div class="viewer-bar">
+      <p class="viewer-caption">
+        <span class="viewer-count" data-counter></span> <span data-caption></span>
+      </p>
+      <div class="viewer-tools">
+        <button type="button" data-act="prev" aria-label={t('viewer.previous')} title={t('viewer.previous')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6"></path>
+          </svg>
+        </button>
+        <button type="button" data-act="next" aria-label={t('viewer.next')} title={t('viewer.next')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 6l6 6-6 6"></path>
+          </svg>
+        </button>
+        <span class="sep" aria-hidden="true"></span>
+        <button
+          type="button"
+          data-act="zoom-out"
+          aria-label={t('viewer.zoomOut')}
+          title={t('viewer.zoomOut')}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6"></circle>
+            <path d="M8 11h6M20 20l-4.5-4.5"></path>
+          </svg>
+        </button>
+        <button type="button" data-act="zoom-in" aria-label={t('viewer.zoomIn')} title={t('viewer.zoomIn')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6"></circle>
+            <path d="M8 11h6M11 8v6M20 20l-4.5-4.5"></path>
+          </svg>
+        </button>
+        <button type="button" data-act="rotate" aria-label={t('viewer.rotate')} title={t('viewer.rotate')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"></path>
+          </svg>
+        </button>
+        <button type="button" data-act="reset" aria-label={t('viewer.reset')} title={t('viewer.reset')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9V4h5M20 15v5h-5M4 15v5h5M20 9V4h-5"></path>
+          </svg>
+        </button>
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" data-act="close" aria-label={t('viewer.close')} title={t('viewer.close')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18"></path>
+          </svg>
+        </button>
+      </div>
+      <!-- Visible on desktop (keys and wheel); phones rely on familiar gestures. -->
+      <p class="viewer-hint">{t('viewer.hint')}</p>
+    </div>
+  </dialog>
+</div>
+
+<script>
+  import {
+    clampDrag,
+    deformedRing,
+    depthOf,
+    isAtRest,
+    lerp,
+    orbitPoint,
+    springStep,
+    toPath,
+    type Orbit,
+    type Point,
+    type SpringState,
+  } from '../lib/gallery/orbit';
+
+  const TAU = Math.PI * 2;
+  const MAX_DRAG = 60;
+  const DRAG_THRESHOLD = 5;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((root) => {
+    const links = [...root.querySelectorAll<HTMLAnchorElement>('[data-shots] a')];
+    const viewer = createViewer(root, links);
+    const orbitMode = window.matchMedia('(min-width: 768px)').matches && !reduce.matches && links.length > 1;
+
+    if (!orbitMode) {
+      // Grid: each image opens the viewer directly.
+      links.forEach((a, i) =>
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          viewer.open(i, a);
+        }),
+      );
+      return;
+    }
+    createSystem(root, links, viewer);
+  });
+
+  /* ======================= System map ======================= */
+
+  interface Ring {
+    orbit: Orbit;
+    /** Indexes of the moons on this ring. */
+    moons: number[];
+    /** Milliseconds per turn: inner rings turn faster, as real moons do. */
+    period: number;
+    rotation: number;
+    backPath: SVGPathElement;
+    frontPath: SVGPathElement;
+  }
+
+  function createSystem(
+    root: HTMLElement,
+    links: HTMLAnchorElement[],
+    viewer: ReturnType<typeof createViewer>,
+  ) {
+    const system = root.querySelector<HTMLElement>('[data-system]')!;
+    const stage = root.querySelector<HTMLElement>('[data-stage]')!;
+    const moons = [...root.querySelectorAll<HTMLElement>('[data-moon]')];
+    const backSvg = root.querySelector<SVGSVGElement>('[data-rings-back]')!;
+    const frontSvg = root.querySelector<SVGSVGElement>('[data-rings-front]')!;
+    const toggle = root.querySelector<HTMLButtonElement>('[data-orbit-toggle]')!;
+    const preview = root.querySelector<HTMLElement>('[data-preview]')!;
+    const previewOpen = root.querySelector<HTMLButtonElement>('[data-preview-open]')!;
+    const previewImg = root.querySelector<HTMLImageElement>('[data-preview-img]')!;
+    const previewCaption = root.querySelector<HTMLElement>('[data-preview-caption]')!;
+    const trail = root.querySelector<SVGSVGElement>('[data-landing-trail]')!;
+    const trailPath = trail.querySelector('path')!;
+
+    root.classList.add('is-orbit');
+    system.hidden = false;
+    preview.hidden = false;
+
+    // One ring up to four moons; beyond that an inner and an outer ring.
+    const svgPath = (svg: SVGSVGElement) => {
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      svg.append(p);
+      return p;
+    };
+    const split = moons.length > 4 ? Math.floor(moons.length / 2) : 0;
+    const groups = split
+      ? [moons.map((_, i) => i).slice(0, split), moons.map((_, i) => i).slice(split)]
+      : [moons.map((_, i) => i)];
+    const rings: Ring[] = groups.map((ids, r) => ({
+      orbit: { cx: 0, cy: 0, rx: 0, ry: 0 },
+      moons: ids,
+      period: groups.length > 1 && r === 0 ? 90_000 : 150_000,
+      // Stagger the rings so their moons don't line up.
+      rotation: r * 0.6,
+      backPath: svgPath(backSvg),
+      frontPath: svgPath(frontSvg),
+    }));
+    const ringOf = moons.map((_, i) => rings.findIndex((r) => r.moons.includes(i)));
+    const slotOf = moons.map((_, i) => {
+      const ring = rings[ringOf[i]];
+      return Math.PI / 2 + (ring.moons.indexOf(i) * TAU) / ring.moons.length;
+    });
+    const springs: SpringState[] = moons.map(() => ({ offset: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } }));
+
+    const measure = () => {
+      const w = stage.clientWidth;
+      const h = stage.clientHeight;
+      const scales = rings.length > 1 ? [0.3, 0.46] : [0.42];
+      rings.forEach((ring, r) => {
+        ring.orbit = { cx: w / 2, cy: h / 2, rx: w * scales[r], ry: h * scales[r] * 0.62 };
+      });
+      [backSvg, frontSvg].forEach((s) => s.setAttribute('viewBox', `0 0 ${w} ${h}`));
+      const box = root.getBoundingClientRect();
+      trail.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+    };
+    new ResizeObserver(measure).observe(root);
+    measure();
+
+    /* ---- Selection: changes only when the visitor chooses ---- */
+    let selected = -1;
+    const select = (i: number) => {
+      if (i === selected) return;
+      selected = i;
+      const a = links[i];
+      links.forEach((l, k) =>
+        k === i ? l.setAttribute('aria-current', 'true') : l.removeAttribute('aria-current'),
+      );
+      moons.forEach((m, k) => m.classList.toggle('is-active', k === i));
+      preview.classList.remove('is-in');
+      previewImg.src = a.dataset.previewSrc!;
+      previewImg.alt = a.querySelector('img')?.alt ?? '';
+      previewCaption.textContent = a.dataset.caption ?? '';
+      previewOpen.setAttribute('aria-label', a.dataset.openLabel ?? '');
+      previewImg
+        .decode?.()
+        .catch(() => {})
+        .finally(() => preview.classList.add('is-in'));
+    };
+    links.forEach((a, i) => {
+      a.setAttribute('aria-label', a.dataset.showLabel ?? '');
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        select(i);
+      });
+    });
+    previewOpen.addEventListener('click', () => viewer.open(selected, previewOpen));
+    select(0);
+
+    /* ---- Motion control ---- */
+    let paused = false;
+    let hovered = false;
+    let visible = true;
+    let speed = 1;
+    let dragged = -1;
+    let last = performance.now();
+    toggle.addEventListener('click', () => {
+      paused = !paused;
+      toggle.setAttribute('aria-pressed', String(paused));
+    });
+    stage.addEventListener('pointerenter', () => (hovered = true));
+    stage.addEventListener('pointerleave', () => (hovered = false));
+    new IntersectionObserver(([e]) => (visible = e.isIntersecting)).observe(stage);
+
+    // A moon: click selects it, drag bends its ring (a press that moves is a drag, not a click).
+    moons.forEach((moon, i) => {
+      let start: Point | null = null;
+      moon.addEventListener('pointerdown', (e) => {
+        start = { x: e.clientX, y: e.clientY };
+        moon.setPointerCapture(e.pointerId);
+      });
+      moon.addEventListener('pointermove', (e) => {
+        if (!start) return;
+        const raw = { x: e.clientX - start.x, y: e.clientY - start.y };
+        if (dragged !== i && Math.hypot(raw.x, raw.y) < DRAG_THRESHOLD) return;
+        dragged = i;
+        moon.classList.add('is-dragged');
+        springs[i] = { offset: clampDrag(raw, MAX_DRAG), velocity: { x: 0, y: 0 } };
+      });
+      const release = () => {
+        if (start && dragged !== i) select(i);
+        start = null;
+        if (dragged === i) {
+          dragged = -1;
+          moon.classList.remove('is-dragged');
+        }
+      };
+      moon.addEventListener('pointerup', release);
+      moon.addEventListener('pointercancel', () => {
+        start = null;
+        dragged = -1;
+        moon.classList.remove('is-dragged');
+      });
+    });
+
+    /* ---- Frame ---- */
+    const frame = (now: number) => {
+      const dt = Math.min(now - last, 64);
+      last = now;
+      const still = paused || hovered || dragged >= 0 || !visible || viewer.isOpen() || document.hidden;
+      speed += ((still ? 0 : 1) - speed) * Math.min(1, dt / 260);
+
+      const stageBox = stage.getBoundingClientRect();
+      const rootBox = root.getBoundingClientRect();
+      let active: Point | null = null;
+
+      rings.forEach((ring, r) => {
+        ring.rotation = (ring.rotation + speed * (dt / ring.period) * TAU) % TAU;
+        let pull: { angle: number; offset: Point } | undefined;
+        ring.moons.forEach((i) => {
+          if (dragged !== i && !isAtRest(springs[i])) springs[i] = springStep(springs[i]);
+          const angle = slotOf[i] + ring.rotation;
+          const p = orbitPoint(ring.orbit, angle);
+          const depth = depthOf(angle);
+          const { offset } = springs[i];
+          if (dragged === i || Math.hypot(offset.x, offset.y) > 0.5) pull = { angle, offset };
+          const x = p.x + offset.x;
+          const y = p.y + offset.y;
+          const moon = moons[i];
+          // Layers: back rings 1 < back moons 2 < planet 3 < front rings 4 < front moons 5.
+          moon.style.zIndex = depth >= 0.5 ? '5' : '2';
+          moon.style.setProperty('--dim', (1 - depth).toFixed(3));
+          moon.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%) scale(${lerp(0.6, 1, depth).toFixed(3)})`;
+          if (i === selected)
+            active = { x: stageBox.left - rootBox.left + x, y: stageBox.top - rootBox.top + y };
+        });
+        // Samples 0–60 span angles 0…π (front half); 60–120 the back half.
+        const points = deformedRing(ring.orbit, 120, pull);
+        ring.frontPath.setAttribute('d', toPath(points.slice(0, 61), false));
+        ring.backPath.setAttribute('d', toPath([...points.slice(60), points[0]], false));
+        if (r === 0) stage.dataset.rotation = ring.rotation.toFixed(4);
+      });
+
+      // Landing trail: from the selected moon to the preview's left edge (side-by-side layout only).
+      const pBox = previewImg.getBoundingClientRect();
+      if (active && pBox.width && pBox.left > stageBox.right - 8) {
+        const a = active as Point;
+        const b = { x: pBox.left - rootBox.left - 10, y: pBox.top - rootBox.top + pBox.height / 2 };
+        const c = { x: (a.x + b.x) / 2, y: Math.min(a.y, b.y) - 40 };
+        trailPath.setAttribute(
+          'd',
+          `M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q ${c.x.toFixed(1)} ${c.y.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`,
+        );
+      } else {
+        trailPath.removeAttribute('d');
+      }
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }
+
+  /* ======================= Viewer ======================= */
+
+  function createViewer(root: HTMLElement, links: HTMLAnchorElement[]) {
+    const dlg = root.querySelector<HTMLDialogElement>('[data-viewer]')!;
+    const img = dlg.querySelector<HTMLImageElement>('[data-viewer-img]')!;
+    const canvas = dlg.querySelector<HTMLElement>('[data-canvas]')!;
+    const counter = dlg.querySelector<HTMLElement>('[data-counter]')!;
+    const caption = dlg.querySelector<HTMLElement>('[data-caption]')!;
+    let index = 0;
+    let opener: HTMLElement | null = null;
+    const view = { scale: 1, rot: 0, x: 0, y: 0 };
+
+    const apply = () => {
+      img.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.scale}) rotate(${view.rot}deg)`;
+      canvas.classList.toggle('is-zoomed', view.scale > 1);
+    };
+    const reset = () => {
+      Object.assign(view, { scale: 1, rot: 0, x: 0, y: 0 });
+      apply();
+    };
+    const zoom = (factor: number) => {
+      view.scale = Math.min(6, Math.max(0.5, view.scale * factor));
+      if (view.scale <= 1) view.x = view.y = 0;
+      apply();
+    };
+
+    const show = (i: number) => {
+      index = (i + links.length) % links.length;
+      const a = links[index];
+      const thumb = a.querySelector('img');
+      // Thumbnail first (already loaded, so the viewer is never empty), then the full image.
+      img.src = thumb?.currentSrc || a.dataset.full!;
+      img.alt = thumb?.alt ?? '';
+      const fullSrc = a.dataset.full!;
+      const pre = new Image();
+      pre.onload = () => {
+        if (links[index] === a) img.src = fullSrc;
+      };
+      pre.src = fullSrc;
+      counter.textContent = `${index + 1} / ${links.length}`;
+      caption.textContent = a.dataset.caption ?? '';
+      reset();
+    };
+
+    const open = (i: number, from: HTMLElement, origin: HTMLElement = from) => {
+      opener = from;
+      show(i);
+      dlg.showModal();
+      // Grow from the thumbnail (FLIP) unless motion is reduced.
+      const thumb = origin.querySelector('img');
+      if (!thumb || reduce.matches) return;
+      const a = thumb.getBoundingClientRect();
+      const b = img.getBoundingClientRect();
+      if (!b.width) return;
+      img.animate(
+        [
+          {
+            transform: `translate(${a.left + a.width / 2 - (b.left + b.width / 2)}px, ${a.top + a.height / 2 - (b.top + b.height / 2)}px) scale(${a.width / b.width})`,
+            opacity: 0.6,
+          },
+          { transform: 'none', opacity: 1 },
+        ],
+        { duration: 320, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+      );
+    };
+
+    dlg.addEventListener('close', () => opener?.focus());
+    // A click on the dimmed area around the image closes the viewer.
+    canvas.addEventListener('click', (e) => {
+      if (e.target === canvas && view.scale <= 1) dlg.close();
+    });
+
+    dlg.querySelectorAll<HTMLButtonElement>('[data-act]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const act = b.dataset.act;
+        if (act === 'prev') show(index - 1);
+        else if (act === 'next') show(index + 1);
+        else if (act === 'zoom-in') zoom(1.4);
+        else if (act === 'zoom-out') zoom(1 / 1.4);
+        else if (act === 'rotate') {
+          view.rot = (view.rot + 90) % 360;
+          apply();
+        } else if (act === 'reset') reset();
+        else if (act === 'close') dlg.close();
+      }),
+    );
+
+    dlg.addEventListener('keydown', (e) => {
+      if (e.target instanceof HTMLButtonElement && (e.key === 'Enter' || e.key === ' ')) return;
+      const keys: Record<string, () => void> = {
+        ArrowLeft: () => show(index - 1),
+        ArrowRight: () => show(index + 1),
+        '+': () => zoom(1.4),
+        '=': () => zoom(1.4),
+        '-': () => zoom(1 / 1.4),
+        r: () => {
+          view.rot = (view.rot + 90) % 360;
+          apply();
+        },
+        '0': reset,
+      };
+      const run = keys[e.key] ?? keys[e.key.toLowerCase()];
+      if (run) {
+        e.preventDefault();
+        run();
+      }
+    });
+
+    canvas.addEventListener(
+      'wheel',
+      (e) => {
+        e.preventDefault();
+        zoom(e.deltaY < 0 ? 1.15 : 1 / 1.15);
+      },
+      { passive: false },
+    );
+    canvas.addEventListener('dblclick', () => (view.scale > 1 ? reset() : zoom(2.5)));
+
+    // Pan with one pointer, pinch-zoom with two.
+    const pointers = new Map<number, Point>();
+    let pinch = 0;
+    canvas.addEventListener('pointerdown', (e) => {
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      canvas.setPointerCapture(e.pointerId);
+      if (pointers.size === 2) {
+        const [p, q] = [...pointers.values()];
+        pinch = Math.hypot(p.x - q.x, p.y - q.y);
+      }
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      const prev = pointers.get(e.pointerId);
+      if (!prev) return;
+      const now = { x: e.clientX, y: e.clientY };
+      pointers.set(e.pointerId, now);
+      if (pointers.size === 2) {
+        const [p, q] = [...pointers.values()];
+        const d = Math.hypot(p.x - q.x, p.y - q.y);
+        if (pinch) zoom(d / pinch);
+        pinch = d;
+      } else if (view.scale > 1) {
+        view.x += now.x - prev.x;
+        view.y += now.y - prev.y;
+        apply();
+      }
+    });
+    const lift = (e: PointerEvent) => {
+      pointers.delete(e.pointerId);
+      if (pointers.size < 2) pinch = 0;
+    };
+    canvas.addEventListener('pointerup', lift);
+    canvas.addEventListener('pointercancel', lift);
+
+    return { open, isOpen: () => dlg.open };
+  }
+</script>
+
+<style>
+  .gallery {
+    position: relative;
+  }
+
+  /* ---------- Baseline: a grid of real images (phones, no JS, reduced motion) ---------- */
+  .shots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: var(--space-8) var(--space-6);
+    padding: 0;
+    list-style: none;
+  }
+
+  .shot a {
+    display: grid;
+    gap: var(--space-3);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .shot :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-card-border);
+    background: var(--color-surface);
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  /* Phone screenshots: narrower columns (two on a phone), so one screen does not fill the viewport. */
+  .shots:has(.is-portrait) {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr));
+    gap: var(--space-6) var(--space-4);
+  }
+
+  /* Phone screenshots keep their portrait shape. */
+  .shot.is-portrait :global(img) {
+    aspect-ratio: auto;
+    width: 100%;
+  }
+
+  .shot a:hover :global(img) {
+    border-color: var(--color-accent);
+  }
+
+  .shot-caption {
+    font-size: var(--text-meta);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+  }
+
+  .system,
+  .preview,
+  .landing-trail {
+    display: none;
+  }
+
+  /* ---------- System map (orbit mode) ---------- */
+  .is-orbit .system-layout {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  @media (min-width: 1024px) {
+    .is-orbit .system-layout {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: var(--space-16);
+      /* Top-aligned: the planet sits level with the preview, however long the caption list. */
+      align-items: start;
+    }
+  }
+
+  .is-orbit .system:not([hidden]) {
+    position: relative;
+    display: block;
+  }
+
+  .stage {
+    position: relative;
+    height: clamp(20rem, 32vw, 28rem);
+    isolation: isolate;
+    touch-action: pan-y;
+  }
+
+  /* The planet dominates: moons are a fraction of its size. */
+  .planet {
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    top: 50%;
+    width: clamp(9rem, 15vw, 13rem);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .planet :global(img) {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    filter: saturate(0.86) brightness(0.9);
+    /* Soft drop shadow towards the lower right, matching the sunlit side of the moons. */
+    box-shadow: 10px 14px 40px -12px rgb(0 0 0 / 0.8);
+  }
+
+  .rings {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .rings-back {
+    z-index: 1;
+  }
+
+  .rings-front {
+    z-index: 4;
+  }
+
+  .rings :global(path) {
+    fill: none;
+    stroke: var(--trail-dot-color);
+    stroke-width: var(--trail-dot-size);
+    stroke-linecap: round;
+    stroke-dasharray: 1 var(--trail-dot-gap);
+  }
+
+  .moons {
+    position: absolute;
+    inset: 0;
+  }
+
+  /*
+   * A moon: a small sphere whose surface is its own image, blurred into colour, lit from the upper
+   * left with a terminator to the lower right. No coloured halo; depth dims the back moons.
+   */
+  .moon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: clamp(1.75rem, 2.6vw, 2.4rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    cursor: pointer;
+    touch-action: none;
+    will-change: transform;
+  }
+
+  .moon-surface {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--color-surface-raised);
+  }
+
+  .moon-surface::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background: var(--tex) center / cover no-repeat;
+    /* Dark screenshots would make black moons: lift them a little. */
+    filter: blur(3px) saturate(1.25) brightness(1.5);
+  }
+
+  .moon-surface::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(
+        circle at 32% 28%,
+        color-mix(in srgb, var(--color-text) 28%, transparent),
+        transparent 38%
+      ),
+      radial-gradient(circle at 70% 75%, rgb(8 9 13 / 0.78), transparent 66%),
+      color-mix(in srgb, var(--color-bg) calc(var(--dim, 0) * 55%), transparent);
+  }
+
+  /* The selected moon: a fine lavender ring with a gap, like a target marker. */
+  .moon::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-accent);
+    opacity: 0;
+    transform: scale(0.8);
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+  }
+
+  .moon:hover::after {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+
+  .moon.is-active::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .moon.is-dragged {
+    cursor: grabbing;
+  }
+
+  .orbit-toggle {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 6;
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-control-border);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .orbit-toggle:hover {
+    color: var(--color-text);
+  }
+
+  .orbit-toggle .i-play,
+  .orbit-toggle[aria-pressed='true'] .i-pause {
+    display: none;
+  }
+
+  .orbit-toggle[aria-pressed='true'] .i-play {
+    display: block;
+  }
+
+  /* Preview: the selected image, whole. */
+  .is-orbit .preview:not([hidden]) {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-6);
+  }
+
+  /* The button hugs the image, so the radius and border follow its real edges (no letterbox). */
+  .preview-open {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-control);
+    cursor: zoom-in;
+  }
+
+  .preview-open img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 24rem;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-card-border);
+    opacity: 0;
+    transition: opacity 280ms var(--ease-out);
+  }
+
+  .preview.is-in img {
+    opacity: 1;
+  }
+
+  .preview figcaption {
+    font-size: var(--text-meta);
+    color: var(--color-text-muted);
+  }
+
+  /* In orbit mode the list is the selector: captions only, the selected one marked with ◆. */
+  .is-orbit .shots {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .is-orbit .shot :global(img) {
+    display: none;
+  }
+
+  .is-orbit .shot a {
+    position: relative;
+    display: block;
+    padding: var(--space-2) 0 var(--space-2) var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .is-orbit .shot a:hover {
+    color: var(--color-text);
+  }
+
+  .is-orbit .shot a[aria-current='true'] {
+    color: var(--color-text);
+  }
+
+  .is-orbit .shot a[aria-current='true']::before {
+    content: '';
+    position: absolute;
+    left: var(--space-1);
+    top: calc(var(--space-2) + 0.6em);
+    width: 7px;
+    height: 7px;
+    background: var(--color-accent);
+    transform: rotate(45deg);
+  }
+
+  .is-orbit .shot-caption {
+    font-size: var(--text-meta);
+    color: inherit;
+  }
+
+  /* The landing trail from the selected moon to the preview (side-by-side layout only). */
+  .is-orbit .landing-trail {
+    position: absolute;
+    inset: 0;
+    z-index: 7;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .landing-trail path {
+    fill: none;
+    stroke: var(--trail-dot-color);
+    stroke-width: var(--trail-dot-size);
+    stroke-linecap: round;
+    stroke-dasharray: 1 var(--trail-dot-gap);
+  }
+
+  /* ---------- Viewer ---------- */
+  .viewer {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgb(13 14 20 / 0.98);
+    color: var(--color-text);
+    overflow: hidden;
+  }
+
+  .viewer[open] {
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+
+  .viewer::backdrop {
+    background: transparent;
+  }
+
+  .viewer-canvas {
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    overflow: hidden;
+    touch-action: none;
+    cursor: zoom-in;
+  }
+
+  .viewer-canvas.is-zoomed {
+    cursor: grab;
+  }
+
+  .viewer-canvas img {
+    max-width: min(96vw, 1600px);
+    max-height: calc(100dvh - 7rem);
+    border-radius: var(--radius-control);
+    transition: transform var(--duration-fast) var(--ease-out);
+    user-select: none;
+  }
+
+  .viewer-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-6);
+    padding: var(--space-3) max(var(--space-6), env(safe-area-inset-right))
+      calc(var(--space-3) + env(safe-area-inset-bottom)) max(var(--space-6), env(safe-area-inset-left));
+    border-top: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-bg) 82%, transparent);
+    backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  .viewer-hint {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  @media (min-width: 1024px) and (pointer: fine) {
+    .viewer-hint {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+      flex-basis: 100%;
+      order: 3;
+      font-family: var(--font-mono);
+      font-size: var(--text-meta);
+      color: var(--color-text-subtle);
+    }
+  }
+
+  .viewer-caption {
+    font-size: var(--text-meta);
+    color: var(--color-text-muted);
+  }
+
+  .viewer-count {
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+    margin-right: var(--space-2);
+  }
+
+  .viewer-tools {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .viewer-tools button {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 0;
+    border-radius: var(--radius-control);
+    cursor: pointer;
+  }
+
+  .viewer-tools button:hover {
+    color: var(--color-text);
+    background: var(--color-surface-raised);
+  }
+
+  .viewer-tools svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .sep {
+    width: 1px;
+    height: 24px;
+    margin-inline: var(--space-2);
+    background: var(--color-border);
+  }
+</style>
