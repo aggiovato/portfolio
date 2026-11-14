@@ -1,0 +1,96 @@
+---
+/**
+ * The one-minute layer of a case study (PRODUCT.md: the visitor recognises the problem, his part
+ * and the outcome without reading the whole article). Sits under the cover and fact sheet.
+ * Outcome items are shipped, verifiable facts; the schema requires at least one.
+ */
+import type { Project } from '../lib/content/projects';
+import { resolveLocale, useTranslations } from '../i18n';
+
+interface Props {
+  glance: Project['data']['glance'];
+}
+const { glance } = Astro.props;
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+---
+
+<section class="glance" aria-labelledby="glance-title">
+  <h2 id="glance-title" class="visually-hidden">
+    {t('glance.label')}
+  </h2>
+  <dl>
+    <div>
+      <dt>{t('glance.problem')}</dt>
+      <dd>{glance.problem}</dd>
+    </div>
+    <div>
+      <dt>{t('glance.contribution')}</dt>
+      <dd>{glance.contribution}</dd>
+    </div>
+    <div>
+      <dt>{t('glance.outcome')}</dt>
+      <dd>
+        <ul>
+          {glance.outcome.map((fact) => (
+            <li>{fact}</li>
+          ))}
+        </ul>
+      </dd>
+    </div>
+  </dl>
+</section>
+
+<style>
+  .glance {
+    container-type: inline-size;
+  }
+
+  dl {
+    display: grid;
+    gap: var(--space-6) var(--space-12);
+  }
+
+  /* Three columns once each has room for a readable line. */
+  @container (min-width: 52rem) {
+    dl {
+      grid-template-columns: 1fr 1fr 1.3fr;
+    }
+  }
+
+  dt {
+    margin-bottom: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-text-subtle);
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-text);
+    text-wrap: pretty;
+  }
+
+  ul {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Small trail dot: the outcome reads as the end of the trajectory. */
+  li {
+    position: relative;
+    padding-left: var(--space-4);
+  }
+
+  li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-jupiter);
+  }
+</style>

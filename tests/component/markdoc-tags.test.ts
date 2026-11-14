@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import Callout from '../../src/components/Callout.astro';
 import DecisionBlock from '../../src/components/DecisionBlock.astro';
 import ProjectMeta from '../../src/components/ProjectMeta.astro';
+import ProjectGlance from '../../src/components/ProjectGlance.astro';
 
 /**
  * Component layer: renders .astro components to HTML with the Container API (experimental in Astro 7)
@@ -24,6 +25,34 @@ describe('DecisionBlock', () => {
     const terms = [...html.matchAll(/<dt[^>]*>([^<]+)<\/dt>/g)].map((m) => m[1]);
     expect(terms).toEqual(['Problem', 'Decision', 'Trade-off']);
     expect(html).toContain('aria-label="Decision: Use Fastify"');
+  });
+
+  it('names the region with its title and keeps forecasts out of Evidence', async () => {
+    const html = await container.renderToString(DecisionBlock, {
+      props: {
+        title: 'Fastify over NestJS',
+        problem: 'Slow start',
+        decision: 'Use Fastify',
+        outlook: 'Maybe later',
+      },
+    });
+    expect(html).toMatch(/<h3[^>]*id="decision-fastify-over-nestjs"[^>]*>Fastify over NestJS<\/h3>/);
+    expect(html).toContain('aria-labelledby="decision-fastify-over-nestjs"');
+    expect(html).not.toContain('aria-label="Decision:');
+    const terms = [...html.matchAll(/<dt[^>]*>([^<]+)<\/dt>/g)].map((m) => m[1]);
+    expect(terms).toEqual(['Problem', 'Decision', 'Outlook']);
+  });
+});
+
+describe('ProjectGlance', () => {
+  it('shows the problem, his part and every outcome fact', async () => {
+    const html = await container.renderToString(ProjectGlance, {
+      props: { glance: { problem: 'P', contribution: 'C', outcome: ['Shipped A', 'Shipped B'] } },
+    });
+    const terms = [...html.matchAll(/<dt[^>]*>([^<]+)<\/dt>/g)].map((m) => m[1]);
+    expect(terms).toEqual(['Problem', 'My part', 'Outcome']);
+    expect(html).toContain('<li');
+    expect(html).toContain('Shipped B');
   });
 });
 

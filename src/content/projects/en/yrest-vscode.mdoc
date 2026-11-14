@@ -16,6 +16,13 @@ role:
   - Development
   - Documentation
 periodLabel: June 2026
+glance:
+  problem: "Mistakes in db.yml conventions, like a missing collection or a key without its _, only showed up when the server ran."
+  contribution: "Built and published it alone: grammars, providers, validation rules, tests and the release pipeline."
+  outcome:
+    - "Published on the VS Code Marketplace, from version tags."
+    - "Highlighting, hover docs, autocompletion and diagnostics, also inside yrest tagged templates."
+    - "45 unit tests cover the validation rules."
 stack:
   - name: VS Code Extension API
     layer: interface
@@ -29,6 +36,23 @@ stack:
   - name: Vitest
     layer: quality
     rationale: Unit tests for the validation rules and shared constants.
+cover:
+  src: ../../../assets/projects/yrest-vscode/cover.webp
+  alt: "Reconstruction of VS Code editing a yRest db.yml: an error underlines the unknown collection “reviews”, with the hover documentation for _rel, the relation-type suggestions and the extension’s icon beside it."
+  caption: "Reconstruction with the extension’s real grammar, messages and documentation."
+gallery:
+  - src: ../../../assets/projects/yrest-vscode/highlighting.webp
+    alt: "db.yml in VS Code with the extension’s highlighting: reserved keys, the relation DSL, cardinalities and template variables in their own colours."
+    caption: "Highlighting for reserved keys, the relation DSL and template variables (reconstruction)."
+  - src: ../../../assets/projects/yrest-vscode/hover.webp
+    alt: "Hover card over _rel showing its documentation and a YAML example."
+    caption: "Hover documentation for every reserved key (reconstruction)."
+  - src: ../../../assets/projects/yrest-vscode/completion.webp
+    alt: "Autocomplete list inside a relation DSL string offering m2o, m2m, many2one, many2many and one2many."
+    caption: "Autocompletion of relation types and aliases (reconstruction)."
+  - src: ../../../assets/projects/yrest-vscode/diagnostics.webp
+    alt: "An error underlines “reviews” with the message “\"reviews\" is not a root collection in this file.”, repeated in the Problems panel."
+    caption: "Diagnostics on every keystroke (reconstruction)."
 links:
   code: https://github.com/aggiovato/yRest-vscode
   docs: https://marketplace.visualstudio.com/items?itemName=aggiovato.yrest
@@ -37,10 +61,6 @@ links:
 ## Problem
 
 yRest's `db.yml` format grew its own conventions: relations (`_rel`), custom routes (`_routes`), a compact relation DSL and template variables. Without editor support, a typo in a collection name or a key without its `_` prefix only showed up when the server ran.
-
-## My contribution
-
-I built and published the extension on my own: grammars, providers, validation rules, tests and the release pipeline.
 
 ## Solution
 
@@ -53,6 +73,7 @@ I built and published the extension on my own: grammars, providers, validation r
 ## Technical decisions
 
 {% decision
+   title="Diagnostics scoped to their section"
    problem="Errors were reported on the first occurrence of a word anywhere in the file, causing false positives."
    decision="Scope each diagnostic to its section, searching from the _rel: or _routes: offset."
    alternatives="Highlight the whole line, or skip positions."

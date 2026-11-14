@@ -16,6 +16,13 @@ role:
   - Desarrollo
   - Documentación
 periodLabel: Junio de 2026
+glance:
+  problem: "Los errores en las convenciones de db.yml, como una colección inexistente o una clave sin su _, solo aparecían al arrancar el servidor."
+  contribution: "La construí y publiqué en solitario: gramáticas, proveedores, reglas de validación, tests y el pipeline de publicación."
+  outcome:
+    - "Publicada en el VS Code Marketplace, desde tags de versión."
+    - "Resaltado, documentación al pasar el cursor, autocompletado y diagnósticos, también dentro de plantillas yrest."
+    - "45 tests unitarios cubren las reglas de validación."
 stack:
   - name: VS Code Extension API
     layer: interface
@@ -29,6 +36,23 @@ stack:
   - name: Vitest
     layer: quality
     rationale: Tests unitarios de las reglas de validación y las constantes compartidas.
+cover:
+  src: ../../../assets/projects/yrest-vscode/cover.webp
+  alt: "Reconstrucción de VS Code editando un db.yml de yRest: un error subraya la colección desconocida «reviews», junto a la documentación emergente de _rel, las sugerencias de tipos de relación y el icono de la extensión."
+  caption: "Reconstrucción con la gramática, los mensajes y la documentación reales de la extensión."
+gallery:
+  - src: ../../../assets/projects/yrest-vscode/highlighting.webp
+    alt: "db.yml en VS Code con el resaltado de la extensión: claves reservadas, el DSL de relaciones, cardinalidades y variables de plantilla con sus propios colores."
+    caption: "Resaltado de claves reservadas, el DSL de relaciones y las variables de plantilla (reconstrucción)."
+  - src: ../../../assets/projects/yrest-vscode/hover.webp
+    alt: "Tarjeta emergente sobre _rel con su documentación y un ejemplo en YAML."
+    caption: "Documentación al pasar el cursor por cada clave reservada (reconstrucción)."
+  - src: ../../../assets/projects/yrest-vscode/completion.webp
+    alt: "Lista de autocompletado dentro de una cadena del DSL de relaciones con m2o, m2m, many2one, many2many y one2many."
+    caption: "Autocompletado de tipos de relación y alias (reconstrucción)."
+  - src: ../../../assets/projects/yrest-vscode/diagnostics.webp
+    alt: "Un error subraya «reviews» con el mensaje “\"reviews\" is not a root collection in this file.”, que también aparece en el panel Problems."
+    caption: "Diagnósticos en cada pulsación (reconstrucción)."
 links:
   code: https://github.com/aggiovato/yRest-vscode
   docs: https://marketplace.visualstudio.com/items?itemName=aggiovato.yrest
@@ -37,10 +61,6 @@ links:
 ## Problema
 
 El formato `db.yml` de yRest fue creando sus propias convenciones: relaciones (`_rel`), rutas personalizadas (`_routes`), un DSL compacto de relaciones y variables de plantilla. Sin soporte en el editor, una errata en el nombre de una colección o una clave sin su prefijo `_` sólo aparecía al arrancar el servidor.
-
-## Mi contribución
-
-Construí y publiqué la extensión por mi cuenta: gramáticas, proveedores, reglas de validación, tests y el pipeline de publicación.
 
 ## Solución
 
@@ -53,6 +73,7 @@ Construí y publiqué la extensión por mi cuenta: gramáticas, proveedores, reg
 ## Decisiones técnicas
 
 {% decision
+   title="Diagnósticos acotados a su sección"
    problem="Los errores se señalaban en la primera aparición de una palabra en cualquier parte del archivo, lo que provocaba falsos positivos."
    decision="Limitar cada diagnóstico a su sección, buscando desde la posición de _rel: o _routes:."
    alternatives="Resaltar la línea entera u omitir las posiciones."

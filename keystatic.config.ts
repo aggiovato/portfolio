@@ -121,11 +121,17 @@ const projects = (locale: Locale) =>
           decision: block({
             label: 'Decision',
             schema: {
+              title: fields.text({ label: 'Title', description: 'Short name, e.g. "Fastify over NestJS".' }),
               problem: fields.text({ label: 'Problem', multiline: true }),
               decision: fields.text({ label: 'Decision', multiline: true }),
               alternatives: fields.text({ label: 'Alternatives', multiline: true }),
               tradeoff: fields.text({ label: 'Trade-off', multiline: true }),
-              evidence: fields.text({ label: 'Evidence', multiline: true }),
+              evidence: fields.text({
+                label: 'Evidence',
+                description: 'A verifiable fact. Put a forecast in Outlook instead.',
+                multiline: true,
+              }),
+              outlook: fields.text({ label: 'Outlook', multiline: true }),
             },
           }),
         },
@@ -159,6 +165,29 @@ const projects = (locale: Locale) =>
       }),
       publishedAt: fields.date({ label: 'Published at' }),
       updatedAt: fields.date({ label: 'Updated at' }),
+      glance: fields.object(
+        {
+          problem: fields.text({
+            label: 'Problem',
+            multiline: true,
+            validation: { length: { min: 1, max: 170 } },
+          }),
+          contribution: fields.text({
+            label: 'My part',
+            multiline: true,
+            validation: { length: { min: 1, max: 170 } },
+          }),
+          outcome: fields.array(
+            fields.text({ label: 'Fact', validation: { length: { min: 1, max: 140 } } }),
+            {
+              label: 'Outcome (shipped, verifiable facts)',
+              itemLabel: (p) => p.value,
+              validation: { length: { min: 1, max: 4 } },
+            },
+          ),
+        },
+        { label: 'At a glance' },
+      ),
       stack: fields.array(
         fields.object({
           name: fields.text({ label: 'Name', validation: { length: { min: 1 } } }),

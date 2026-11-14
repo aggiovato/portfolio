@@ -42,6 +42,15 @@ const projects = defineCollection({
         periodLabel: z.string(),
         publishedAt: z.coerce.date().optional(),
         updatedAt: z.coerce.date().optional(),
+        /**
+         * The one-minute layer (PRODUCT.md: understood without reading the whole article): the
+         * problem, his part and what came of it. Outcome lists shipped, verifiable facts only.
+         */
+        glance: z.object({
+          problem: z.string().min(1).max(170),
+          contribution: z.string().min(1).max(170),
+          outcome: z.array(z.string().min(1).max(140)).min(1).max(4),
+        }),
         stack: z.array(stackItem).default([]),
         // Keystatic saves an empty cover as `{}` (or alt only): that means no cover.
         cover: z.preprocess(

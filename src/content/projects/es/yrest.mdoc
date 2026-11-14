@@ -17,6 +17,13 @@ role:
   - Desarrollo
   - Documentación
 periodLabel: Junio de 2026 – actualidad
+glance:
+  problem: "El frontend se bloquea esperando APIs que aún no existen, y json-server se queda corto para pantallas reales."
+  contribution: "Lo diseñé y construí en solitario: alcance del producto, CLI, servidor, el formato db.yml, tests, documentación y releases."
+  outcome:
+    - "Publicado en npm como @yrest/cli, con releases desde tags de versión y procedencia de npm."
+    - "Un sitio de documentación con un playground interactivo."
+    - "Tests unitarios, end-to-end y de seguridad en CI con Node 20 y 22."
 stack:
   - name: TypeScript
     layer: runtime
@@ -40,16 +47,22 @@ stack:
     layer: interface
     rationale: Sitio de documentación con búsqueda, traducciones y el playground interactivo.
 cover:
-  caption: Captura del playground de yRest — editas db.yml y el diagrama ER se actualiza mientras escribes.
-  src: ../../../assets/projects/yrest/playground.png
-  alt: El playground de yRest. A la izquierda, un archivo db.yml con users, posts, tags y una colección pivote post_tags; a la derecha, el diagrama entidad-relación generado a partir de él, con posts enlazados a users por userId y a tags a través de post_tags.
+  src: ../../../assets/projects/yrest/cover.webp
+  alt: "Composición de yRest: el editor de db.yml del playground, el diagrama entidad-relación que genera y una terminal que ejecuta npx @yrest/cli serve db.yml con la salida real del servidor en http://localhost:3070."
+  caption: "Un archivo db.yml, su diagrama de relaciones y el servidor que arranca."
 gallery:
-  - src: ../../../assets/projects/yrest/playground-full.png
-    alt: Vista completa del playground de yRest con el ejemplo completo de db.yml y su diagrama ER, junto a las acciones Reset, Copy y Clear.
-    caption: Playground — editas db.yml y el diagrama ER se actualiza en tiempo real; las relaciones se validan mientras escribes.
-  - src: ../../../assets/projects/yrest/docs-home.png
-    alt: Página de inicio del sitio de documentación de yRest, con el lema «Zero-config REST API mock server from a single YAML file» y los botones Quick Start y GitHub.
-    caption: Sitio de documentación, hecho con Astro Starlight.
+  - src: ../../../assets/projects/yrest/playground.webp
+    alt: "El playground de yRest: a la izquierda un db.yml con users, posts, tags y la tabla pivote post_tags; a la derecha, el diagrama entidad-relación generado a partir de él."
+    caption: "Playground: editas db.yml y el diagrama se actualiza mientras escribes."
+  - src: ../../../assets/projects/yrest/docs-home.webp
+    alt: "Portada del sitio de documentación de yRest: el logo, el lema «Zero-config REST API mock server from a single YAML file» e iconos de funciones orbitando alrededor del logo."
+    caption: "Sitio de documentación, hecho con Astro Starlight."
+  - src: ../../../assets/projects/yrest/docs-quick-start.webp
+    alt: "La página Quick Start de la documentación de yRest: cuatro pasos — instalar, definir db.yml, servir en localhost:3070 y usar los endpoints CRUD."
+    caption: "Documentación: de cero a una API funcionando en cuatro pasos."
+  - src: ../../../assets/projects/yrest/docs-relations.webp
+    alt: "La página Relations de la documentación de yRest, que explica many2one, one2one y many2many con un ejemplo de _rel."
+    caption: "Documentación: relaciones, con tres tipos y un DSL compacto."
 links:
   demo: https://yrest-docs.netlify.app/playground/
   code: https://github.com/aggiovato/yRest
@@ -84,10 +97,6 @@ npx @yrest/cli serve db.yml
 
 Cada colección de primer nivel se convierte en un recurso CRUD completo (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) en `http://localhost:3070`. El puerto por defecto es una pequeña broma: Y + A + M + L en ASCII suman 307.
 
-## Mi contribución
-
-Diseñé y construí yRest por mi cuenta: alcance del producto, CLI, servidor, el formato `db.yml`, tests, el sitio de documentación y el pipeline de publicación.
-
 ## Solución
 
 El proyecto creció por fases, y cada una cerraba un hueco que me encontraba al usarlo en frontends reales:
@@ -103,13 +112,15 @@ El proyecto creció por fases, y cada una cerraba un hueco que me encontraba al 
 ## Decisiones técnicas
 
 {% decision
+   title="Fastify en lugar de NestJS"
    problem="La herramienta se ejecuta con npx: cada arranque tiene que sentirse instantáneo."
    decision="Un stack ligero con Fastify, Commander, yaml y Zod en lugar de un framework como NestJS."
    alternatives="NestJS, con módulos, inyección de dependencias y decoradores."
    tradeoff="Menos estructura de serie, así que los límites entre módulos (cli, storage, server, router, config) se mantienen por convención."
-   evidence="NestJS sigue siendo una opción si yRest crece hacia un panel web o un sistema de plugins." /%}
+   outlook="NestJS sigue siendo una opción si yRest crece hacia un panel web o un sistema de plugins." /%}
 
 {% decision
+   title="Escrituras atómicas"
    problem="Las escrituras van directamente al db.yml del usuario; un proceso interrumpido podría dejarlo corrupto."
    decision="Escrituras atómicas: escribir en un archivo temporal y renombrarlo sobre el original."
    alternatives="Escribir sobre el propio archivo o mantener los cambios sólo en memoria."
@@ -117,11 +128,11 @@ El proyecto creció por fases, y cada una cerraba un hueco que me encontraba al 
    evidence="POST, PUT, PATCH y DELETE persisten en db.yml sin dejar archivos a medias." /%}
 
 {% decision
+   title="Rutas personalizadas antes que el proxy"
    problem="Algunos endpoints de un frontend real no son CRUD, y otros deberían llegar a una API real."
    decision="Lanzar primero las rutas personalizadas y aplazar el proxy de respaldo."
    alternatives="Un proxy híbrido que reenvíe las rutas desconocidas a un backend real."
-   tradeoff="Todavía no se pueden mezclar rutas simuladas y reales."
-   evidence="Las rutas personalizadas cubren el caso más habitual sin depender de un proxy HTTP." /%}
+   tradeoff="Todavía no se pueden mezclar rutas simuladas y reales." /%}
 
 ## Calidad
 
@@ -133,4 +144,4 @@ yRest es una herramienta de desarrollo y pruebas, no un backend. Los datos viven
 
 ## Qué viene después
 
-La hoja de ruta incluye un panel visual, una imagen de Docker, validación de peticiones con JSON Schema, canales WebSocket simulados y una extensión de VS Code con snippets de YAML.
+La hoja de ruta incluye un panel visual, una imagen de Docker, validación de peticiones con JSON Schema, canales WebSocket simulados y snippets de YAML para el editor. El soporte de editor ya existe como proyecto aparte: yRest para VS Code.

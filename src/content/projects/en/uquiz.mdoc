@@ -16,6 +16,13 @@ role:
   - Product design
   - Android development
 periodLabel: January – May 2026
+glance:
+  problem: "Studying technical topics with my own questions needed an offline tool for both calm review and testing myself under pressure."
+  contribution: "A personal project end to end: product idea, screens, architecture, game rules and tests."
+  outcome:
+    - "A completed offline Android app with Study and Game modes."
+    - "Adaptive per-question timers and a personal ranking with nine tiers."
+    - "Scoring and timing rules covered by unit tests."
 stack:
   - name: Kotlin + Jetpack Compose
     layer: interface
@@ -36,22 +43,31 @@ stack:
     layer: quality
     rationale: Unit tests for the scoring, timing and game utility logic.
 cover:
-  src: ../../../assets/projects/uquiz/cover.png
-  alt: Three UQuiz screens side by side — personal stats with accuracy and sessions, the detail of an "Angular 20 – RxJS" pack with 20 questions, and a game summary with the session score.
-  caption: Screenshots of the UQuiz Android app.
+  src: ../../../assets/projects/uquiz/cover.webp
+  alt: "Three phones running UQuiz: the intro of a study session for the Tech Mix pack, the home screen with day streak, total XP and rank progress, and a game summary with +136 points."
+  caption: "Study mode, home and a game summary, from the app’s official screenshots."
 gallery:
+  - src: ../../../assets/projects/uquiz/home.jpg
+    alt: "UQuiz home: greeting, the U-ADEPT mascot, day streak, total XP, score with progress to the next rank, and Random Play and Random Study cards."
+    caption: "Home — streak, XP and progress to the next rank."
   - src: ../../../assets/projects/uquiz/library.jpg
-    alt: Study mode library with folders such as Frontend, Java and UNIVERSAE and a search field for packs.
-    caption: Library — questions organised into folders and packs.
-  - src: ../../../assets/projects/uquiz/game.jpg
-    alt: Game mode home with a random play card and packs in progress with their completion bars.
-    caption: Game mode — continue packs in progress or start a random game.
+    alt: "Library with folders such as Frontend, Java, UNIVERSAE and 日本語 and a search field for packs."
+    caption: "Library — questions organised into folders and packs."
+  - src: ../../../assets/projects/uquiz/pack_details.jpg
+    alt: "Detail of the “Angular 20 – RxJS” pack: 20 questions, Study and Play buttons and the list of questions with their difficulty."
+    caption: "Pack detail — questions, difficulty and both modes."
   - src: ../../../assets/projects/uquiz/study_session.jpg
-    alt: Study mode intro for the Tech Mix pack, with 40 questions and medium average difficulty.
-    caption: Study mode intro.
-  - src: ../../../assets/projects/uquiz/study_summary.jpg
-    alt: Study summary showing 10 correct answers, 0 incorrect, 100% accuracy and 45 seconds of effective time.
-    caption: Study summary.
+    alt: "Study mode intro for the Tech Mix pack, with 40 questions and medium average difficulty."
+    caption: "Study mode — review question by question with explanations."
+  - src: ../../../assets/projects/uquiz/game_session.jpg
+    alt: "Game mode intro for the Tech Mix pack, with 40 questions, medium difficulty and an estimated time of about 19 minutes 59 seconds."
+    caption: "Game mode — the time budget is estimated per pack."
+  - src: ../../../assets/projects/uquiz/game_summary.jpg
+    alt: "Game summary with +136 points at the Adept rank, 305 MMR to the next rank, 10 correct answers and 100% accuracy."
+    caption: "Game summary — score, rank and MMR to the next tier."
+  - src: ../../../assets/projects/uquiz/stats.jpg
+    alt: "Personal stats: sessions, questions answered, accuracy, total time and accuracy by mode."
+    caption: "Stats — study and game performance side by side."
 links:
   code: https://github.com/aggiovato/uquiz
 ---
@@ -59,10 +75,6 @@ links:
 ## Problem
 
 I wanted to train technical knowledge (Angular, RxJS, Java…) with my own questions, offline, and in two moods: calm review when learning, and pressure when testing myself.
-
-## My contribution
-
-A personal project: product idea, screens, architecture, game rules and tests.
 
 ## Solution
 
@@ -74,6 +86,7 @@ A personal project: product idea, screens, architecture, game rules and tests.
 ## Technical decisions
 
 {% decision
+   title="An adaptive time budget"
    problem="A fixed timer is unfair: long questions need more reading time than short ones."
    decision="An adaptive time budget per question: base time by difficulty plus a bonus by text length, blended with the user's history and clamped between 5 and 60 seconds."
    alternatives="One fixed timer per question or per difficulty."
@@ -81,6 +94,7 @@ A personal project: product idea, screens, architecture, game rules and tests.
    evidence="Unit tests for base times, length bonus, its cap, the historical blend and the clamp." /%}
 
 {% decision
+   title="Clean Architecture with Room"
    problem="The app has to work without a connection and stay maintainable as features grow."
    decision="Clean Architecture with domain slices (content, attempts, stats, ranking, user, import/export) and Room as the only source of truth."
    alternatives="A single layer of screens talking to the database directly."

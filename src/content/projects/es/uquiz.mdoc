@@ -16,6 +16,13 @@ role:
   - Diseño de producto
   - Desarrollo Android
 periodLabel: Enero – mayo de 2026
+glance:
+  problem: "Estudiar temas técnicos con mis propias preguntas requería una herramienta sin conexión, tanto para repasar con calma como para ponerme a prueba bajo presión."
+  contribution: "Un proyecto personal de principio a fin: idea de producto, pantallas, arquitectura, reglas de juego y tests."
+  outcome:
+    - "Una app Android sin conexión, terminada, con modo Estudio y modo Juego."
+    - "Temporizadores adaptativos por pregunta y un ranking personal con nueve niveles."
+    - "Reglas de puntuación y tiempos cubiertas por tests unitarios."
 stack:
   - name: Kotlin + Jetpack Compose
     layer: interface
@@ -36,22 +43,31 @@ stack:
     layer: quality
     rationale: Tests unitarios de la lógica de puntuación, tiempos y utilidades del juego.
 cover:
-  src: ../../../assets/projects/uquiz/cover.png
-  alt: Tres pantallas de UQuiz una junto a otra — estadísticas personales con precisión y sesiones, el detalle de un pack «Angular 20 – RxJS» con 20 preguntas y el resumen de una partida con la puntuación de la sesión.
-  caption: Capturas de la app UQuiz para Android.
+  src: ../../../assets/projects/uquiz/cover.webp
+  alt: "Tres móviles con UQuiz: la introducción de una sesión de estudio del pack Tech Mix, la pantalla de inicio con racha, XP total y progreso de rango, y el resumen de una partida con +136 puntos."
+  caption: "Modo Estudio, inicio y resumen de partida, a partir de las capturas oficiales de la app."
 gallery:
+  - src: ../../../assets/projects/uquiz/home.jpg
+    alt: "Inicio de UQuiz: saludo, la mascota U-ADEPT, racha de días, XP total, puntuación con el progreso al siguiente rango y las tarjetas Random Play y Random Study."
+    caption: "Inicio: racha, XP y progreso hacia el siguiente rango."
   - src: ../../../assets/projects/uquiz/library.jpg
-    alt: Biblioteca del modo Estudio con carpetas como Frontend, Java y UNIVERSAE y un campo de búsqueda de packs.
-    caption: Biblioteca — preguntas organizadas en carpetas y packs.
-  - src: ../../../assets/projects/uquiz/game.jpg
-    alt: Inicio del modo Juego con una tarjeta de partida aleatoria y packs en curso con sus barras de progreso.
-    caption: Modo Juego — continuar packs en curso o empezar una partida aleatoria.
+    alt: "Biblioteca con carpetas como Frontend, Java, UNIVERSAE y 日本語 y un campo de búsqueda de packs."
+    caption: "Biblioteca: preguntas organizadas en carpetas y packs."
+  - src: ../../../assets/projects/uquiz/pack_details.jpg
+    alt: "Detalle del pack «Angular 20 – RxJS»: 20 preguntas, los botones Study y Play y la lista de preguntas con su dificultad."
+    caption: "Detalle de un pack: preguntas, dificultad y los dos modos."
   - src: ../../../assets/projects/uquiz/study_session.jpg
-    alt: Introducción del modo Estudio para el pack Tech Mix, con 40 preguntas y dificultad media.
-    caption: Introducción del modo Estudio.
-  - src: ../../../assets/projects/uquiz/study_summary.jpg
-    alt: Resumen de estudio con 10 respuestas correctas, 0 incorrectas, 100 % de precisión y 45 segundos de tiempo efectivo.
-    caption: Resumen de estudio.
+    alt: "Introducción del modo Estudio para el pack Tech Mix, con 40 preguntas y dificultad media."
+    caption: "Modo Estudio: repaso pregunta a pregunta con explicaciones."
+  - src: ../../../assets/projects/uquiz/game_session.jpg
+    alt: "Introducción del modo Juego para el pack Tech Mix, con 40 preguntas, dificultad media y un tiempo estimado de unos 19 minutos y 59 segundos."
+    caption: "Modo Juego: el tiempo se estima para cada pack."
+  - src: ../../../assets/projects/uquiz/game_summary.jpg
+    alt: "Resumen de partida con +136 puntos en el rango Adept, 305 de MMR para el siguiente rango, 10 aciertos y 100 % de precisión."
+    caption: "Resumen de partida: puntuación, rango y MMR hasta el siguiente nivel."
+  - src: ../../../assets/projects/uquiz/stats.jpg
+    alt: "Estadísticas personales: sesiones, preguntas respondidas, precisión, tiempo total y precisión por modo."
+    caption: "Estadísticas: rendimiento en estudio y en juego, lado a lado."
 links:
   code: https://github.com/aggiovato/uquiz
 ---
@@ -59,10 +75,6 @@ links:
 ## Problema
 
 Quería entrenar conocimientos técnicos (Angular, RxJS, Java…) con mis propias preguntas, sin conexión y en dos modos: repaso tranquilo mientras aprendo y presión cuando quiero ponerme a prueba.
-
-## Mi contribución
-
-Un proyecto personal: idea de producto, pantallas, arquitectura, reglas del juego y tests.
 
 ## Solución
 
@@ -74,6 +86,7 @@ Un proyecto personal: idea de producto, pantallas, arquitectura, reglas del jueg
 ## Decisiones técnicas
 
 {% decision
+   title="Un presupuesto de tiempo adaptativo"
    problem="Un temporizador fijo es injusto: las preguntas largas necesitan más tiempo de lectura que las cortas."
    decision="Un presupuesto de tiempo adaptativo por pregunta: tiempo base según la dificultad más un extra por la longitud del texto, combinado con el historial del usuario y acotado entre 5 y 60 segundos."
    alternatives="Un temporizador fijo por pregunta o por dificultad."
@@ -81,6 +94,7 @@ Un proyecto personal: idea de producto, pantallas, arquitectura, reglas del jueg
    evidence="Tests unitarios de los tiempos base, el extra por longitud, su límite, la mezcla con el historial y el acotado." /%}
 
 {% decision
+   title="Clean Architecture con Room"
    problem="La app tiene que funcionar sin conexión y seguir siendo mantenible a medida que crecen las funciones."
    decision="Clean Architecture con módulos de dominio (contenido, intentos, estadísticas, ranking, usuario, importación/exportación) y Room como única fuente de verdad."
    alternatives="Una sola capa de pantallas que hablan directamente con la base de datos."

@@ -1,29 +1,57 @@
 ---
 import { resolveLocale, useTranslations } from '../i18n';
 
-/** Technical decision with alternatives and trade-off (spec §10, decision narrative template). */
+/**
+ * Technical decision with alternatives and trade-off (spec §10, decision narrative template).
+ * `title` names the decision for skimming and labels the region; `evidence` is for verifiable
+ * facts only, and a forecast goes in `outlook` instead.
+ */
 interface Props {
+  title?: string;
   problem: string;
   decision: string;
   alternatives?: string;
   tradeoff?: string;
   evidence?: string;
+  outlook?: string;
 }
-const { problem, decision, alternatives, tradeoff, evidence } = Astro.props;
+const { title, problem, decision, alternatives, tradeoff, evidence, outlook } = Astro.props;
 const t = useTranslations(resolveLocale(Astro.currentLocale));
-const rows = [
-  [t('decision.problem'), problem],
-  [t('decision.decision'), decision],
-  [t('decision.alternatives'), alternatives],
-  [t('decision.tradeoff'), tradeoff],
-  [t('decision.evidence'), evidence],
-].filter((r): r is [string, string] => Boolean(r[1]));
+// Narrative order (spec §10), with a weight per row: the decision is the headline, problem and
+// trade-off read normally, the supporting rows step back.
+type Weight = 'lead' | 'main' | 'aside';
+const rows = (
+  [
+    [t('decision.problem'), problem, 'main'],
+    [t('decision.decision'), decision, 'lead'],
+    [t('decision.alternatives'), alternatives, 'aside'],
+    [t('decision.tradeoff'), tradeoff, 'main'],
+    [t('decision.evidence'), evidence, 'aside'],
+    [t('decision.outlook'), outlook, 'aside'],
+  ] as const
+).filter((r): r is [string, string, Weight] => Boolean(r[1]));
+// Ids only need to be unique per page; a case study has a handful of decisions with distinct titles.
+const titleId = title
+  ? `decision-${title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')}`
+  : undefined;
 ---
 
-<section class="decision" aria-label={t('decision.label', { decision })}>
+<section
+  class="decision"
+  aria-labelledby={titleId}
+  aria-label={titleId ? undefined : t('decision.label', { decision })}
+>
+  {title && (
+    <h3 id={titleId} class="decision-title">
+      {title}
+    </h3>
+  )}
   <dl>
-    {rows.map(([term, value]) => (
-      <div class="row">
+    {rows.map(([term, value, weight]) => (
+      <div class:list={['row', `row--${weight}`]}>
         <dt>{term}</dt>
         <dd>{value}</dd>
       </div>
@@ -38,6 +66,13 @@ const rows = [
     border-radius: var(--radius-card);
     overflow: hidden;
   }
+  /* The block's own heading: overrides the article's h3 spacing, sits on the block's top edge. */
+  .decision .decision-title {
+    margin: 0;
+    padding: var(--space-4) var(--space-6) var(--space-3);
+    font-size: var(--text-lead);
+    border-bottom: 1px solid var(--color-border);
+  }
   .row {
     display: grid;
     gap: var(--space-1);
@@ -46,13 +81,32 @@ const rows = [
   .row + .row {
     border-top: 1px solid var(--color-border);
   }
-  .row:nth-child(2) {
-    background: var(--color-surface);
+  /* The decision itself: the line a skimming reader takes away. */
+  .row--lead {
+    background: var(--color-surface-raised);
+  }
+  .row--lead dd {
+    font-size: var(--text-lead);
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--color-text);
+  }
+  .row--main dd {
+    color: var(--color-text);
+  }
+  /* Supporting rows stay visible (alternatives are part of the judgement) but step back. */
+  .row--aside {
+    padding-block: var(--space-3);
+  }
+  .row--aside dd {
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
   }
   dt {
     font-family: var(--font-mono);
     font-size: var(--text-meta);
-    color: var(--color-accent);
+    /* A label, not an action: lavender is reserved for what can be acted on. */
+    color: var(--color-text-subtle);
   }
   dd {
     margin: 0;

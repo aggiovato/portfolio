@@ -18,11 +18,13 @@ export default defineMarkdocConfig({
       render: component('./src/components/DecisionBlock.astro'),
       selfClosing: true,
       attributes: {
+        title: { type: String },
         problem: { type: String, required: true },
         decision: { type: String, required: true },
         alternatives: { type: String },
         tradeoff: { type: String },
         evidence: { type: String },
+        outlook: { type: String },
       },
     },
   },

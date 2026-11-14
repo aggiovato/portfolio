@@ -17,6 +17,13 @@ role:
   - Development
   - Documentation
 periodLabel: June 2026 – present
+glance:
+  problem: "Frontend work blocks on APIs that don't exist yet, and json-server stays too shallow for real screens."
+  contribution: "Designed and built it alone: product scope, CLI, server, the db.yml format, tests, docs and releases."
+  outcome:
+    - "Published on npm as @yrest/cli, released from version tags with npm provenance."
+    - "A documentation site with an interactive playground."
+    - "Unit, end-to-end and security tests in CI on Node 20 and 22."
 stack:
   - name: TypeScript
     layer: runtime
@@ -40,16 +47,22 @@ stack:
     layer: interface
     rationale: Documentation site with search, translations and the interactive playground.
 cover:
-  caption: Screenshot of the yRest playground — edit db.yml, the ER diagram updates as you type.
-  src: ../../../assets/projects/yrest/playground.png
-  alt: The yRest playground. On the left, a db.yml file with users, posts, tags and a post_tags pivot collection; on the right, the entity-relationship diagram generated from it, with posts linked to users by userId and to tags through post_tags.
+  src: ../../../assets/projects/yrest/cover.webp
+  alt: "Composition of yRest: the playground’s db.yml editor, the entity-relationship diagram it generates and a terminal running npx @yrest/cli serve db.yml with the real server output at http://localhost:3070."
+  caption: "One db.yml file, its relationship diagram and the server it starts."
 gallery:
-  - src: ../../../assets/projects/yrest/playground-full.png
-    alt: Full view of the yRest playground with the complete db.yml example and its ER diagram, plus the Reset, Copy and Clear actions.
-    caption: Playground — edit db.yml and the ER diagram updates in real time; relations are validated as you type.
-  - src: ../../../assets/projects/yrest/docs-home.png
-    alt: Home page of the yRest documentation site, with the tagline "Zero-config REST API mock server from a single YAML file" and Quick Start and GitHub buttons.
-    caption: Documentation site, built with Astro Starlight.
+  - src: ../../../assets/projects/yrest/playground.webp
+    alt: "The yRest playground: a db.yml with users, posts, tags and a post_tags pivot on the left, and the entity-relationship diagram generated from it on the right."
+    caption: "Playground — edit db.yml and the diagram updates as you type."
+  - src: ../../../assets/projects/yrest/docs-home.webp
+    alt: "Home of the yRest documentation site: the logo, the tagline “Zero-config REST API mock server from a single YAML file” and feature icons orbiting the logo."
+    caption: "Documentation site, built with Astro Starlight."
+  - src: ../../../assets/projects/yrest/docs-quick-start.webp
+    alt: "The Quick Start page of the yRest docs: four steps — install, define db.yml, serve on localhost:3070 and use the CRUD endpoints."
+    caption: "Docs — from zero to a live API in four steps."
+  - src: ../../../assets/projects/yrest/docs-relations.webp
+    alt: "The Relations page of the yRest docs, explaining many2one, one2one and many2many with a _rel example."
+    caption: "Docs — relations: three types and a compact DSL."
 links:
   demo: https://yrest-docs.netlify.app/playground/
   code: https://github.com/aggiovato/yRest
@@ -84,10 +97,6 @@ npx @yrest/cli serve db.yml
 
 Every top-level collection becomes a full CRUD resource (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) on `http://localhost:3070`. The default port is a small joke: Y + A + M + L in ASCII adds up to 307.
 
-## My contribution
-
-I designed and built yRest on my own: product scope, CLI, server, the `db.yml` format, tests, the documentation site and the release pipeline.
-
 ## Solution
 
 The project grew in phases, each one closing a gap I hit while using it in real frontends:
@@ -103,13 +112,15 @@ The project grew in phases, each one closing a gap I hit while using it in real 
 ## Technical decisions
 
 {% decision
+   title="Fastify over NestJS"
    problem="The tool runs through npx: every start has to feel instant."
    decision="A lightweight stack on Fastify, Commander, yaml and Zod instead of a framework like NestJS."
    alternatives="NestJS, with modules, dependency injection and decorators."
    tradeoff="Less built-in structure, so module boundaries (cli, storage, server, router, config) are kept by convention."
-   evidence="NestJS stays an option if yRest grows into a web panel or a plugin system." /%}
+   outlook="NestJS stays an option if yRest grows into a web panel or a plugin system." /%}
 
 {% decision
+   title="Atomic writes"
    problem="Writes go straight to the user's db.yml; an interrupted process could leave it corrupted."
    decision="Atomic writes: write to a temporary file, then rename it over the original."
    alternatives="Writing in place, or keeping changes only in memory."
@@ -117,11 +128,11 @@ The project grew in phases, each one closing a gap I hit while using it in real 
    evidence="POST, PUT, PATCH and DELETE persist to db.yml without partial files." /%}
 
 {% decision
+   title="Custom routes before the proxy"
    problem="Some endpoints in a real frontend aren't CRUD, and some should hit a real API."
    decision="Ship custom routes first and defer the proxy fallback."
    alternatives="A hybrid proxy that forwards unknown routes to a real backend."
-   tradeoff="Mixing mocked and real routes is not possible yet."
-   evidence="Custom routes cover the most common case without depending on an HTTP proxy." /%}
+   tradeoff="Mixing mocked and real routes is not possible yet." /%}
 
 ## Quality
 
@@ -133,4 +144,4 @@ yRest is a development and testing tool, not a backend. Data lives in a YAML fil
 
 ## What's next
 
-The roadmap includes a visual panel, a Docker image, request validation with JSON Schema, WebSocket mock channels and a VS Code extension with YAML snippets.
+The roadmap includes a visual panel, a Docker image, request validation with JSON Schema, WebSocket mock channels and YAML snippets for the editor. Editor support itself already shipped as a separate project, yRest for VS Code.
