@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [1.1.0] — 2026-11-14
+
 ### Added
 
 - **Notes:** a blog of short technical articles at `/notes/`, with covers, figures with captions, a reading index, reading time, topics and an RSS feed per language. Two RxJS notes, in English, Spanish and Italian.
