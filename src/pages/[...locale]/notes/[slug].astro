@@ -5,6 +5,7 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import ArticleBody from '../../../components/ArticleBody.astro';
 import ContactCTA from '../../../components/ContactCTA.astro';
+import NewsletterForm from '../../../components/NewsletterForm.astro';
 import { getNoteAlternates, getNotesInLocale, notePath, type Note } from '../../../lib/content/notes';
 import { readingMinutes } from '../../../lib/content/note-utils';
 import { defaultLocale, localizePath, locales, resolveLocale, useTranslations } from '../../../i18n';
@@ -104,6 +105,11 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
       <Content />
     </ArticleBody>
 
+    <!-- The reader just finished: the moment to offer the next note. -->
+    <div class="container subscribe">
+      <NewsletterForm id="note-newsletter" />
+    </div>
+
     <nav class="container next" aria-label={t('note.all')}>
       {older && (
         <a class="older" href={notePath(older)}>
@@ -146,9 +152,13 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
    * Desktop: header, cover and closing links start on the reading column's edge (past the index in
    * ArticleBody), so the title, the picture and the text share one left line.
    */
+  .subscribe {
+    padding-bottom: var(--space-16);
+  }
   @media (min-width: 1024px) {
     .head,
     .cover,
+    .subscribe,
     .next {
       /* The container's own gutter, plus the index column and its gap in ArticleBody. */
       padding-left: calc(var(--gutter) + 14rem + var(--space-16));

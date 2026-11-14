@@ -64,6 +64,8 @@ export default defineConfig({
     ...(isDev ? [react(), keystatic()] : []),
     // Only generated pages end up in the sitemap, so drafts are never listed in production.
     sitemap({
+      // The newsletter's confirmation steps are noindex: keep them out of the sitemap too.
+      filter: (page) => !page.includes('/newsletter/'),
       i18n: {
         defaultLocale,
         // Same hreflang codes as the <link rel="alternate"> tags in BaseLayout.

@@ -77,6 +77,22 @@ export const it: UiDictionary = {
   'note.readingTime': '{minutes} min di lettura',
   'note.all': 'Tutte le note',
   'note.tags': 'Argomenti',
+  'newsletter.title': 'Ricevi le nuove note via email',
+  'newsletter.text':
+    'Un’email quando pubblico una nota, nella lingua che scegli. Puoi disiscriverti da qualsiasi email.',
+  'newsletter.footer': 'Nuove note via email',
+  'newsletter.email': 'Indirizzo email',
+  'newsletter.language': 'Lingua',
+  'newsletter.submit': 'Iscriviti',
+  'newsletter.consent':
+    'Prima riceverai un’email di conferma. Il tuo indirizzo è custodito da Brevo, il servizio che invia le note, e usato solo per loro.',
+  'newsletter.pendingTitle': 'Controlla la posta',
+  'newsletter.pendingBody':
+    'Ti ho inviato un’email per confermare l’iscrizione. Aprila e clicca sul link; fino ad allora non riceverai altro.',
+  'newsletter.confirmedTitle': 'Iscrizione completata',
+  'newsletter.confirmedBody':
+    'Ogni nuova nota arriverà nella tua casella. Ogni email ha un link per disiscriverti.',
+  'newsletter.backToNotes': 'Torna alle note',
   'work.title': 'Progetti',
   'work.description': 'Casi di studio: il problema, il mio ruolo, le decisioni e cosa ho imparato.',
   'work.intro':

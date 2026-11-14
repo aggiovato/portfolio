@@ -1,0 +1,189 @@
+---
+/**
+ * Newsletter subscription (Brevo, double opt-in). A plain HTML form posted straight to the Brevo
+ * form of a language (src/data/site.ts `newsletter`); Brevo redirects to /newsletter/pending/ and,
+ * once the email link is clicked, to /newsletter/confirmed/. Works without JavaScript in the page's
+ * language; with JS a language select appears and retargets the form to that language's list.
+ *
+ * - `full`: heading, text and form (end of a note).
+ * - `compact`: one line and the form (footer).
+ * `id` keeps labels unique when both appear on one page.
+ */
+import { newsletter } from '../data/site';
+import { localeNames, locales, resolveLocale, useTranslations, type Locale } from '../i18n';
+
+interface Props {
+  id: string;
+  variant?: 'full' | 'compact';
+}
+
+const { id, variant = 'full' } = Astro.props;
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const available = locales.filter((l): l is Locale => Boolean(newsletter[l]));
+// The page's language when it has a list, else the first one that does (English).
+const initial = newsletter[locale] ? locale : available[0];
+const action = initial ? newsletter[initial] : undefined;
+const targets = Object.fromEntries(available.map((l) => [l, newsletter[l]]));
+---
+
+{action && initial && (
+  <section class:list={['newsletter', `newsletter--${variant}`]} aria-labelledby={`${id}-title`}>
+    {variant === 'full' ? (
+      <>
+        <h2 id={`${id}-title`}>{t('newsletter.title')}</h2>
+        <p class="text">{t('newsletter.text')}</p>
+      </>
+    ) : (
+      <h2 id={`${id}-title`} class="compact-title">
+        {t('newsletter.footer')}
+      </h2>
+    )}
+    <form method="post" action={action} data-newsletter={JSON.stringify(targets)}>
+      <div class="row">
+        <label class="field">
+          <span class="label">{t('newsletter.email')}</span>
+          <input
+            type="email"
+            name="EMAIL"
+            required
+            autocomplete="email"
+            inputmode="email"
+            spellcheck="false"
+          />
+        </label>
+        {available.length > 1 && (
+          <label class="field field--lang" hidden data-newsletter-lang>
+            <span class="label">{t('newsletter.language')}</span>
+            <select>
+              {available.map((l) => (
+                <option value={l} selected={l === initial} lang={l}>
+                  {localeNames[l]}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <button class="btn btn-primary" type="submit">
+          {t('newsletter.submit')}
+        </button>
+      </div>
+      <p class="consent">{t('newsletter.consent')}</p>
+      <!-- Brevo's anti-spam trap: people never see it, bots fill it in. -->
+      <div class="trap" aria-hidden="true">
+        <input type="text" name="email_address_check" value="" tabindex="-1" autocomplete="off" />
+      </div>
+      <input type="hidden" name="locale" value={initial} data-newsletter-locale />
+      <input type="hidden" name="html_type" value="simple" />
+    </form>
+  </section>
+)}
+
+<script>
+  // Progressive enhancement: show the language select and point the form at that language's list.
+  document.querySelectorAll<HTMLFormElement>('form[data-newsletter]').forEach((form) => {
+    const targets = JSON.parse(form.dataset.newsletter ?? '{}') as Record<string, string>;
+    const wrapper = form.querySelector<HTMLElement>('[data-newsletter-lang]');
+    const select = wrapper?.querySelector('select');
+    const localeField = form.querySelector<HTMLInputElement>('[data-newsletter-locale]');
+    if (!wrapper || !select || !localeField) return;
+    wrapper.hidden = false;
+    select.addEventListener('change', () => {
+      const target = targets[select.value];
+      if (!target) return;
+      form.action = target;
+      localeField.value = select.value;
+    });
+  });
+</script>
+
+<style>
+  .newsletter {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .newsletter--full {
+    max-width: var(--measure);
+    padding: var(--space-8);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+  h2 {
+    font-size: var(--text-h3);
+  }
+  .compact-title {
+    font-size: 1rem;
+    font-weight: 650;
+    color: var(--color-text);
+  }
+  .text {
+    color: var(--color-text-muted);
+  }
+  form {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--space-3);
+  }
+  .field {
+    display: grid;
+    gap: var(--space-1);
+    flex: 1 1 14rem;
+  }
+  .field--lang {
+    flex: 0 1 9rem;
+  }
+  .field[hidden] {
+    display: none;
+  }
+  .label {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-text-subtle);
+  }
+  input,
+  select {
+    min-height: 48px;
+    width: 100%;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-control);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font: inherit;
+  }
+  input:hover,
+  select:hover {
+    border-color: var(--color-text-muted);
+  }
+  input:user-invalid {
+    border-color: var(--color-error);
+  }
+  /* .btn is styled for links; a <button> also needs the font and no native border. */
+  .btn {
+    flex: 0 0 auto;
+    border: 0;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .consent {
+    font-size: var(--text-meta);
+    line-height: 1.5;
+    color: var(--color-text-subtle);
+  }
+  /* Off-screen, not display:none: some bots skip hidden fields, which is what the trap relies on. */
+  .trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+</style>
