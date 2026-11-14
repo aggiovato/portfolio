@@ -8,9 +8,9 @@ CSS tokens · static output · English (default) + Spanish (`/es/`).
 - **Language:** site copy in English and Spanish via `src/i18n/`; **all code comments in English**;
   `.claude/` and README in English; the local spec in Spanish.
 - Logo and planet are provisional assets; do not treat them as final.
-- Non-final images (`docs/referencias/` design references, `src/assets/projects/` example screenshots)
-  are gitignored and exist only locally; CI runs `npm run assets:placeholders`. Never commit them
-  until they are final. Jupiter (`src/assets/hero/`) and the logo are versioned.
+- Case study images (`src/assets/projects/<slug>/`), Jupiter (`src/assets/hero/`) and the logo are
+  versioned. Design references (`docs/referencias/`) are local only. `npm run assets:placeholders`
+  stays as a safety net for a referenced image that is missing.
 
 ## Environment
 
@@ -31,7 +31,9 @@ CSS tokens · static output · English (default) + Spanish (`/es/`).
 | Build + draft leak check  | `npm run build && npm run verify:drafts` | `task verify:drafts`              |
 | Everything, CI order      | —                                        | `task preflight`                  |
 
-CI: `.github/workflows/ci.yml` (quality → build → e2e) on PRs and pushes to `main`.
+CI: `.github/workflows/ci.yml` (quality → build → e2e → deploy) on PRs and pushes to `main`. Deploy
+uploads the tested `dist/` to Netlify: a preview per PR, production on `main`. Netlify never builds
+itself; secrets `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`. Headers live in `public/_headers`.
 
 ## Key invariants
 

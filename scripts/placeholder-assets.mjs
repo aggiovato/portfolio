@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Creates neutral placeholder images for every local image the site references but that is not on
- * disk. The case study screenshots are gitignored until the final ones exist, so a fresh clone or
- * CI would otherwise fail: `astro:assets` imports and the `image()` fields of the content schema
- * need real files.
+ * disk (safety net: case study images are versioned, but a missing one would otherwise fail the
+ * build, since `astro:assets` imports and the `image()` fields of the content schema need real
+ * files).
  *
  * Never overwrites an existing file, so running it locally with the real images is a no-op.
  * Usage: node scripts/placeholder-assets.mjs
