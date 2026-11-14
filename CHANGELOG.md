@@ -19,6 +19,8 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ### Changed
 
+- **SEO and sharing:** the site uses its real address (aggiovato.netlify.app) for canonical links, the sitemap and feeds; every page has a 1200×630 share image (a branded card per language, or the cover); notes and case studies are marked as articles with dates and topics; structured data describes the site, its author and each article; `robots.txt` points to the sitemap.
+- **Note images:** diagrams are trimmed to their panel, without the paper margin and double frame, and shown whole in the notes index.
 - Long-form reading has more line height and paragraph space, and the case study's Stack heading aligns with the text column.
 
 ### Removed
