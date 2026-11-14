@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-14T14:42:49+00:00",
+  "title": "Design System: aggiovato",
+  "extensions": {
+    "colorMeta": {
+      "night-side-graphite": {
+        "role": "neutral",
+        "displayName": "Night-Side Graphite",
+        "canonical": "oklch(20.3% 0.016 279.3)",
+        "tonalRamp": ["#0b0b0d", "#24252a", "#404149", "#5f606a", "#80828c", "#a3a4ad", "#c8c9ce", "#eeeef0"]
+      },
+      "upper-atmosphere-plum": {
+        "role": "neutral",
+        "displayName": "Upper-Atmosphere Plum",
+        "canonical": "oklch(23.9% 0.037 298.1)",
+        "tonalRamp": ["#0c0a10", "#26232e", "#443f51", "#635d74", "#857e96", "#a7a1b5", "#cac7d3", "#efeef2"]
+      },
+      "aurora-lavender": {
+        "role": "primary",
+        "displayName": "Aurora Lavender",
+        "canonical": "oklch(78.4% 0.129 300.3)",
+        "tonalRamp": ["#0e061a", "#2b1a44", "#4c3172", "#6e4d9f", "#8f6ec4", "#af96dc", "#cfc1eb", "#f0ecf9"]
+      },
+      "great-red-spot-peach": {
+        "role": "secondary",
+        "displayName": "Great Red Spot Peach",
+        "canonical": "oklch(79.7% 0.079 47.7)",
+        "tonalRamp": ["#140803", "#371e10", "#5e3621", "#865338", "#aa7458", "#c79a83", "#dfc3b5", "#f5ece8"]
+      },
+      "ion-violet": {
+        "role": "tertiary",
+        "displayName": "Ion Violet",
+        "canonical": "oklch(56.1% 0.217 290.0)",
+        "tonalRamp": ["#0d0327", "#280e5d", "#471d99", "#6738d0", "#865ff8", "#a58eff", "#c8beff", "#eeebff"]
+      },
+      "starlight": {
+        "role": "neutral",
+        "displayName": "Starlight",
+        "canonical": "oklch(96.4% 0.013 306.0)",
+        "tonalRamp": ["#0c0b0d", "#262428", "#434147", "#635f67", "#848088", "#a6a3aa", "#cac8cc", "#efeeef"]
+      },
+      "aurora-mint": {
+        "role": "neutral",
+        "displayName": "Aurora Mint",
+        "canonical": "oklch(84.5% 0.081 160.8)",
+        "tonalRamp": ["#020f08", "#0b2c1d", "#1a4d36", "#316f52", "#549172", "#81b298", "#b5d1c1", "#e8f1ec"]
+      },
+      "signal-rose": {
+        "role": "neutral",
+        "displayName": "Signal Rose",
+        "canonical": "oklch(84.3% 0.088 12.1)",
+        "tonalRamp": ["#160608", "#3a191e", "#633037", "#8c4b54", "#b06c74", "#cd9399", "#e3bfc2", "#f7ebec"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Home hero title only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Case study h1, under 18ch."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section headings."
+      },
+      "subtitle": {
+        "displayName": "Subtitle",
+        "purpose": "Card titles and h3."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "Taglines under a title."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text, max 56ch (about 74 characters)."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Paths, chips, terms, counters (mono)."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Inline code and code blocks (mono)."
+      }
+    },
+    "shadows": [
+      {
+        "name": "planet-glow",
+        "value": "0 0 60px -6px rgb(121 80 232 / 0.45)",
+        "purpose": "The small Jupiter at the centre of a gallery orbit."
+      },
+      {
+        "name": "moon",
+        "value": "0 0 24px -4px rgb(121 80 232 / 0.45), 0 18px 36px -14px rgb(0 0 0 / 0.85)",
+        "purpose": "Orbiting thumbnails."
+      },
+      {
+        "name": "glass-panel",
+        "value": "backdrop-filter: blur(18px) saturate(140%); background: color-mix(in srgb, #15161e 78–82%, transparent)",
+        "purpose": "Mobile menu, language menu and viewer bar: panels that open over content."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Default easing for state changes and arrivals."
+      },
+      {
+        "name": "duration-fast",
+        "value": "160ms",
+        "purpose": "Hover, colour and menu transitions."
+      },
+      {
+        "name": "page-out",
+        "value": "120ms ease-in",
+        "purpose": "Old page fades out first in a cross-document view transition."
+      },
+      {
+        "name": "page-in",
+        "value": "260ms ease-out, 120ms delay, rise 10px",
+        "purpose": "New page arrives after the old one has gone."
+      },
+      {
+        "name": "shared-element",
+        "value": "340ms ease-out",
+        "purpose": "Card cover and title flying to the case study."
+      },
+      {
+        "name": "orbit",
+        "value": "120s per turn",
+        "purpose": "Gallery orbit; eases to a stop under the pointer."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "xs",
+        "value": "360px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "900px"
+      },
+      {
+        "name": "xl",
+        "value": "1024px"
+      },
+      {
+        "name": "2xl",
+        "value": "1100px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single filled action per view.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\">Explore my work <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 0.75rem; min-height: 48px; padding: 0 2rem; border-radius: 12px; background: var(--color-accent, #c6a5ff); color: var(--color-on-accent, #21152f); font: 700 1rem/1 \"Manrope Variable\", Manrope, system-ui, sans-serif; text-decoration: none; transition: background-color 160ms cubic-bezier(0.22,1,0.36,1), transform 160ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-primary svg { transition: transform 160ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-primary:hover { background: var(--color-accent-hover, #d8c1ff); transform: translateY(-1px); } .ds-btn-primary:hover svg { transform: translateX(3px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-focus, #e8ae91); outline-offset: 3px; }"
+    },
+    {
+      "name": "Underlined Link",
+      "kind": "button",
+      "refersTo": "link-underline",
+      "description": "Secondary action: a link with a lavender underline.",
+      "html": "<a class=\"ds-link-underline\" href=\"#\">Let’s talk</a>",
+      "css": ".ds-link-underline { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-text, #f5f1fa); font: 650 1rem/1.4 \"Manrope Variable\", Manrope, system-ui, sans-serif; text-decoration: underline; text-decoration-color: var(--color-accent, #c6a5ff); text-decoration-thickness: 2px; text-underline-offset: 6px; transition: color 160ms, text-decoration-color 160ms; } .ds-link-underline:hover { color: var(--color-accent-hover, #d8c1ff); text-decoration-color: var(--color-accent-hover, #d8c1ff); } .ds-link-underline:focus-visible { outline: 2px solid var(--color-focus, #e8ae91); outline-offset: 3px; border-radius: 4px; }"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Static mono label for categories, stack and roles.",
+      "html": "<ul class=\"ds-chips\"><li class=\"ds-chip\">Open source</li><li class=\"ds-chip\">Node.js</li><li class=\"ds-chip\">Developer tools</li></ul>",
+      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0; margin: 0; list-style: none; } .ds-chip { display: inline-flex; align-items: center; min-height: 28px; padding: 0 0.75rem; border: 1px solid var(--color-control-border, #827b94); border-radius: 999px; color: var(--color-text-muted, #bcb5ca); font: 400 0.8125rem/1 \"JetBrains Mono Variable\", \"JetBrains Mono\", ui-monospace, monospace; }"
+    },
+    {
+      "name": "Path Label",
+      "kind": "custom",
+      "refersTo": "path-label",
+      "description": "Section eyebrow written as a code path.",
+      "html": "<p class=\"ds-path\">portfolio / work / <b>yrest.mdoc</b></p>",
+      "css": ".ds-path { margin: 0; color: var(--color-text-subtle, #9691a8); font: 400 0.8125rem/1.4 \"JetBrains Mono Variable\", \"JetBrains Mono\", ui-monospace, monospace; } .ds-path b { color: var(--color-accent, #c6a5ff); font-weight: 500; }"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Header links with the current page underlined in lavender.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Main\"><a href=\"#\" aria-current=\"page\">Work</a><a href=\"#\">About</a><a href=\"#\">Contact</a></nav>",
+      "css": ".ds-nav { display: flex; gap: 0.5rem; } .ds-nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 0.75rem; border-radius: 12px; color: var(--color-text-muted, #bcb5ca); font: 600 1rem/1 \"Manrope Variable\", Manrope, system-ui, sans-serif; text-decoration: none; transition: color 160ms; } .ds-nav a:hover, .ds-nav a[aria-current=\"page\"] { color: var(--color-text, #f5f1fa); } .ds-nav a[aria-current=\"page\"] { text-decoration: underline; text-decoration-color: var(--color-accent, #c6a5ff); text-decoration-thickness: 2px; text-underline-offset: 8px; } .ds-nav a:focus-visible { outline: 2px solid var(--color-focus, #e8ae91); outline-offset: 3px; }"
+    },
+    {
+      "name": "Project Preview",
+      "kind": "card",
+      "refersTo": "project-preview",
+      "description": "16:10 screenshot frame of a project card.",
+      "html": "<a class=\"ds-preview\" href=\"#\"><span>Screenshot</span></a>",
+      "css": ".ds-preview { display: grid; place-items: center; width: 320px; aspect-ratio: 16 / 10; border-radius: 20px; border: 1px solid var(--color-card-border, #443653); background: var(--color-card, #2a2339); color: var(--color-text-subtle, #9691a8); font: 400 0.8125rem \"JetBrains Mono Variable\", ui-monospace, monospace; text-decoration: none; transition: border-color 160ms; } .ds-preview:hover, .ds-preview:focus-visible { border-color: var(--color-accent, #c6a5ff); outline: none; }"
+    },
+    {
+      "name": "Callout",
+      "kind": "custom",
+      "refersTo": "callout",
+      "description": "Editorial aside in a case study; a tone dot before the title encodes its type.",
+      "html": "<aside class=\"ds-callout\"><p class=\"ds-callout-title\">Limits</p><p>yRest is a development and testing tool, not a backend.</p></aside>",
+      "css": ".ds-callout { padding: 1rem 1.5rem; border: 1px solid var(--color-border, #363344); border-radius: 12px; background: var(--color-surface, #1b1d28); color: var(--color-text-muted, #bcb5ca); font: 400 1rem/1.6 \"Manrope Variable\", Manrope, system-ui, sans-serif; } .ds-callout p { margin: 0; } .ds-callout-title { display: flex; align-items: center; gap: 0.5rem; color: var(--color-text, #f5f1fa); font-weight: 700; margin-bottom: 0.25rem !important; } .ds-callout-title::before { content: \"\"; width: 8px; height: 8px; border-radius: 50%; background: var(--color-jupiter, #e8ae91); }"
+    },
+    {
+      "name": "Dotted Trail",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "The rocket trail used for trajectories, horizons, the index and orbits.",
+      "html": "<svg class=\"ds-trail\" viewBox=\"0 0 320 60\" aria-hidden=\"true\"><path d=\"M0 50 Q 160 -10 320 50\"/></svg>",
+      "css": ".ds-trail { width: 320px; height: 60px; overflow: visible; } .ds-trail path { fill: none; stroke: rgb(245 241 250 / 0.42); stroke-width: 1.75; stroke-linecap: round; stroke-dasharray: 1 9; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Landing Log",
+    "overview": "Every page is an entry in a log kept after landing on Jupiter: a precise, dated record of what was built and why, written by someone who stayed curious after arriving. The log is editorial first — large type, generous space, one idea per screen — and technical in its marginalia: file paths as eyebrows, line numbers, a `mission` object, code in the hero's palette. The planet and its sky give the record a place; they never stand between the visitor and the work.\n\nThe world is dark only. A night-side graphite ground carries everything; the plum of the upper atmosphere appears where projects live, reached gradually rather than through a hard band. Colour is scarce on purpose: lavender marks what you can act on, Jupiter's peach adds warmth in small doses, and the rest is graphite and starlight. Character lives in recurring details — the rocket's dotted trail, the ◆ that marks where you are, the code-path labels — so components themselves can stay precise and calm.\n\nMotion is a single, deliberate moment per surface (the rocket's arrival, the slow orbit of a gallery) plus transitions that answer the visitor's actions. Everything respects `prefers-reduced-motion`, and the content is complete before any effect runs.",
+    "keyCharacteristics": [
+      "Dark-only, graphite ground with a gradual plum atmosphere where projects live.",
+      "One action colour (lavender); peach only as a warm accent and for focus.",
+      "Manrope for reading, JetBrains Mono for anything that is code, data or a path.",
+      "Thin outlines and soft radii; depth from tone and soft violet glows, not stacked shadows.",
+      "The rocket's dotted trail as the system's recurring line: trajectory, horizon, index, orbit."
+    ],
+    "rules": [
+      {
+        "name": "The One Signal Rule",
+        "body": "Lavender means \"you can act on this\". It is never a background wash, a decorative fill or body text; if an element is not interactive and is not the current location, it is not lavender.",
+        "section": "colors"
+      },
+      {
+        "name": "The Gradual Atmosphere Rule",
+        "body": "Plum is never a shaped band with an edge. It appears through a long gradient from graphite (about 28rem) and leaves the same way, so no seam can show.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono Means Machine Rule",
+        "body": "Monospace marks what a machine would print: paths, code, counts, codes, labels. It is never used for sentences.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Eyebrow Caps Rule",
+        "body": "Section eyebrows are lowercase code paths (`~/work`, `portfolio / work / yrest.mdoc`), never tracked uppercase labels.",
+        "section": "typography"
+      },
+      {
+        "name": "The Scene-Only Elevation Rule",
+        "body": "Only things that float in the sky get a glow or a shadow. Cards, buttons and blocks in the reading flow stay flat and rely on borders and tone.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep lavender for actions, the current location and the hero's highlighted word only.",
+      "Do use the dotted trail (1.75px dots every 10px, Starlight at 42%) for any trajectory, horizon, orbit or progress line.",
+      "Do label sections with a lowercase code path, and use mono for paths, code, counts and labels.",
+      "Do reach the plum surface through a long gradient from graphite and leave it the same way.",
+      "Do make every scene element decorative and hidden from assistive technology, and keep the content complete without JavaScript and with reduced motion."
+    ],
+    "donts": [
+      "Don't use blurred bands, hard horizontal cuts or shaped colour blocks between sections; they showed seams at the screen edges.",
+      "Don't give cards, buttons or reading blocks a drop shadow; only floating scene objects get glow and shadow.",
+      "Don't use tracked uppercase eyebrow labels or numbered markers on content that is not a real sequence.",
+      "Don't add spatial jargon to navigation labels (Work, About, Contact stay plain), military imagery, game-like interfaces or omnipresent neon.",
+      "Don't let two pages overlap during a transition; the old page leaves before the new one arrives."
+    ]
+  }
+}
