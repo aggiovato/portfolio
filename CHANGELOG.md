@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [1.0.0] — 2026-11-14
+
 First public version of the portfolio.
 
 ### Added
