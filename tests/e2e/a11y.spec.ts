@@ -6,7 +6,18 @@ import { expect, test } from '@playwright/test';
  * the issues; keyboard and screen reader checks stay manual (.claude/rules/accessibility.md).
  * Exceptions go through `exclude` with a reason, never by disabling a whole rule.
  */
-const PAGES = ['/', '/work/', '/about/', '/contact/', '/es/', '/es/work/', '/404/'];
+const PAGES = [
+  '/',
+  '/work/',
+  '/about/',
+  '/contact/',
+  '/es/',
+  '/es/work/',
+  '/it/',
+  '/ja/',
+  '/ja/work/',
+  '/404/',
+];
 
 test.describe('accessibility (axe)', () => {
   test.skip(({ isMobile }) => isMobile, 'Same markup on mobile; audited once on desktop');

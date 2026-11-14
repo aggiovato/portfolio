@@ -11,6 +11,7 @@ export const es: UiDictionary = {
   'site.defaultTitle': '{person} — {role} · {brand}',
 
   // Layout and navigation
+  'a11y.newTab': '(se abre en una pestaña nueva)',
   'a11y.skipToContent': 'Saltar al contenido',
   'nav.label': 'Principal',
   'nav.menu': 'Menú',
@@ -78,7 +79,25 @@ export const es: UiDictionary = {
   'project.onThisPage': 'En esta página',
   'project.stack': 'Stack',
   'project.gallery': 'Galería',
+  'gallery.label': 'Galería del proyecto',
+  'gallery.open': 'Abrir la imagen {n} de {total}: {caption}',
+  'gallery.show': 'Mostrar la imagen {n} de {total}: {caption}',
+  'gallery.pause': 'Pausar la órbita',
+  'viewer.label': 'Visor de imágenes',
+  'viewer.close': 'Cerrar',
+  'viewer.previous': 'Imagen anterior',
+  'viewer.next': 'Imagen siguiente',
+  'viewer.zoomIn': 'Acercar',
+  'viewer.zoomOut': 'Alejar',
+  'viewer.rotate': 'Girar 90°',
+  'viewer.reset': 'Restablecer vista',
+  'viewer.counter': '{n} / {total}',
+  'viewer.hint': 'Usa la rueda o pellizca para hacer zoom; arrastra para mover.',
   'project.next': 'Siguiente proyecto',
+  'glance.label': 'De un vistazo',
+  'glance.problem': 'Problema',
+  'glance.contribution': 'Mi parte',
+  'glance.outcome': 'Resultado',
   'project.meta.type': 'Tipo',
   'project.meta.period': 'Periodo',
   'project.meta.status': 'Estado',
@@ -117,6 +136,7 @@ export const es: UiDictionary = {
   'decision.alternatives': 'Alternativas',
   'decision.tradeoff': 'Compromiso',
   'decision.evidence': 'Evidencia',
+  'decision.outlook': 'Perspectiva',
 
   // About
   'about.title': 'Sobre mí',
@@ -145,6 +165,8 @@ export const es: UiDictionary = {
   'notFound.heading': 'Esta órbita está vacía.',
   'notFound.body':
     'La página que buscas no existe o se ha movido. Revisa la dirección o vuelve a terreno conocido.',
+  'notFound.englishOnly': 'Este caso de estudio solo está disponible en inglés.',
+  'notFound.readInEnglish': 'Leerlo en inglés',
   'notFound.home': 'Ir al inicio',
   'notFound.projects': 'Ver proyectos',
 };

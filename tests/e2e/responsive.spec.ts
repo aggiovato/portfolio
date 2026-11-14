@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 // Widths required by §21: no horizontal overflow.
 const WIDTHS = [320, 375, 768, 1024, 1440];
-const PATHS = ['/', '/work/', '/about/', '/contact/', '/es/', '/es/work/'];
+const PATHS = ['/', '/work/', '/about/', '/contact/', '/es/', '/es/work/', '/it/', '/ja/', '/ja/work/'];
 
 test.describe('no horizontal overflow', () => {
   test.skip(({ isMobile }) => isMobile, 'Viewport set explicitly; runs once on desktop');
@@ -53,12 +53,17 @@ test.describe('mobile menu', () => {
     expect(await main.boundingBox()).toEqual(before);
     // The page behind is inert while the menu is open.
     await expect(main).toHaveJSProperty('inert', true);
+    // The header drops its view-transition-name while a glass panel is open (a named element is a
+    // backdrop root, so the panel's blur would not see the page), and gets it back on close.
+    const header = page.locator('.site-header');
+    await expect(header).toHaveCSS('view-transition-name', 'none');
 
     // Tap the scrim, below the panel.
     const viewport = page.viewportSize()!;
     await page.mouse.click(viewport.width / 2, viewport.height - 20);
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(main).toHaveJSProperty('inert', false);
+    await expect(header).toHaveCSS('view-transition-name', 'site-header');
   });
 
   test('the close icon is centred in its button', async ({ browser }) => {

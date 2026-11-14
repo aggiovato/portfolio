@@ -9,6 +9,7 @@ import {
   useTranslations,
 } from '../../src/i18n';
 import { dictionaries } from '../../src/i18n/ui';
+import { caseStudyFallback } from '../../src/i18n/fallback';
 
 describe('resolveLocale', () => {
   it('keeps a supported locale and falls back to the default otherwise', () => {
@@ -52,13 +53,23 @@ describe('stripLocale', () => {
 
 describe('alternatesFor', () => {
   it('lists the same page in every locale', () => {
-    expect(alternatesFor('/es/about/')).toEqual({ en: '/about/', es: '/es/about/' });
+    expect(alternatesFor('/es/about/')).toEqual({
+      en: '/about/',
+      es: '/es/about/',
+      it: '/it/about/',
+      ja: '/ja/about/',
+    });
   });
 });
 
 describe('localeParams', () => {
   it('renders the default locale without a path segment', () => {
-    expect(localeParams()).toEqual([{ params: { locale: undefined } }, { params: { locale: 'es' } }]);
+    expect(localeParams()).toEqual([
+      { params: { locale: undefined } },
+      { params: { locale: 'es' } },
+      { params: { locale: 'it' } },
+      { params: { locale: 'ja' } },
+    ]);
   });
 });
 
@@ -82,5 +93,20 @@ describe('translations', () => {
         );
       }
     }
+  });
+});
+
+describe('caseStudyFallback', () => {
+  it('points an untranslated case study address to the default-locale original', () => {
+    expect(caseStudyFallback('/it/work/yrest/')).toEqual({ locale: 'it', href: '/work/yrest/' });
+    expect(caseStudyFallback('/ja/work/yrest-vscode')).toEqual({ locale: 'ja', href: '/work/yrest-vscode/' });
+  });
+
+  it('ignores default-locale, unknown-locale and non-case-study paths', () => {
+    expect(caseStudyFallback('/work/yrest/')).toBeNull();
+    expect(caseStudyFallback('/en/work/yrest/')).toBeNull();
+    expect(caseStudyFallback('/fr/work/yrest/')).toBeNull();
+    expect(caseStudyFallback('/it/about/')).toBeNull();
+    expect(caseStudyFallback('/it/work/')).toBeNull();
   });
 });

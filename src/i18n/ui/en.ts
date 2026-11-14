@@ -13,6 +13,7 @@ export const en = {
   'site.defaultTitle': '{person} — {role} · {brand}',
 
   // Layout and navigation
+  'a11y.newTab': '(opens in a new tab)',
   'a11y.skipToContent': 'Skip to content',
   'nav.label': 'Main',
   'nav.menu': 'Menu',
@@ -80,7 +81,25 @@ export const en = {
   'project.onThisPage': 'On this page',
   'project.stack': 'Stack',
   'project.gallery': 'Gallery',
+  'gallery.label': 'Project gallery',
+  'gallery.open': 'Open image {n} of {total}: {caption}',
+  'gallery.show': 'Show image {n} of {total}: {caption}',
+  'gallery.pause': 'Pause orbit',
+  'viewer.label': 'Image viewer',
+  'viewer.close': 'Close',
+  'viewer.previous': 'Previous image',
+  'viewer.next': 'Next image',
+  'viewer.zoomIn': 'Zoom in',
+  'viewer.zoomOut': 'Zoom out',
+  'viewer.rotate': 'Rotate 90°',
+  'viewer.reset': 'Reset view',
+  'viewer.counter': '{n} / {total}',
+  'viewer.hint': 'Scroll or pinch to zoom, drag to move.',
   'project.next': 'Next project',
+  'glance.label': 'At a glance',
+  'glance.problem': 'Problem',
+  'glance.contribution': 'My part',
+  'glance.outcome': 'Outcome',
   'project.meta.type': 'Type',
   'project.meta.period': 'Period',
   'project.meta.status': 'Status',
@@ -119,6 +138,7 @@ export const en = {
   'decision.alternatives': 'Alternatives',
   'decision.tradeoff': 'Trade-off',
   'decision.evidence': 'Evidence',
+  'decision.outlook': 'Outlook',
 
   // About
   'about.title': 'About',
@@ -147,6 +167,8 @@ export const en = {
   'notFound.heading': 'This orbit is empty.',
   'notFound.body':
     'The page you’re looking for doesn’t exist or has moved. Check the address, or go back to familiar ground.',
+  'notFound.englishOnly': 'This case study is only available in English.',
+  'notFound.readInEnglish': 'Read it in English',
   'notFound.home': 'Go to home',
   'notFound.projects': 'See projects',
 } as const;

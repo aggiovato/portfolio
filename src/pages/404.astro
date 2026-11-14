@@ -1,9 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { defaultLocale, useTranslations } from '../i18n';
+import { defaultLocale, locales, useTranslations } from '../i18n';
 
 // Static hosts serve a single /404.html, so it is rendered in the default locale.
 const t = useTranslations(defaultLocale);
+// The English-only notice speaks the visitor's language: one short pair per locale.
+const englishOnly = Object.fromEntries(
+  locales.map((l) => {
+    const tl = useTranslations(l);
+    return [l, { note: tl('notFound.englishOnly'), link: tl('notFound.readInEnglish') }];
+  }),
+);
 ---
 
 <BaseLayout title={t('notFound.title')} noindex>
@@ -11,6 +18,14 @@ const t = useTranslations(defaultLocale);
     <div class="container">
       <p class="path-label">
         ~/<b>404</b>
+      </p>
+      <!--
+        Shown by the script only for an untranslated case study address (/it/work/<slug>/) whose
+        English original exists. Without JS the 404 stays as it is.
+      -->
+      <p class="english-only" data-english-only={JSON.stringify(englishOnly)} hidden>
+        <span data-note></span>
+        <a class="link-underline" data-link hreflang="en"></a>
       </p>
       <h1>{t('notFound.heading')}</h1>
       <p class="lead">{t('notFound.body')}</p>
@@ -30,7 +45,44 @@ const t = useTranslations(defaultLocale);
   </section>
 </BaseLayout>
 
+<script>
+  import { caseStudyFallback } from '../i18n/fallback';
+
+  const box = document.querySelector<HTMLElement>('[data-english-only]');
+  const fallback = caseStudyFallback(location.pathname);
+  if (box && fallback) {
+    const strings = JSON.parse(box.dataset.englishOnly ?? '{}')[fallback.locale];
+    // Only offer the link if the original really exists (a mistyped slug stays a plain 404).
+    fetch(fallback.href, { method: 'HEAD' })
+      .then((res) => {
+        if (!res.ok || !strings) return;
+        box.lang = fallback.locale;
+        box.querySelector('[data-note]')!.textContent = strings.note;
+        const link = box.querySelector<HTMLAnchorElement>('[data-link]')!;
+        link.textContent = strings.link;
+        link.href = fallback.href;
+        box.hidden = false;
+      })
+      .catch(() => {});
+  }
+</script>
+
 <style>
+  .english-only {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-6);
+    padding: var(--space-4) var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+  .english-only[hidden] {
+    display: none;
+  }
   h1 {
     margin-top: var(--space-2);
     font-size: var(--text-h1-project);

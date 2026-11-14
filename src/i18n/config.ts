@@ -3,7 +3,7 @@
  * The default locale has no URL prefix (`/work/`); every other locale does (`/es/work/`).
  * Adding a locale: append it here, add `src/i18n/ui/<locale>.ts` and register it in `ui/index.ts`.
  */
-export const locales = ['en', 'es'] as const;
+export const locales = ['en', 'es', 'it', 'ja'] as const;
 export type Locale = (typeof locales)[number];
 
 export const defaultLocale: Locale = 'en';
@@ -12,12 +12,16 @@ export const defaultLocale: Locale = 'en';
 export const localeNames: Record<Locale, string> = {
   en: 'English',
   es: 'Español',
+  it: 'Italiano',
+  ja: '日本語',
 };
 
 /** Open Graph locale codes (`og:locale`). */
 export const ogLocales: Record<Locale, string> = {
   en: 'en_US',
   es: 'es_ES',
+  it: 'it_IT',
+  ja: 'ja_JP',
 };
 
 export function isLocale(value: unknown): value is Locale {

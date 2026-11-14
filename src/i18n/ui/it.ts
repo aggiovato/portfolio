@@ -1,0 +1,172 @@
+import type { UiDictionary } from './index';
+
+/** Italian interface strings. The type forces the exact key set of `en.ts`. */
+export const it: UiDictionary = {
+  // Site-wide
+  'site.role': 'Sviluppatore full-stack',
+  'site.focus': 'frontend e prodotto',
+  'site.tagline': 'Interfacce curate. Sistemi affidabili. Idee che prendono vita.',
+  'site.description':
+    'Alejandro Lugo è uno sviluppatore full-stack con focus su frontend e prodotto: interfacce curate, sistemi affidabili e idee che prendono vita.',
+  'site.defaultTitle': '{person} — {role} · {brand}',
+
+  // Layout and navigation
+  'a11y.newTab': '(si apre in una nuova scheda)',
+  'a11y.skipToContent': 'Vai al contenuto',
+  'nav.label': 'Principale',
+  'nav.menu': 'Menu',
+  'nav.home': '{brand} — home',
+  'nav.work': 'Progetti',
+  'nav.about': 'Chi sono',
+  'nav.contact': 'Contatti',
+  'nav.language': 'Lingua',
+  'nav.switchTo': 'Leggi questa pagina in {language}',
+  'footer.label': 'Piè di pagina',
+  'footer.meaning': 'significa «atterrato su Giove».',
+  'footer.builtBy': 'Realizzato da {person} con Astro.',
+
+  // Home
+  'hero.titleLine1': 'Radicato nel codice.',
+  'hero.titleLine2': 'Fatto per',
+  'hero.titleHighlight': 'esplorare.',
+  'hero.identity': '{role}, con focus su {focus}.',
+  'hero.primaryCta': 'Esplora i miei progetti',
+  'hero.secondaryCta': 'Parliamone',
+  'hero.backToTop': 'Torna su',
+  'hero.arrivalPoint': 'Punto di arrivo',
+  'home.workTitle': 'Cose che ho realizzato.',
+  'home.seeAllProjects': 'Vedi tutti i progetti',
+  'home.workEmpty': 'I casi di studio sono in lavorazione. Nel frattempo, il codice è su',
+  'home.processTitle': 'Come lavoro.',
+  'home.process1Title': 'Capire il problema',
+  'home.process1Body':
+    'Parlo con chi svolge il lavoro, ricostruisco il flusso attuale e trovo dove si rompe davvero prima di proporre schermate.',
+  'home.process2Title': 'Progettare la soluzione',
+  'home.process2Body':
+    'Abbozzo il flusso principale, concordo presto i contratti dei dati e decido cosa lasciare fuori dalla prima versione.',
+  'home.process3Title': 'Costruire e iterare',
+  'home.process3Body':
+    'Rilascio una parte utilizzabile, osservo come viene usata e la rifinisco. Interfacce e API evolvono insieme.',
+  'home.aboutTitle': 'Orientato al prodotto, frontend prima di tutto.',
+  'home.aboutBody':
+    'Sono {person}, uno sviluppatore full-stack che passa la maggior parte del tempo dove le decisioni di prodotto incontrano l’interfaccia. Mi piace trasformare processi confusi in strumenti che si usano senza manuale, e mi interessano allo stesso modo i sistemi che li sostengono: contratti chiari, dati prevedibili e codice che chi viene dopo possa leggere.',
+  'home.coreStack': 'Stack principale',
+  'home.moreAboutMe': 'Di più su di me',
+
+  // Carousel and cards
+  'carousel.label': 'Progetti selezionati',
+  'carousel.previous': 'Progetti precedenti',
+  'carousel.next': 'Progetti successivi',
+  'card.viewProject': 'Vedi il progetto',
+  'card.categories': 'Categorie',
+  'card.screenshotPending': 'Screenshot in arrivo',
+  'card.draft': 'Bozza',
+  'card.draftDevOnly': 'Bozza · visibile solo in sviluppo',
+  'card.inDefaultLanguage': 'In inglese',
+
+  // Work
+  'work.title': 'Progetti',
+  'work.description': 'Casi di studio: il problema, il mio ruolo, le decisioni e cosa ho imparato.',
+  'work.intro':
+    'Ogni progetto spiega il problema, il mio ruolo, le decisioni prese e cosa farei diversamente.',
+  'work.empty': 'I casi di studio sono in arrivo.',
+
+  // Case study
+  'project.liveDemo': 'Demo dal vivo',
+  'project.sourceCode': 'Codice sorgente',
+  'project.documentation': 'Documentazione',
+  'project.tryItLive': 'Provalo dal vivo →',
+  'project.onThisPage': 'In questa pagina',
+  'project.stack': 'Stack',
+  'project.gallery': 'Galleria',
+  'gallery.label': 'Galleria del progetto',
+  'gallery.open': 'Apri l’immagine {n} di {total}: {caption}',
+  'gallery.show': 'Mostra l’immagine {n} di {total}: {caption}',
+  'gallery.pause': 'Metti in pausa l’orbita',
+  'viewer.label': 'Visualizzatore di immagini',
+  'viewer.close': 'Chiudi',
+  'viewer.previous': 'Immagine precedente',
+  'viewer.next': 'Immagine successiva',
+  'viewer.zoomIn': 'Ingrandisci',
+  'viewer.zoomOut': 'Riduci',
+  'viewer.rotate': 'Ruota di 90°',
+  'viewer.reset': 'Ripristina vista',
+  'viewer.counter': '{n} / {total}',
+  'viewer.hint': 'Usa la rotella o pizzica per lo zoom; trascina per spostare.',
+  'project.next': 'Progetto successivo',
+  'glance.label': 'In breve',
+  'glance.problem': 'Problema',
+  'glance.contribution': 'Il mio ruolo',
+  'glance.outcome': 'Risultato',
+  'project.meta.type': 'Tipo',
+  'project.meta.period': 'Periodo',
+  'project.meta.status': 'Stato',
+  'project.meta.role': 'Ruolo',
+  'project.meta.context': 'Contesto',
+  'project.privateProduct': 'Prodotto privato',
+  'project.type.personal': 'Progetto personale',
+  'project.type.open-source': 'Open source',
+  'project.type.professional': 'Lavoro professionale',
+  'project.status.active': 'Attivo',
+  'project.status.completed': 'Completato',
+  'project.status.prototype': 'Prototipo',
+  'project.status.paused': 'In pausa',
+  'stack.layer': 'Livello',
+  'stack.technology': 'Tecnologia',
+  'stack.why': 'Perché',
+  'stack.layer.interface': 'Interfaccia',
+  'stack.layer.api': 'API',
+  'stack.layer.data': 'Dati',
+  'stack.layer.runtime': 'Runtime',
+  'stack.layer.quality': 'Qualità',
+  'stack.layer.infrastructure': 'Infrastruttura',
+  'stack.layer.tooling': 'Strumenti',
+  'stack.usage.production': 'Produzione',
+  'stack.usage.prototype': 'Prototipo',
+  'stack.usage.exploration': 'Esplorazione',
+
+  // Markdoc tags
+  'callout.note': 'Nota',
+  'callout.constraint': 'Vincolo',
+  'callout.learning': 'Imparato',
+  'callout.editorial': 'Nota editoriale',
+  'decision.label': 'Decisione: {decision}',
+  'decision.problem': 'Problema',
+  'decision.decision': 'Decisione',
+  'decision.alternatives': 'Alternative',
+  'decision.tradeoff': 'Compromesso',
+  'decision.evidence': 'Evidenze',
+  'decision.outlook': 'Prospettiva',
+
+  // About
+  'about.title': 'Chi sono',
+  'about.description': 'Chi è {person}: {role} con focus su {focus}.',
+  'about.lead':
+    'Sono {person}. Costruisco prodotti web dall’inizio alla fine, con la maggior parte dell’attenzione sull’interfaccia e sulle decisioni di prodotto che ci stanno dietro.',
+  'about.nameBefore': 'Il nome',
+  'about.nameAfter':
+    'significa «atterrato su Giove»: un promemoria per continuare a esplorare, ma su un terreno solido. In pratica significa curiosità per i nuovi strumenti e una ostinata preferenza per ciò che è testato, documentato e facile da cambiare.',
+  'about.workWith': 'Con cosa lavoro',
+  'about.experience': 'Esperienza',
+  'about.experienceSoon': 'Il percorso professionale arriverà presto.',
+
+  // Contact
+  'contact.title': 'Contatti',
+  'contact.heading': 'Parliamone.',
+  'contact.description': 'Come contattare {person}.',
+  'contact.intro': 'Raccontami cosa stai costruendo e dove sei bloccato. Di solito rispondo in pochi giorni.',
+  'contact.email': 'Email',
+  'cta.title': 'Hai un prodotto che vale la pena costruire? Parliamone.',
+  'cta.email': 'Scrivimi',
+  'cta.otherWays': 'Altri modi per contattarmi',
+
+  // 404
+  'notFound.title': 'Pagina non trovata',
+  'notFound.heading': 'Quest’orbita è vuota.',
+  'notFound.body':
+    'La pagina che cerchi non esiste o è stata spostata. Controlla l’indirizzo o torna su un terreno conosciuto.',
+  'notFound.englishOnly': 'Questo caso di studio è disponibile solo in inglese.',
+  'notFound.readInEnglish': 'Leggilo in inglese',
+  'notFound.home': 'Vai alla home',
+  'notFound.projects': 'Vedi i progetti',
+};

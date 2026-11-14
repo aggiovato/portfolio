@@ -23,13 +23,15 @@ const current = stripLocale(Astro.url.pathname);
 const isActive = (href: string) => current.startsWith(href);
 
 // Keep the reader on the equivalent page; an untranslated case study falls back to that locale's work index.
-const languages = locales
-  .filter((l) => l !== locale)
-  .map((l) => ({
-    locale: l,
-    name: localeNames[l],
-    href: alternates[l] ?? localizePath(current.startsWith('/work/') ? '/work/' : '/', l),
-  }));
+const languages = locales.map((l) => ({
+  locale: l,
+  name: localeNames[l],
+  code: l.toUpperCase(),
+  href:
+    l === locale
+      ? Astro.url.pathname
+      : (alternates[l] ?? localizePath(current.startsWith('/work/') ? '/work/' : '/', l)),
+}));
 ---
 
 <header class="site-header">
@@ -77,19 +79,64 @@ const languages = locales
             <span class="github-label">GitHub</span>
           </a>
         </li>
-        {languages.map((l) => (
-          <li class="nav-lang">
-            <a
-              href={l.href}
-              hreflang={l.locale}
-              lang={l.locale}
-              aria-label={`${l.locale.toUpperCase()} — ${useTranslations(l.locale)('nav.switchTo', { language: l.name })}`}
-              data-locale-switch={l.locale}
-            >
-              <span aria-hidden="true">{l.locale.toUpperCase()}</span>
-            </a>
-          </li>
-        ))}
+        <!-- Language menu: a native disclosure (works without JS); the script only adds closing. -->
+        <li class="nav-lang">
+          <details class="lang" data-lang-menu>
+            <summary>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"></path>
+              </svg>
+              <span class="lang-current" aria-hidden="true">
+                {locale.toUpperCase()}
+              </span>
+              <span class="visually-hidden">
+                {locale.toUpperCase()} — {t('nav.language')}: {localeNames[locale]}
+              </span>
+              <svg
+                class="chevron"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </summary>
+            <ul class="lang-list">
+              {languages.map((l) => (
+                <li>
+                  <a
+                    href={l.href}
+                    hreflang={l.locale}
+                    lang={l.locale}
+                    aria-current={l.locale === locale ? 'true' : undefined}
+                    aria-label={useTranslations(l.locale)('nav.switchTo', { language: l.name })}
+                    data-locale-switch={l.locale}
+                  >
+                    <span class="lang-name">{l.name}</span>
+                    <span class="lang-code" aria-hidden="true">
+                      {l.code}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </li>
       </ul>
     </nav>
   </div>
@@ -135,6 +182,33 @@ const languages = locales
     // Back/forward cache restores the page as it was left.
     addEventListener('pageshow', (e) => e.persisted && isOpen() && setOpen(false, { focus: false }));
   }
+
+  /** Language menu: close it like a popover (Escape, a click outside, leaving the page). */
+  const langMenu = document.querySelector<HTMLDetailsElement>('[data-lang-menu]');
+  if (langMenu) {
+    const close = (returnFocus = false) => {
+      if (!langMenu.open) return;
+      langMenu.open = false;
+      if (returnFocus) langMenu.querySelector('summary')?.focus();
+    };
+    // Capture phase: runs before the mobile menu's Escape handler, so Escape closes only the
+    // innermost layer (the language list) and leaves the menu open.
+    document.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'Escape' && langMenu.open) {
+          e.stopPropagation();
+          close(true);
+        }
+      },
+      { capture: true },
+    );
+    document.addEventListener('click', (e) => {
+      if (!langMenu.contains(e.target as Node)) close();
+    });
+    addEventListener('pageswap', () => close());
+    addEventListener('pageshow', (e) => e.persisted && close());
+  }
 </script>
 
 <style>
@@ -143,6 +217,16 @@ const languages = locales
     top: 0;
     z-index: 50;
     border-bottom: 1px solid var(--color-border);
+  }
+
+  /*
+   * The header is its own layer in page transitions, so it stays still while the page changes.
+   * Not while one of its glass panels is open: a view-transition-name makes the header a backdrop
+   * root, and the panel's blur could then not see the page behind it. Both panels close before
+   * the page is captured (pageswap), so a navigation always finds the name in place.
+   */
+  :global(html:not([data-menu-open='true'])) .site-header:not(:has(.lang[open])) {
+    view-transition-name: site-header;
   }
 
   /*
@@ -227,10 +311,95 @@ const languages = locales
     border-left: 1px solid var(--color-border);
   }
 
-  .nav-lang a {
+  /* ---------- Language menu ---------- */
+  .lang {
+    position: relative;
+  }
+
+  .lang summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding-inline: var(--space-3);
+    border-radius: var(--radius-control);
     font-family: var(--font-mono);
     font-size: var(--text-meta);
     letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    list-style: none;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .lang summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .lang summary:hover,
+  .lang[open] summary {
+    color: var(--color-text);
+  }
+
+  .chevron {
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+
+  .lang[open] .chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Desktop: a glass panel under the button, like the mobile menu. `.nav` raises it above the
+     generic `.nav ul` row, which would size each item to its content. */
+  .nav .lang-list {
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    right: 0;
+    z-index: 2;
+    display: grid;
+    min-width: 13rem;
+    padding: var(--space-2);
+    list-style: none;
+    background: color-mix(in srgb, var(--color-bg) 82%, transparent);
+    backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+  }
+
+  .nav .lang-list a {
+    justify-content: space-between;
+    gap: var(--space-6);
+    width: 100%;
+    padding-inline: var(--space-6) var(--space-3);
+    position: relative;
+    font-weight: 500;
+  }
+
+  .nav .lang-list a:hover {
+    background: var(--color-surface-raised);
+  }
+
+  .lang-code {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-text-subtle);
+  }
+
+  /* Current language: the ◆ from the case study index, no underline. */
+  .nav .lang-list a[aria-current='true'] {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .nav .lang-list a[aria-current='true']::before {
+    content: '';
+    position: absolute;
+    left: var(--space-2);
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    background: var(--color-accent);
+    transform: translateY(-50%) rotate(45deg);
   }
 
   .github-label {
@@ -347,6 +516,19 @@ const languages = locales
       padding: var(--space-2) 0 0;
       border-left: 0;
       border-top: 1px solid var(--color-border);
+    }
+
+    :global(.js) .lang summary {
+      padding-inline: 0;
+    }
+
+    :global(.js) .nav .lang-list {
+      position: static;
+      min-width: 0;
+      padding: 0 0 var(--space-2);
+      background: none;
+      backdrop-filter: none;
+      border: 0;
     }
 
     :global(.js) .github-label {
