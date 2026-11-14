@@ -1,0 +1,12 @@
+# Netlify response headers (static site, no server).
+# Fingerprinted build assets never change under the same name: cache them for a year.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Baseline security headers for every page. No CSP yet: inline scripts (early `js` class,
+# speculation rules) would need hashes; add one once the inline set is stable.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()

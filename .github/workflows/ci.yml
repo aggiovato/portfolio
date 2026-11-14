@@ -4,6 +4,9 @@ name: CI
 #   quality → static checks + unit/component tests (fast feedback)
 #   build   → production build + draft leak check (what a deploy would publish)
 #   e2e     → Playwright against a production build with drafts (smoke, i18n, axe)
+#   deploy  → only after all three pass: the very dist/ the build job produced goes to Netlify,
+#             as a preview for a PR (linked in a comment) or to production for a push to main.
+#             Netlify never builds on its own, so nothing reaches production without this pipeline.
 # See .claude/rules/testing.md for what each layer covers.
 on:
   pull_request:
@@ -31,7 +34,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # Provisional images are gitignored: generate neutral placeholders for the missing ones.
+      # Safety net: neutral placeholders for any referenced image missing from the repo.
       - name: Placeholder images
         run: npm run assets:placeholders
       - name: Prettier
@@ -61,7 +64,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # Provisional images are gitignored: generate neutral placeholders for the missing ones.
+      # Safety net: neutral placeholders for any referenced image missing from the repo.
       - name: Placeholder images
         run: npm run assets:placeholders
       # Production build: no SHOW_DRAFTS, so drafts must not generate routes or sitemap entries.
@@ -90,7 +93,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # Provisional images are gitignored: generate neutral placeholders for the missing ones.
+      # Safety net: neutral placeholders for any referenced image missing from the repo.
       - name: Placeholder images
         run: npm run assets:placeholders
       - name: Install Playwright browser
@@ -106,3 +109,65 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  deploy:
+    name: Deploy (Netlify)
+    runs-on: ubuntu-latest
+    needs: [quality, build, e2e]
+    if: github.event_name == 'push' || !github.event.pull_request.draft
+    # One deploy per branch at a time; a newer push supersedes a queued one.
+    concurrency:
+      group: deploy-${{ github.ref }}
+      cancel-in-progress: true
+    environment:
+      name: ${{ github.event_name == 'push' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.url }}
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+    steps:
+      # PRs from forks and Dependabot get no secrets: they are tested, not deployed.
+      - name: Check credentials
+        id: creds
+        run: |
+          if [ -n "$NETLIFY_AUTH_TOKEN" ] && [ -n "$NETLIFY_SITE_ID" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Netlify secrets not available for this run; skipping deploy."
+          fi
+      - uses: actions/download-artifact@v7
+        if: steps.creds.outputs.ok == 'true'
+        with:
+          name: dist
+          path: dist/
+      - uses: actions/setup-node@v7
+        if: steps.creds.outputs.ok == 'true'
+        with:
+          node-version-file: .nvmrc
+      - name: Deploy
+        id: deploy
+        if: steps.creds.outputs.ok == 'true'
+        env:
+          PROD: ${{ github.event_name == 'push' }}
+          ALIAS: pr-${{ github.event.pull_request.number }}
+          MESSAGE: ${{ github.event_name == 'push' && github.sha || format('PR #{0}', github.event.pull_request.number) }}
+        run: |
+          if [ "$PROD" = "true" ]; then target=(--prod); else target=(--alias "$ALIAS"); fi
+          npx -y netlify-cli@27.16.1 deploy --dir dist --site "$NETLIFY_SITE_ID" --no-build \
+            "${target[@]}" --message "$MESSAGE" --json > deploy.json
+          url=$(node -e "const d=require('./deploy.json'); console.log(process.env.PROD==='true' ? d.url : d.deploy_url)")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed: $url" >> "$GITHUB_STEP_SUMMARY"
+      - name: Link the preview in the PR
+        if: steps.creds.outputs.ok == 'true' && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          URL: ${{ steps.deploy.outputs.url }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          body="Preview: $URL (commit ${GITHUB_SHA::7}, after quality, build and e2e passed)"
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --edit-last --body "$body" \
+            || gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body "$body"
