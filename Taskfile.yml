@@ -161,6 +161,24 @@ tasks:
           printf "\n  \033[1;32m→  All checks passed — safe to push\033[0m\n\n"
         silent: true
 
+  # ── Release ────────────────────────────────────────────────────────────────
+  # Write the changes under «## [Unreleased]» in CHANGELOG.md first. `npm version` bumps
+  # package.json, dates that section (scripts/changelog.mjs), commits and tags vX.Y.Z.
+  # Then `git push --follow-tags`: CI runs the full pipeline and deploys the tag to production
+  # (a GitHub Release is created for minor and major versions).
+
+  release:patch:
+    desc: Release a fix (x.y.N) — bump, date the changelog, commit and tag
+    cmd: '{{.NODE}} npm version patch -m "chore(release): v%s"'
+
+  release:minor:
+    desc: Release new features (x.N.0) — bump, date the changelog, commit and tag
+    cmd: '{{.NODE}} npm version minor -m "chore(release): v%s"'
+
+  release:major:
+    desc: Release a breaking change (N.0.0) — bump, date the changelog, commit and tag
+    cmd: '{{.NODE}} npm version major -m "chore(release): v%s"'
+
   # ── Housekeeping ───────────────────────────────────────────────────────────
 
   clean:

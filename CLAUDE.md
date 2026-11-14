@@ -31,9 +31,11 @@ CSS tokens · static output · English (default) + Spanish (`/es/`).
 | Build + draft leak check  | `npm run build && npm run verify:drafts` | `task verify:drafts`              |
 | Everything, CI order      | —                                        | `task preflight`                  |
 
-CI: `.github/workflows/ci.yml` (quality → build → e2e → deploy) on PRs and pushes to `main`. Deploy
-uploads the tested `dist/` to Netlify: a preview per PR, production on `main`. Netlify never builds
-itself; secrets `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`. Headers live in `public/_headers`.
+CI: `.github/workflows/ci.yml` (quality → build → e2e → deploy). PRs get a Netlify preview; a push
+to `main` is tested only; a version tag `vX.Y.Z` (from `task release:patch|minor|major`, after writing
+«Unreleased» in `CHANGELOG.md`) is checked against `package.json` and the changelog, deployed to
+production, and gets a GitHub Release when it is minor or major. Netlify never builds itself; secrets
+`NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`. Headers live in `public/_headers`.
 
 ## Key invariants
 
