@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [1.3.0] — 2026-11-15
+
 ### Added
 
 - **Back to top everywhere:** the rocket button now appears on every page once you scroll, and lifts off when it takes you up.
