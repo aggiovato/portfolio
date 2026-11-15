@@ -1,0 +1,2 @@
+# Netlify redirects (static site). Common guesses for the sitemap point to the one Astro generates.
+/sitemap.xml  /sitemap-index.xml  301

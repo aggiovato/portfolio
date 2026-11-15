@@ -30,6 +30,17 @@ test.describe('seo', () => {
     expect(post?.datePublished).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 
+  test('llms.txt summarises the site in Markdown with links to the case studies', async ({ request }) => {
+    const res = await request.get('/llms.txt');
+    expect(res.status()).toBe(200);
+    expect(res.headers()['content-type']).toContain('text/plain');
+    const body = await res.text();
+    expect(body).toMatch(/^# Heber Alejandro Lugo — aggiovato\n\n> /);
+    expect(body).toContain('## Case studies\n\n- [');
+    expect(body).toMatch(/- \[yRest\]\(https?:\/\/[^)]+\/work\/yrest\/\): /);
+    expect(body).toContain('## Notes');
+  });
+
   test('robots.txt allows crawling and points to the sitemap', async ({ request }) => {
     const body = await (await request.get('/robots.txt')).text();
     expect(body).toContain('Allow: /');
