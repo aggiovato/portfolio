@@ -12,6 +12,13 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Changed
+
+- The diagrams of the three RxJS notes (fundamentals, mapping operators, combining streams) are
+  drawn as SVG over a notebook background, in the site's fonts and each note's language, and legible
+  on phones; their covers are drawn the same way. New `{% diagram %}` tag for notes: a
+  marble diagram or a timeline by id, or any SVG or image on the same notebook background.
+
 ---
 
 ## [1.7.0] — 2026-11-15
