@@ -7,7 +7,8 @@
  * The word sits on its own line, so changing it never reflows the sentence. Motion (WCAG 2.2.2):
  * the words cycle once each time the section comes into view, with a soft crossfade, and rest on
  * the first, all in under five seconds. Screen readers get the whole
- * sentence, still. Without JS or with reduced motion the resting word just stays.
+ * sentence (the resting word is in the HTML; the swap is not announced). Without JS or with
+ * reduced motion the resting word just stays.
  */
 import Watermark from './Watermark.astro';
 import { site } from '../data/site';
@@ -24,16 +25,16 @@ const words = t('cta.words').split('|');
     <div class="copy">
       <h2 id="cta-title">
         {t('cta.titleBefore')}{' '}
-        <span class="rotator" aria-hidden="true" data-cta-words={JSON.stringify(words)}>
+        <span class="rotator" data-cta-words={JSON.stringify(words)}>
           <em class="shine" data-cta-word>
             {words[0]}
           </em>
-        </span>
-        <span class="visually-hidden">{words[0]}</span> {t('cta.titleAfter')}
+        </span>{' '}
+        {t('cta.titleAfter')}
       </h2>
       <p class="body">{t('cta.body')}</p>
     </div>
-    <div class="actions">
+    <div class="actions" data-fab-avoid>
       <a class="btn btn-primary" href={`mailto:${site.email}`}>
         {t('cta.email')}
       </a>

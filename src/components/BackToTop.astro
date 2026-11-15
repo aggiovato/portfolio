@@ -20,6 +20,33 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
 </button>
 
 <script>
+  // The FAB steps aside only while it actually overlaps something it would cover (the call to
+  // action's buttons, the subscription form: elements marked [data-fab-avoid]), so it never hides
+  // an action and is still there at the bottom of every page.
+  {
+    const button = document.querySelector<HTMLButtonElement>('[data-fab]');
+    const avoid = [...document.querySelectorAll<HTMLElement>('[data-fab-avoid]')];
+    if (button && avoid.length) {
+      const overlaps = (a: DOMRect, b: DOMRect) =>
+        a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+      let frame = 0;
+      const check = () => {
+        frame = 0;
+        if (button.hidden) return;
+        // Measure where the button sits even while it is tucked (transform is not layout).
+        const fabBox = button.getBoundingClientRect();
+        button.classList.toggle(
+          'is-tucked',
+          avoid.some((el) => overlaps(fabBox, el.getBoundingClientRect())),
+        );
+      };
+      const schedule = () => (frame ||= requestAnimationFrame(check));
+      addEventListener('scroll', schedule, { passive: true });
+      addEventListener('resize', schedule);
+      new MutationObserver(schedule).observe(button, { attributes: true, attributeFilter: ['hidden'] });
+    }
+  }
+
   const fab = document.querySelector<HTMLButtonElement>('[data-fab]');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -123,6 +150,21 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
       width: 52px;
       height: 52px;
     }
+  }
+
+  /* Out of the way while it would cover an action (see [data-fab-avoid]). */
+  .fab.is-tucked {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+  }
+
+  .fab {
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
   }
 
   /* Lift-off on click (pages without the hero's flight): the rocket rises out of the button. */

@@ -228,6 +228,10 @@ codes, labels. It is never used for sentences.
 
 ## Layout
 
+On the home, every section's heading and copy start on the hero text's edge (after the log column,
+`--hero-indent`), so the log's reading line runs down the whole page; only card media extend to the
+container's edge.
+
 A centred container (max 1360px) with fluid gutters from 20–24px on phones to 72px on desktop
 (16px below 360px). Sections are separated by generous vertical space (4–6rem) and a hairline;
 the projects section replaces the hairline with the dotted horizon.

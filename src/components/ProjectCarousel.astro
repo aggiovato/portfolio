@@ -9,8 +9,9 @@
  * - Mobile (< 768 px): one column, no carousel (brief and §9: projects are read at a glance).
  * - Compact card: screenshot on top (the protagonist), title, one sentence (tagline → summary),
  *   2–3 tags and «View project». A single link per card (the title) that covers all of it.
- * - Width: centred block up to 1520 px (wider than the text). Heading, track and footer share
- *   the same edge: 2 cards visible on desktop, 1 + a peek on tablet.
+ * - Width: the site container. On desktop up to three cards sit side by side with the screenshot
+ *   on top: with three featured projects it is a still grid (no controls); more turn it into a
+ *   carousel. Tablet: one card and a peek of the next.
  */
 import { Image } from 'astro:assets';
 import { projectLocale, projectPath, type Project } from '../lib/content/projects';
@@ -94,7 +95,7 @@ const t = useTranslations(locale);
                   src={data.cover.src}
                   alt=""
                   widths={[480, 720, 960, 1280]}
-                  sizes="(min-width: 1100px) 26vw, (min-width: 768px) 44vw, 100vw"
+                  sizes="(min-width: 1100px) 30vw, (min-width: 768px) 44vw, 100vw"
                   loading={i === 0 ? 'eager' : 'lazy'}
                 />
               ) : (
@@ -202,10 +203,10 @@ const t = useTranslations(locale);
 </script>
 
 <style>
-  /* Centred block, wider than the text container (up to 1520 px). */
+  /* The site container's content box: cards line up with every other section. */
   .carousel {
     --gap: var(--space-8);
-    width: min(100% - 2 * var(--gutter), 1520px);
+    width: min(100% - 2 * var(--gutter), var(--container-max) - 2 * var(--gutter));
     margin-inline: auto;
   }
 
@@ -294,18 +295,16 @@ const t = useTranslations(locale);
       overscroll-behavior-x: contain;
       scroll-snap-type: x mandatory;
       scrollbar-width: none;
-      /* Hints that there is more to the right until the end is reached. */
+    }
+
+    /* Hints that there is more to the right, only while there is (the script sets data-at-end). */
+    .carousel[data-at-end='false'] .track {
       -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
       mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
     }
 
     .track::-webkit-scrollbar {
       display: none;
-    }
-
-    .carousel[data-at-end='true'] .track {
-      -webkit-mask-image: none;
-      mask-image: none;
     }
 
     @media (prefers-reduced-motion: no-preference) {
@@ -321,10 +320,11 @@ const t = useTranslations(locale);
     }
   }
 
-  /* Desktop: two cards visible. */
+  /* Desktop: three cards visible, screenshot on top (each card is under the 560 px side-by-side
+     threshold below). */
   @media (min-width: 1100px) {
     .slide {
-      flex-basis: calc((100% - var(--gap)) / 2);
+      flex-basis: calc((100% - 2 * var(--gap)) / 3);
     }
   }
 

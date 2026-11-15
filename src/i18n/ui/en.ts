@@ -6,10 +6,11 @@
 export const en = {
   // Site-wide
   'site.role': 'Full-stack developer',
-  'site.focus': 'Frontend and product',
-  'site.tagline': 'Thoughtful interfaces. Reliable systems. Ideas brought to life.',
+  'site.focus': 'turning ideas into products that scale',
+  'site.tagline':
+    'From the first conversation to the release: product, interface, backend and the tooling that keeps it running.',
   'site.description':
-    'Alejandro Lugo is a full-stack developer focused on frontend and product: thoughtful interfaces, reliable systems and ideas brought to life.',
+    'Alejandro Lugo is a full-stack developer who turns ideas into products that scale: from the first conversation to the release.',
   'site.defaultTitle': '{person} — {role} · {brand}',
 
   // Layout and navigation
@@ -35,6 +36,7 @@ export const en = {
   'hero.identity': '{role}, focused on {focus}.',
   'hero.primaryCta': 'Explore my work',
   'hero.secondaryCta': 'Let’s talk',
+  'hero.latest': 'Latest project:',
   'hero.backToTop': 'Back to top',
   'hero.arrivalPoint': 'Arrival point',
   'home.workTitle': 'Things I’ve shipped.',
@@ -44,12 +46,16 @@ export const en = {
   'home.process1Title': 'Understand the problem',
   'home.process1Body':
     'Talk to the people doing the work, map the current flow and find where it actually breaks before proposing screens.',
+  'home.process1Example':
+    'frontend work blocked on APIs that did not exist yet, and json-server fell short for real screens.',
   'home.process2Title': 'Design the solution',
   'home.process2Body':
     'Sketch the main flow, agree on data contracts early and decide what to leave out of the first version.',
+  'home.process2Example': 'the scoring and the timers were formulas on paper before they were code.',
   'home.process3Title': 'Build and iterate',
   'home.process3Body':
     'Ship a usable slice, watch how it is used and refine. Interfaces and APIs evolve together.',
+  'home.process3Example': 'false positives in the first release led to diagnostics scoped to their section.',
   'home.aboutTitle': 'Product first. Tools that grow with it.',
   'home.aboutBody':
     'I’m {person}, a full-stack developer. I start with the business and the product: how the work is organised and what the person behind it wants to build. The tools should be the natural expression of that order, so first we line up the ideas, then I build on a base that can grow. Scalability isn’t an afterthought; it’s part of the first design.',

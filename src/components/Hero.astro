@@ -5,6 +5,12 @@ import LogoMark from './LogoMark.astro';
 import { site } from '../data/site';
 import { localizePath, resolveLocale, useTranslations } from '../i18n';
 
+interface Props {
+  /** The most recent case study: concrete proof right under the tagline, updated as projects are added. */
+  latest?: { title: string; href: string };
+}
+
+const { latest } = Astro.props;
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 // The `mission` object, flight notes and log are decorative code: they stay in English in every locale.
@@ -59,6 +65,14 @@ const t = useTranslations(locale);
           <span>{t('hero.identity', { role: t('site.role'), focus: t('site.focus').toLowerCase() })}</span>
         </p>
         <p class="tagline">{t('site.tagline')}</p>
+        {latest && (
+          <p class="latest">
+            {t('hero.latest')}{' '}
+            <a class="link-underline" href={latest.href}>
+              {latest.title}
+            </a>
+          </p>
+        )}
 
         <div class="cta-row">
           <div class="actions">
@@ -85,10 +99,10 @@ const t = useTranslations(locale);
           </div>
 
           <pre class="mission" aria-hidden="true"><code><span class="k">const</span> mission = {'{'}
-  craft: <span class="s" data-field="craft">'web experiences'</span>,
+  craft: <span class="s" data-field="craft">'products'</span>,
   target: <span class="n" data-field="target">'jupiter'</span>,
   status: <span class="s" data-field="status">'building'</span>,
-{'}'}; <span class="c">// click anywhere to launch</span></code></pre>
+{'}'}; <span class="c">// click the sky to launch</span></code></pre>
         </div>
       </div>
     </div>
@@ -141,7 +155,7 @@ const t = useTranslations(locale);
     '// deploy: green',
   ];
   const CRAFTS = [
-    'web experiences',
+    'products',
     'design systems',
     'reliable APIs',
     'product decisions',
@@ -530,6 +544,8 @@ const t = useTranslations(locale);
       if (!desktop.matches) return;
       const target = event.target as Element;
       if (target.closest('a, button, input, textarea, select, summary')) return;
+      // The text column is for reading: a click there (to focus, to select) never launches.
+      if (target.closest('.content, .log')) return;
       if (window.getSelection()?.toString()) return; // do not interfere with text selection
       launch(clampAboveHorizon(heroPoint(event.clientX, event.clientY)));
     });
@@ -867,6 +883,24 @@ const t = useTranslations(locale);
     color: var(--color-text-muted);
   }
 
+  /* The evidence line: mono label, the project as a link. */
+  .latest {
+    margin-top: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-text-subtle);
+  }
+
+  .latest a {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    min-height: 0;
+  }
+
   /* CTAs and the `mission` block share a row when there is room; otherwise the code wraps below. */
   .cta-row {
     margin-top: var(--space-8);
@@ -1133,9 +1167,14 @@ const t = useTranslations(locale);
     }
   }
 
+  /* The sky is the launch area: crosshair there, the normal cursor over the text column. */
   @media (min-width: 1024px) and (pointer: fine) {
     .hero {
       cursor: crosshair;
+    }
+
+    .hero :is(.content, .log) {
+      cursor: auto;
     }
   }
 

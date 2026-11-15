@@ -7,7 +7,7 @@ import ProjectCarousel from '../../components/ProjectCarousel.astro';
 import ContactCTA from '../../components/ContactCTA.astro';
 import Watermark from '../../components/Watermark.astro';
 import HorizonArc from '../../components/HorizonArc.astro';
-import { getFeaturedProjects } from '../../lib/content/projects';
+import { getFeaturedProjects, getPublicProjects, projectPath } from '../../lib/content/projects';
 import { site } from '../../data/site';
 import { localeParams, localizePath, resolveLocale, useTranslations } from '../../i18n';
 
@@ -16,17 +16,38 @@ export const getStaticPaths = (() => localeParams()) satisfies GetStaticPaths;
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 const featured = await getFeaturedProjects(locale, 8);
+// The newest case study (listings are sorted by date), shown under the hero's tagline.
+const [newest] = await getPublicProjects(locale);
+const latest = newest && { title: newest.data.title, href: projectPath(newest) };
 
-// TODO: replace with concrete examples from real work (§8.4).
+// Each step shows where it happened, in a real case study (by slug). A step whose project is not
+// published in this listing simply shows no example.
+const projects = await getPublicProjects(locale);
+const evidence = (slug: string, example: string) => {
+  const project = projects.find((p) => p.data.slug === slug);
+  return project && { title: project.data.title, href: projectPath(project), example };
+};
 const process = [
-  { title: t('home.process1Title'), body: t('home.process1Body') },
-  { title: t('home.process2Title'), body: t('home.process2Body') },
-  { title: t('home.process3Title'), body: t('home.process3Body') },
+  {
+    title: t('home.process1Title'),
+    body: t('home.process1Body'),
+    evidence: evidence('yrest', t('home.process1Example')),
+  },
+  {
+    title: t('home.process2Title'),
+    body: t('home.process2Body'),
+    evidence: evidence('uquiz', t('home.process2Example')),
+  },
+  {
+    title: t('home.process3Title'),
+    body: t('home.process3Body'),
+    evidence: evidence('yrest-vscode', t('home.process3Example')),
+  },
 ];
 ---
 
 <BaseLayout sky={false}>
-  <Hero />
+  <Hero latest={latest} />
 
   <section class="section section--projects work" aria-labelledby="work-title">
     <HorizonArc />
@@ -69,6 +90,14 @@ const process = [
             </span>
             <h3>{step.title}</h3>
             <p>{step.body}</p>
+            {step.evidence && (
+              <p class="evidence">
+                <a class="link-underline" href={step.evidence.href}>
+                  {step.evidence.title}
+                </a>
+                : {step.evidence.example}
+              </p>
+            )}
           </li>
         ))}
       </ol>
@@ -105,14 +134,29 @@ const process = [
     padding-bottom: clamp(var(--space-16), 8vw, var(--space-24));
   }
 
+  /*
+   * One reading edge for the whole home (DESIGN.md «log»): from 1024 px every section's heading
+   * and copy start where the hero's text does, past the log column. Card media may extend left of
+   * it; text does not.
+   */
   @media (min-width: 1024px) {
     .work {
       padding-top: var(--space-16);
     }
 
-    /* Same left edge as the hero text (after the log). */
-    .work > :global(.container) {
+    .work > :global(.container),
+    .work :global(.carousel .head),
+    .work :global(.carousel .foot),
+    .process-container,
+    .about,
+    :global(main:has([data-launchpad]) .contact-cta > .container) {
       padding-left: calc(max(var(--gutter), env(safe-area-inset-left)) + var(--hero-indent));
+    }
+
+    /* The carousel block already sits inside the gutter: only the indent is added. */
+    .work :global(.carousel .head),
+    .work :global(.carousel .foot) {
+      padding-left: var(--hero-indent);
     }
   }
 
@@ -136,7 +180,7 @@ const process = [
   .step {
     display: block;
     font-family: var(--font-mono);
-    font-size: clamp(2.25rem, 1.7rem + 1.8vw, 3.25rem);
+    font-size: clamp(1.75rem, 1.5rem + 1vw, 2.375rem);
     font-weight: 300;
     line-height: 1;
     letter-spacing: -0.02em;
@@ -153,6 +197,19 @@ const process = [
 
   .process p {
     color: var(--color-text-muted);
+  }
+
+  /* The proof under each step: where it happened, as a link to that case study. */
+  .process .evidence {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px dashed var(--color-border);
+    font-size: 0.9375rem;
+    color: var(--color-text-subtle);
+  }
+  .process .evidence a {
+    min-height: 0;
+    font-weight: 650;
   }
 
   @media (min-width: 900px) {

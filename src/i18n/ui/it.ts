@@ -4,10 +4,11 @@ import type { UiDictionary } from './index';
 export const it: UiDictionary = {
   // Site-wide
   'site.role': 'Sviluppatore full-stack',
-  'site.focus': 'frontend e prodotto',
-  'site.tagline': 'Interfacce curate. Sistemi affidabili. Idee che prendono vita.',
+  'site.focus': 'trasformare idee in prodotti che crescono',
+  'site.tagline':
+    'Dalla prima conversazione al rilascio: prodotto, interfaccia, backend e gli strumenti che lo tengono in piedi.',
   'site.description':
-    'Alejandro Lugo è uno sviluppatore full-stack con focus su frontend e prodotto: interfacce curate, sistemi affidabili e idee che prendono vita.',
+    'Alejandro Lugo è uno sviluppatore full-stack che trasforma idee in prodotti che crescono: dalla prima conversazione al rilascio.',
   'site.defaultTitle': '{person} — {role} · {brand}',
 
   // Layout and navigation
@@ -33,6 +34,7 @@ export const it: UiDictionary = {
   'hero.identity': '{role}, con focus su {focus}.',
   'hero.primaryCta': 'Esplora i miei progetti',
   'hero.secondaryCta': 'Parliamone',
+  'hero.latest': 'Ultimo progetto:',
   'hero.backToTop': 'Torna su',
   'hero.arrivalPoint': 'Punto di arrivo',
   'home.workTitle': 'Cose che ho realizzato.',
@@ -42,12 +44,17 @@ export const it: UiDictionary = {
   'home.process1Title': 'Capire il problema',
   'home.process1Body':
     'Parlo con chi svolge il lavoro, ricostruisco il flusso attuale e trovo dove si rompe davvero prima di proporre schermate.',
+  'home.process1Example':
+    'il frontend si bloccava in attesa di API che non esistevano ancora, e json-server non bastava per schermate reali.',
   'home.process2Title': 'Progettare la soluzione',
   'home.process2Body':
     'Abbozzo il flusso principale, concordo presto i contratti dei dati e decido cosa lasciare fuori dalla prima versione.',
+  'home.process2Example': 'punteggio e timer sono stati formule su carta prima di diventare codice.',
   'home.process3Title': 'Costruire e iterare',
   'home.process3Body':
     'Rilascio una parte utilizzabile, osservo come viene usata e la rifinisco. Interfacce e API evolvono insieme.',
+  'home.process3Example':
+    'i falsi positivi della prima versione hanno portato a limitare ogni diagnostica alla sua sezione.',
   'home.aboutTitle': 'Prima il prodotto. Strumenti che crescono con lui.',
   'home.aboutBody':
     'Sono {person}, sviluppatore full-stack. Parto dal business e dal prodotto: come è organizzato il lavoro e cosa vuole costruire la persona che c’è dietro. Gli strumenti dovrebbero essere l’espressione naturale di quell’ordine, quindi prima allineiamo le idee e poi costruisco su una base che possa crescere. La scalabilità non è un ripensamento: fa parte del primo progetto.',

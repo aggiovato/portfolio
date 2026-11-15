@@ -18,19 +18,19 @@ const root = new URL('../', import.meta.url);
 const file = (path) => new URL(path, root).href;
 const copy = {
   en: {
-    role: 'Full-stack developer · frontend and product',
+    role: 'Full-stack developer · ideas into products that scale',
     line1: 'Grounded in code.',
     line2: 'Built to',
     accent: 'explore.',
   },
   es: {
-    role: 'Desarrollador full-stack · frontend y producto',
+    role: 'Desarrollador full-stack · ideas a productos que escalan',
     line1: 'Anclado en el código.',
     line2: 'Hecho para',
     accent: 'explorar.',
   },
   it: {
-    role: 'Sviluppatore full-stack · frontend e prodotto',
+    role: 'Sviluppatore full-stack · idee in prodotti che crescono',
     line1: 'Radicato nel codice.',
     line2: 'Fatto per',
     accent: 'esplorare.',

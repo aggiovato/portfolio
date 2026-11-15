@@ -243,6 +243,18 @@ const languages = locales.map((l) => ({
     backdrop-filter: blur(10px);
   }
 
+  /* Phones, or no backdrop blur: an opaque bar, so scrolled text never shows through it. */
+  @media (max-width: 767px) {
+    .site-header::before {
+      background: var(--color-bg);
+    }
+  }
+  @supports not (backdrop-filter: blur(1px)) {
+    .site-header::before {
+      background: var(--color-bg);
+    }
+  }
+
   .bar {
     position: relative;
     display: flex;

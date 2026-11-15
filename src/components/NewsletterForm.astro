@@ -40,7 +40,7 @@ const targets = Object.fromEntries(available.map((l) => [l, newsletter[l]]));
         {t('newsletter.footer')}
       </h2>
     )}
-    <form method="post" action={action} data-newsletter={JSON.stringify(targets)}>
+    <form data-fab-avoid method="post" action={action} data-newsletter={JSON.stringify(targets)}>
       <div class="row">
         <label class="field">
           <span class="label">{t('newsletter.email')}</span>
@@ -72,7 +72,8 @@ const targets = Object.fromEntries(available.map((l) => [l, newsletter[l]]));
             ))}
           </div>
         </fieldset>
-        <button class="btn btn-primary" type="submit">
+        <!-- Footer: outlined, so the page's one filled action stays the call to talk (DESIGN.md). -->
+        <button class:list={['btn', variant === 'full' ? 'btn-primary' : 'btn-quiet']} type="submit">
           {t('newsletter.submit')}
         </button>
       </div>
@@ -219,6 +220,16 @@ const targets = Object.fromEntries(available.map((l) => [l, newsletter[l]]));
   input:user-invalid {
     border-color: var(--color-error);
   }
+  .btn-quiet {
+    background: transparent;
+    color: var(--color-text);
+    box-shadow: inset 0 0 0 1px var(--color-control-border);
+  }
+  .btn-quiet:hover {
+    color: var(--color-accent-hover);
+    box-shadow: inset 0 0 0 1px var(--color-accent);
+  }
+
   /* .btn is styled for links; a <button> also needs the font and no native border. */
   .btn {
     flex: 0 0 auto;
