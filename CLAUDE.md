@@ -64,6 +64,8 @@ in params.items %}`, `{{ item.TITLE|LINK|DESCRIPTION|ENCLOSURE }}`, `{{ unsubscr
 - Projects are read only through `src/lib/content/projects.ts`, notes only through `src/lib/content/notes.ts`
   (draft filter). Never `getCollection('projects' | 'notes')` in pages. The Notes menu entry and `/notes/`
   only exist once a note is visible (§7).
+- About's «What I work with» tree lives in `src/content/skills/<locale>.yaml` (read through
+  `src/lib/content/skills.ts`); translations keep the English ids and branch counts.
 - Pages live in `src/pages/[...locale]/` and use `localeParams()`; no hard-coded copy or internal links.
 - Case study translations share file name and `slug` across `src/content/projects/<locale>/`.
 - Verify Astro APIs against the installed version (types in `node_modules/astro`, docs.astro.build).

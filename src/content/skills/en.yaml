@@ -1,0 +1,152 @@
+# What I work with (About page): areas → technologies → branches, each with when I reach for it.
+# Translations (es.yaml, it.yaml) keep the same group and node ids and the same number of branches.
+intro: Open a technology to see its branches and when I reach for each one.
+groups:
+  - id: frontend
+    title: Frontend
+    nodes:
+      - id: angular
+        name: Angular
+        summary: My main framework for business applications.
+        branches:
+          - name: Routing
+            when: Lazy-loaded routes per feature and guards for access, so each area of the app loads and grows on its own.
+          - name: State with signals and NgRx
+            when: Signals for local and derived state; a store only when several features share and change the same data.
+          - name: Components
+            when: Standalone components, split into containers that talk to services and presentational ones that only receive inputs.
+          - name: RxJS
+            when: For anything that happens over time, like HTTP calls, search as you type or cancellation; the operator follows the behaviour the screen needs.
+      - id: react
+        name: React
+        summary: Product interfaces and interactive tools.
+        branches:
+          - name: Hooks
+            when: A custom hook as soon as the same logic appears in two components, such as data fetching, forms or subscriptions.
+          - name: Server state with TanStack Query
+            when: Data that comes from an API lives in a query cache, not in a global store, with caching, retries and refetching built in.
+          - name: Global state with Redux or context
+            when: Context for values that rarely change, like theme or session; Redux only when many parts of the app edit the same state.
+          - name: Components
+            when: Small components composed through props and children; a shared component library once a pattern repeats.
+      - id: typescript
+        name: TypeScript
+        summary: The contract between every layer.
+        branches:
+          - name: Strict typing
+            when: Strict mode always; types model the domain so that invalid states cannot be written.
+          - name: Shared models
+            when: The same types for API requests and responses on both sides when frontend and backend live together.
+      - id: styling
+        name: HTML, CSS, Sass and Tailwind
+        summary: Interfaces that are accessible and consistent.
+        branches:
+          - name: Semantic HTML
+            when: Native elements before ARIA; links navigate, buttons act, and the page works before any JavaScript.
+          - name: Design tokens
+            when: Colours, spacing and type as tokens from day one, so a design system can grow out of them.
+          - name: Sass or Tailwind
+            when: Sass with tokens for a product with its own design system; Tailwind when speed matters and the team shares its conventions.
+  - id: backend
+    title: Backend
+    nodes:
+      - id: spring
+        name: Java and Spring Boot
+        summary: Backends with complex business rules.
+        branches:
+          - name: Layered architecture
+            when: Controllers, services and repositories around the domain, so the rules can be tested without the framework.
+          - name: REST APIs
+            when: Resource-based endpoints with validation and consistent errors, so every client reads them the same way.
+          - name: JPA and transactions
+            when: JPA for ordinary persistence; hand-written queries when a report or a bulk operation needs them.
+          - name: Security with JWT
+            when: Stateless authentication with JWT when several clients consume the same API.
+      - id: node
+        name: Node.js
+        summary: Lightweight APIs, tooling and CLIs.
+        branches:
+          - name: Express
+            when: Small APIs, or a backend for one frontend that adapts data to what its screens need.
+          - name: GraphQL and Apollo
+            when: When screens need different shapes of the same data and REST would mean many endpoints or over-fetching.
+          - name: CLIs and developer tools
+            when: Tools like yRest, a CLI with a local server and its own file format, published on npm.
+  - id: data
+    title: Data
+    nodes:
+      - id: sql
+        name: PostgreSQL and MySQL
+        summary: The default for business data.
+        branches:
+          - name: Relational modelling
+            when: Entities, relations and constraints in the database itself when the data has a clear structure and must stay consistent.
+          - name: Indexes and queries
+            when: Indexes follow the real queries; I add them when a query proves slow, not before.
+      - id: nosql
+        name: MongoDB and Redis
+        summary: When the shape or the speed of the data asks for it.
+        branches:
+          - name: MongoDB
+            when: Documents whose shape varies, or that are always read and written whole.
+          - name: Redis
+            when: Cache and short-lived data, such as sessions or rate limits, in front of a slower source.
+  - id: architecture
+    title: Architecture
+    nodes:
+      - id: design
+        name: Design and architecture
+        summary: Decisions that keep the product easy to change.
+        branches:
+          - name: Object-oriented programming and SOLID
+            when: Objects with one responsibility and injected dependencies, above all in Java backends with a rich domain.
+          - name: Design patterns
+            when: A pattern when it names a problem I already have, such as a strategy for interchangeable rules or an adapter at the edge of an external API.
+          - name: Clean Architecture
+            when: The domain kept apart from frameworks when the logic is the valuable part, as in UQuiz.
+          - name: Scalability
+            when: First a structure that can grow, with modules per feature and clear contracts; performance and infrastructure work once real usage shows where it is needed.
+  - id: delivery
+    title: Delivery
+    nodes:
+      - id: git
+        name: Git and versioning
+        summary: A history that explains the product.
+        branches:
+          - name: Branches and pull requests
+            when: One branch per change and a pull request with checks before it reaches main, so main can always be released.
+          - name: Conventional commits
+            when: Short typed messages (feat, fix, chore) so the changelog and the next version can be derived from them.
+          - name: Semantic versioning
+            when: A version tag and a changelog entry for every release; a fix is a patch, a feature a minor, a breaking change a major.
+      - id: testing
+        name: Testing
+        summary: In proportion to the risk.
+        branches:
+          - name: Unit tests with Vitest and JUnit
+            when: For pure logic, such as rules, calculations and transformations; fast and without the framework.
+          - name: End-to-end with Playwright
+            when: For what a user actually does, like navigation, forms and critical flows, plus automated accessibility checks.
+          - name: API testing with Postman
+            when: To explore and document an API's contract while it is being built.
+      - id: ci
+        name: CI/CD and Docker
+        summary: Automating what repeats.
+        branches:
+          - name: CI pipelines
+            when: Lint, types, tests and build on every pull request; deployments only from a version tag or the main branch.
+          - name: Docker
+            when: The same environment in development and production, and services such as databases started with one command.
+  - id: product
+    title: Product
+    nodes:
+      - id: analysis
+        name: Analysis and product ownership
+        summary: Before any code.
+        branches:
+          - name: Requirements
+            when: Business needs written as flows, edge cases and acceptance criteria that developers and stakeholders read the same way.
+          - name: Prioritisation
+            when: What goes into the first version and what waits, weighed by value and risk.
+          - name: Design in Figma
+            when: Flows and screens prototyped before building when the interaction is new or has to be validated.

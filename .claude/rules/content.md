@@ -33,6 +33,9 @@ time; Keystatic will edit the same files later (§13), so keep the format editor
   translations with the same file name and slug, read only through `src/lib/content/notes.ts`
   (`getPublicNotes`, `getNotesInLocale`, `notePath`, `getNoteAlternates`, `hasNotes`). Published
   notes need `publishedAt`. `verify:drafts` also fails if `/notes/` ships without a published note.
+- The skill tree (About) is a data collection, `src/content/skills/<locale>.yaml`, read only through
+  `src/lib/content/skills.ts`. Each branch says when it is used; translations keep the same group
+  and node ids and branch counts (`assertSkillParity`), and a missing locale falls back to English.
 - Highlight key terms with `{% highlight %}term{% /highlight %}`; code in a section heading is
   always highlighted. When and how: `highlighting.md`.
 - Images in Markdoc (notes and case studies): `![alt](path "Caption")` renders an optimised figure

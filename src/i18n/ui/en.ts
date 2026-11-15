@@ -180,12 +180,13 @@ export const en = {
   'about.headingWord': 'first',
   'about.description': 'About {person}: {role} focused on {focus}.',
   'about.lead':
-    'I’m {person}, a full-stack developer. Before any screen or endpoint, I want to understand the business: how the work is organised, who does what, and what the person behind it is trying to build.',
+    'I’m {person}, a full-stack developer with a focus on frontend and product. Before designing a screen or building an API, I want to understand the people who will use it: how they work, what gets in their way, and what they need to achieve.',
   'about.approach':
-    'Good tools are the natural expression of that order. So the first job is to line up the ideas, the founder’s and the team’s, into a clear structure; the software grows out of it, and it is designed from the start to scale with the business instead of being rebuilt every time it grows.',
-  'about.nameBefore': 'The name',
-  'about.nameAfter':
-    'means “landed on Jupiter”: a reminder to keep exploring, but to do it on solid ground. In practice that means curiosity about new tools and a stubborn preference for things that are tested, documented and easy to change.',
+    'My work combines development, functional analysis and product ownership. I turn business needs into clear workflows, interfaces and technical decisions, working through what belongs in the first version and what can wait. I aim to build software that solves today’s problem and remains easy to change as the product evolves.',
+  'about.background':
+    'My background is in telecommunications and electronics engineering. I started programming close to the hardware before moving into cross-platform and web development. That experience shaped how I approach software: understanding how the parts fit together, tracing problems across layers, and balancing technical choices with practical constraints.',
+  'about.today':
+    'Today, I work primarily with Angular and React on the frontend, alongside Spring Boot and Node.js on the backend. What interests me most is connecting the whole process, from understanding a problem to putting a useful tool in someone’s hands.',
   'about.workWith': 'What I work with',
 
   // Contact

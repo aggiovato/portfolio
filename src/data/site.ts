@@ -14,7 +14,7 @@ export const site = {
     github: 'https://github.com/aggiovato' as string,
     linkedin: 'https://www.linkedin.com/in/aggiovato' as string,
   },
-  coreStack: ['Angular', 'React', 'TypeScript', 'Spring Boot', 'PostgreSQL'],
+  coreStack: ['Angular', 'React', 'TypeScript', 'Spring Boot', 'Node.js', 'PostgreSQL'],
 } as const;
 
 /**

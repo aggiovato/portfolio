@@ -179,12 +179,13 @@ export const it: UiDictionary = {
   'about.headingWord': 'prodotto',
   'about.description': 'Chi è {person}: {role}, si occupa di {focus}.',
   'about.lead':
-    'Sono {person}, sviluppatore full-stack. Prima di qualsiasi schermata o endpoint, voglio capire il business: come è organizzato il lavoro, chi fa cosa e cosa sta cercando di costruire la persona che c’è dietro.',
+    'Sono {person}, sviluppatore full-stack con un focus su frontend e prodotto. Prima di progettare una schermata o costruire un’API, voglio capire le persone che la useranno: come lavorano, cosa le ostacola e cosa devono ottenere.',
   'about.approach':
-    'I buoni strumenti sono l’espressione naturale di quell’ordine. Per questo il primo lavoro è allineare le idee, quelle dell’imprenditore e del team, in una struttura chiara; il software nasce da lì ed è pensato fin dall’inizio per crescere con il business, invece di essere rifatto ogni volta che cresce.',
-  'about.nameBefore': 'Il nome',
-  'about.nameAfter':
-    'significa «atterrato su Giove»: un promemoria per continuare a esplorare, ma su un terreno solido. In pratica significa curiosità per i nuovi strumenti e una ostinata preferenza per ciò che è testato, documentato e facile da cambiare.',
+    'Il mio lavoro unisce sviluppo, analisi funzionale e responsabilità di prodotto. Trasformo le esigenze di business in flussi, interfacce e decisioni tecniche chiare, decidendo cosa entra nella prima versione e cosa può aspettare. Cerco di costruire software che risolva il problema di oggi e resti facile da cambiare man mano che il prodotto evolve.',
+  'about.background':
+    'La mia formazione è in ingegneria delle telecomunicazioni e dell’elettronica. Ho iniziato a programmare vicino all’hardware prima di passare allo sviluppo multipiattaforma e web. Quell’esperienza ha plasmato il mio modo di affrontare il software: capire come si incastrano le parti, seguire un problema attraverso i livelli e bilanciare le scelte tecniche con i vincoli reali.',
+  'about.today':
+    'Oggi lavoro soprattutto con Angular e React sul frontend, insieme a Spring Boot e Node.js sul backend. Ciò che mi interessa di più è collegare l’intero processo: dal capire un problema al mettere uno strumento utile nelle mani di qualcuno.',
   'about.workWith': 'Con cosa lavoro',
 
   // Contact

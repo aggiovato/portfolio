@@ -4,12 +4,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import HighlightedTitle from '../../components/HighlightedTitle.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import ContactCTA from '../../components/ContactCTA.astro';
+import SkillTree from '../../components/SkillTree.astro';
+import { getSkillTree } from '../../lib/content/skills';
 import { site } from '../../data/site';
 import { localeParams, resolveLocale, useTranslations } from '../../i18n';
 
 export const getStaticPaths = (() => localeParams()) satisfies GetStaticPaths;
 
-const t = useTranslations(resolveLocale(Astro.currentLocale));
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const skills = await getSkillTree(locale);
 ---
 
 <BaseLayout
@@ -29,17 +33,16 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
       <div class="prose">
         <p class="lead">{t('about.lead', { person: site.person })}</p>
         <p>{t('about.approach')}</p>
-        <p>
-          {t('about.nameBefore')} <strong>{site.brand}</strong> {t('about.nameAfter')}
-        </p>
-
-        <h2>{t('about.workWith')}</h2>
-        <ul class="chip-list">
-          {site.coreStack.map((tech) => (
-            <li class="chip">{tech}</li>
-          ))}
-        </ul>
+        <p>{t('about.background')}</p>
+        <p>{t('about.today')}</p>
       </div>
+
+      {skills && (
+        <section class="work-with" aria-labelledby="work-with">
+          <h2 id="work-with">{t('about.workWith')}</h2>
+          <SkillTree tree={skills} />
+        </section>
+      )}
     </div>
   </section>
   <ContactCTA />
@@ -60,8 +63,10 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   strong {
     color: var(--color-text);
   }
+  .work-with {
+    margin-top: var(--space-16);
+  }
   h2 {
-    margin-top: var(--space-12);
     margin-bottom: var(--space-4);
     font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
   }

@@ -179,12 +179,13 @@ export const es: UiDictionary = {
   'about.headingWord': 'producto',
   'about.description': 'Sobre {person}: {role} centrado en {focus}.',
   'about.lead':
-    'Soy {person}, desarrollador full-stack. Antes de cualquier pantalla o endpoint, quiero entender el negocio: cómo se organiza el trabajo, quién hace qué y qué intenta construir la persona que está detrás.',
+    'Soy {person}, desarrollador full-stack con foco en frontend y producto. Antes de diseñar una pantalla o construir una API, quiero entender a las personas que la van a usar: cómo trabajan, qué se lo complica y qué necesitan conseguir.',
   'about.approach':
-    'Las buenas herramientas son la expresión natural de ese orden. Por eso lo primero es alinear las ideas, las del emprendedor y las del equipo, en una estructura clara; el software nace de ahí y se diseña desde el principio para escalar con el negocio, en lugar de rehacerse cada vez que crece.',
-  'about.nameBefore': 'El nombre',
-  'about.nameAfter':
-    'significa «aterrizado en Júpiter»: un recordatorio de seguir explorando, pero con los pies en el suelo. En la práctica, curiosidad por las herramientas nuevas y una preferencia testaruda por lo que está probado, documentado y es fácil de cambiar.',
+    'Mi trabajo combina desarrollo, análisis funcional y responsabilidad de producto. Convierto necesidades de negocio en flujos, interfaces y decisiones técnicas claras, y decido qué entra en la primera versión y qué puede esperar. Busco construir software que resuelva el problema de hoy y siga siendo fácil de cambiar a medida que el producto evoluciona.',
+  'about.background':
+    'Mi formación es de ingeniero en telecomunicaciones y electrónica. Empecé programando cerca del hardware antes de pasar al desarrollo multiplataforma y web. Esa experiencia marcó mi forma de abordar el software: entender cómo encajan las piezas, seguir un problema a través de las capas y equilibrar las decisiones técnicas con las limitaciones reales.',
+  'about.today':
+    'Hoy trabajo sobre todo con Angular y React en el frontend, y con Spring Boot y Node.js en el backend. Lo que más me interesa es conectar todo el proceso: desde entender un problema hasta poner una herramienta útil en manos de alguien.',
   'about.workWith': 'Con qué trabajo',
 
   // Contact
