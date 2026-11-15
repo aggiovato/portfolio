@@ -114,4 +114,24 @@ distintas.
 Estas herramientas combinan flujos; no crean hilos. Un error no gestionado en cualquier entrada hace
 fallar la salida combinada.
 
+{% quiz %}
+{% question text="Guardar debe usar el último estado del formulario, pero un cambio en el formulario por sí solo no debe guardar nada. ¿Qué operador va en lugar de `???`?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=2 explanation="Con `withLatestFrom`, solo la fuente (`submit$`) dispara una salida; `form$` solo actualiza el valor guardado." %}
+```ts
+submit$.pipe(???(form$)).subscribe(([, form]) => save(form));
+```
+{% /question %}
+
+{% question text="El view model de un dashboard debe actualizarse cada vez que cambian los filtros o los datos. ¿Qué operador?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=1 explanation="`combineLatest` emite los últimos valores de todas las entradas cada vez que cambia cualquiera, una vez que cada una ha emitido al menos una vez." /%}
+
+{% question text="Una página necesita tres peticiones HTTP finitas, todas, antes de mostrarse. ¿Qué operador?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=4 explanation="`forkJoin` espera a que todas las entradas emitan y terminen, y entonces emite sus últimos valores una vez: una foto final." /%}
+
+{% question text="En el experimento (A1 a los 1 s, B1 a los 2 s), ¿por qué no hay salida a los 1 s?" options=["A1 queda en cola hasta que B emita", "B aún no ha emitido, así que A1 se descarta", "`withLatestFrom` espera a que A termine"] answer=2 explanation="Cuando llega A1, B no tiene valor que leer, así que A1 no produce nada. No se pone en cola: la primera salida es A2 con B1, a los 4 s." %}
+```ts
+a$.pipe(withLatestFrom(b$));
+```
+{% /question %}
+
+{% question text="Pasas a `forkJoin` una entrada que nunca termina, como el `valueChanges` de un formulario. ¿Qué pasa?" options=["Emite cada vez que cambia el formulario", "Nunca emite: sigue esperando a que esa entrada termine", "Emite una vez, con el primer valor del formulario"] answer=2 explanation="`forkJoin` solo emite cuando todas las entradas han terminado. Una entrada que nunca termina lo deja esperando." /%}
+{% /quiz %}
+
 Fuentes: la API de RxJS 7 de [combineLatest](https://rxjs.dev/api/index/function/combineLatest), [withLatestFrom](https://rxjs.dev/api/operators/withLatestFrom), [zip](https://rxjs.dev/api/index/function/zip) y [forkJoin](https://rxjs.dev/api/index/function/forkJoin).

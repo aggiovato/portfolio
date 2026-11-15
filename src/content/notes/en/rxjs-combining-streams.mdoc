@@ -110,4 +110,24 @@ Ask when to emit, then choose the tool. The same values can lead to very differe
 These tools combine streams; they do not create threads. An unhandled error in any input fails the
 combined output.
 
+{% quiz %}
+{% question text="Saving must use the latest form state, but a change in the form alone must not save anything. Which operator replaces `???`?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=2 explanation="With `withLatestFrom`, only the source (`submit$`) triggers an output; `form$` just updates the stored value." %}
+```ts
+submit$.pipe(???(form$)).subscribe(([, form]) => save(form));
+```
+{% /question %}
+
+{% question text="A dashboard's view model must update whenever the filters or the data change. Which operator?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=1 explanation="`combineLatest` emits the latest values of all inputs whenever any of them changes, once each has emitted at least once." /%}
+
+{% question text="A page needs three finite HTTP requests, all of them, before it renders. Which operator?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=4 explanation="`forkJoin` waits for every input to emit and complete, then emits their last values once: one final snapshot." /%}
+
+{% question text="In the experiment (A1 at 1s, B1 at 2s), why is there no output at 1s?" options=["A1 is queued until B emits", "B has not emitted yet, so A1 is skipped", "`withLatestFrom` waits for A to complete"] answer=2 explanation="When A1 arrives, B has no value to read, so A1 produces nothing. It is not queued: the first output is A2 with B1, at 4s." %}
+```ts
+a$.pipe(withLatestFrom(b$));
+```
+{% /question %}
+
+{% question text="You pass `forkJoin` an input that never completes, like a form's `valueChanges`. What happens?" options=["It emits each time the form changes", "It never emits: it keeps waiting for that input to complete", "It emits once, with the form's first value"] answer=2 explanation="`forkJoin` emits only after every input completes. An input that never completes keeps it waiting." /%}
+{% /quiz %}
+
 Sources: the RxJS 7 API for [combineLatest](https://rxjs.dev/api/index/function/combineLatest), [withLatestFrom](https://rxjs.dev/api/operators/withLatestFrom), [zip](https://rxjs.dev/api/index/function/zip) and [forkJoin](https://rxjs.dev/api/index/function/forkJoin).
