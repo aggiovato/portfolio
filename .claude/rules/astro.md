@@ -12,16 +12,17 @@ installed version (`astro-docs-lookup` skill); guides online often show other ma
 
 ## Layers
 
-| Layer          | Location                         | Rule                                                                                   |
-| -------------- | -------------------------------- | -------------------------------------------------------------------------------------- |
-| Routes         | `src/pages/[...locale]/`         | Thin: load data, pick a layout, compose components. No business logic.                 |
-| Layout         | `src/layouts/BaseLayout.astro`   | `<html lang>`, SEO/OG, hreflang, skip link, header/footer. One layout for now.         |
-| Components     | `src/components/*.astro`         | Receive data through `Props`; no data fetching, no per-project special cases (§6).     |
-| Content access | `src/lib/content/projects.ts`    | The **only** caller of `getCollection('projects')` (draft filter, §13).                |
-| Pure logic     | `src/lib/**/*.ts`, `src/i18n/`   | No `astro:*` imports, so Vitest covers it directly (`project-utils.ts`, `gravity.ts`). |
-| Content        | `src/content/projects/<locale>/` | Markdoc case studies validated by `src/content.config.ts`.                             |
-| Site data      | `src/data/site.ts`               | Locale-independent data only (name, email, links). Copy goes to `src/i18n/ui/`.        |
-| Tokens         | `src/styles/tokens.css`          | Every colour, size, radius and duration (see `styling.md`).                            |
+| Layer          | Location                         | Rule                                                                                                  |
+| -------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Routes         | `src/pages/[...locale]/`         | Thin: load data, pick a layout, compose components. No business logic.                                |
+| Layout         | `src/layouts/BaseLayout.astro`   | `<html lang>`, SEO/OG, hreflang, skip link, header/footer. One layout for now.                        |
+| Components     | `src/components/*.astro`         | Receive data through `Props`; no data fetching, no per-project special cases (§6).                    |
+| Content access | `src/lib/content/projects.ts`    | The **only** caller of `getCollection('projects')` (draft filter, §13).                               |
+| Pure logic     | `src/lib/**/*.ts`, `src/i18n/`   | No `astro:*` imports, so Vitest covers it directly (`project-utils.ts`, `gravity.ts`).                |
+| Client scripts | `src/scripts/**/*.ts`            | DOM controllers too large for a component `<script>` (`hero/flight.ts`); the math stays in `src/lib`. |
+| Content        | `src/content/projects/<locale>/` | Markdoc case studies validated by `src/content.config.ts`.                                            |
+| Site data      | `src/data/site.ts`               | Locale-independent data only (name, email, links). Copy goes to `src/i18n/ui/`.                       |
+| Tokens         | `src/styles/tokens.css`          | Every colour, size, radius and duration (see `styling.md`).                                           |
 
 A new page is a file under `src/pages/[...locale]/` exporting
 `getStaticPaths = (() => localeParams()) satisfies GetStaticPaths` (see `i18n.md`). Only `404.astro`
