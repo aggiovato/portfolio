@@ -1,0 +1,29 @@
+---
+/** Watermark drawing (Watermark.astro draws the grid, places and styles it): A dish sending its waves to a satellite. Contact. */
+---
+
+{/* The dish on its mount, bottom left. */}
+<path class="line" d="M70 460h170M120 460l35-90 35 90" />
+<path class="line" d="M88 330a110 110 0 0 0 150 -60z" />
+<path class="line" d="M163 300l50-50" />
+<circle class="line" cx="218" cy="245" r="6" />
+{/* The waves it sends, and the satellite that receives them. */}
+<path
+  class="trail"
+  d="M250 220a40 40 0 0 1 22 -40M272 236a80 80 0 0 1 44 -80M294 252a120 120 0 0 1 66 -120"
+/>
+<g class="accent" transform="translate(410 100) rotate(-30)">
+  <rect x="-16" y="-12" width="32" height="24" rx="3" />
+  <path d="M-16 0h-44M16 0h44M-60 -14v28M60 -14v28M-46 -14v28M46 -14v28" />
+</g>
+<g class="calc">
+  <text x="250" y="320">
+    f = 2.4 GHz
+  </text>
+  <text x="250" y="346">
+    λ = c / f
+  </text>
+  <text x="330" y="190">
+    ack
+  </text>
+</g>

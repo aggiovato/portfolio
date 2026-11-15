@@ -3,243 +3,48 @@
  * A large, faint line drawing behind a section, as a watermark: part of the section's idea, never
  * content. Drawn with the rocket's dotted trail and thin strokes (DESIGN.md «The Landing Log»),
  * rotated, clipped by the section, decorative (aria-hidden) and static.
- * - `launch`: a launch blueprint (trajectory, angle, rocket, the calculations beside it). Contact.
- * - `structure`: business → product → tools on a base that grows. About.
- * - `liftoff`: the rocket leaving its pad, tower and countdown beside it. How I work.
- * - `orbits`: a planet with its moons on their orbits, one per project. Work.
- * - `marbles`: a marble diagram, values on a timeline through an operator. Notes.
- * - `signal`: a dish sending its waves to a satellite. Contact.
+ * Each drawing is its own component in ./watermarks/ (what it shows and where it is used is in its
+ * header); this one draws the shared grid, places the drawing and styles its strokes: `line`,
+ * `accent` (the one lavender piece), `trail` (dotted) and `calc` (mono notes).
  * `anchor="top"` pins it beside a page's title instead of the section's middle.
  * The parent section must be `position: relative` with `overflow: hidden` (or `clip`).
  */
+import Launch from './watermarks/Launch.astro';
+import Liftoff from './watermarks/Liftoff.astro';
+import Marbles from './watermarks/Marbles.astro';
+import Orbits from './watermarks/Orbits.astro';
+import Signal from './watermarks/Signal.astro';
+import Structure from './watermarks/Structure.astro';
+
+const drawings = {
+  launch: Launch,
+  structure: Structure,
+  liftoff: Liftoff,
+  orbits: Orbits,
+  marbles: Marbles,
+  signal: Signal,
+};
+
 interface Props {
-  kind: 'launch' | 'structure' | 'liftoff' | 'orbits' | 'marbles' | 'signal';
+  kind: keyof typeof drawings;
   side: 'left' | 'right' | 'center';
   anchor?: 'middle' | 'top';
 }
 
 const { kind, side, anchor = 'middle' } = Astro.props;
+const Drawing = drawings[kind];
 const grid = Array.from({ length: 6 }, (_, i) => `M${40 + i * 88} 20v480M20 ${40 + i * 88}h480`);
 ---
 
 <div class:list={['watermark', `watermark--${side}`, `watermark--${anchor}`]} aria-hidden="true">
-  {kind === 'orbits' ? (
-    <svg viewBox="0 0 520 520" fill="none">
-      <g class="grid">
-        {grid.map((d) => (
-          <path d={d} />
-        ))}
-      </g>
-      {/* The planet, its band, and three orbits with a moon each. */}
-      <circle class="line" cx="260" cy="260" r="62" />
-      <path class="line" d="M202 240c40 14 76 14 116 0M200 270c40 16 80 16 120 0" />
-      <ellipse class="trail" cx="260" cy="260" rx="140" ry="54" transform="rotate(-16 260 260)" />
-      <ellipse class="trail" cx="260" cy="260" rx="196" ry="84" transform="rotate(-16 260 260)" />
-      <ellipse class="line" cx="260" cy="260" rx="240" ry="112" transform="rotate(-16 260 260)" />
-      <circle class="accent" cx="128" cy="300" r="13" />
-      <circle class="line" cx="438" cy="168" r="10" />
-      <circle class="line" cx="320" cy="364" r="8" />
-      <g class="calc">
-        <text x="96" y="338">
-          yrest
-        </text>
-        <text x="410" y="140">
-          uquiz
-        </text>
-        <text x="300" y="398">
-          vscode
-        </text>
-        <text x="60" y="480">
-          r = a(1 − e²) / (1 + e cos θ)
-        </text>
-      </g>
-    </svg>
-  ) : kind === 'marbles' ? (
-    <svg viewBox="0 0 520 520" fill="none">
-      <g class="grid">
-        {grid.map((d) => (
-          <path d={d} />
-        ))}
-      </g>
-      {/* Source timeline, the operator box, and the resulting timeline. */}
-      <path class="line" d="M50 140h400M440 130l14 10-14 10" />
-      <circle class="line" cx="120" cy="140" r="18" />
-      <circle class="line" cx="220" cy="140" r="18" />
-      <circle class="line" cx="330" cy="140" r="18" />
-      <path class="line" d="M400 122v36" />
-      <rect class="accent" x="90" y="214" width="340" height="80" rx="10" />
-      <path class="trail" d="M120 160v54M220 160v54M330 160v54M120 294v76M220 294v76M330 294v76" />
-      <path class="line" d="M50 390h400M440 380l14 10-14 10" />
-      <rect class="line" x="104" y="374" width="32" height="32" rx="4" />
-      <rect class="line" x="204" y="374" width="32" height="32" rx="4" />
-      <rect class="line" x="314" y="374" width="32" height="32" rx="4" />
-      <path class="line" d="M400 372v36" />
-      <g class="calc">
-        <text x="114" y="146">
-          a
-        </text>
-        <text x="214" y="146">
-          b
-        </text>
-        <text x="324" y="146">
-          c
-        </text>
-        <text x="186" y="260">
-          switchMap(x =&gt; …)
-        </text>
-        <text x="50" y="470">
-          source$.pipe(…)
-        </text>
-      </g>
-    </svg>
-  ) : kind === 'signal' ? (
-    <svg viewBox="0 0 520 520" fill="none">
-      <g class="grid">
-        {grid.map((d) => (
-          <path d={d} />
-        ))}
-      </g>
-      {/* The dish on its mount, bottom left. */}
-      <path class="line" d="M70 460h170M120 460l35-90 35 90" />
-      <path class="line" d="M88 330a110 110 0 0 0 150 -60z" />
-      <path class="line" d="M163 300l50-50" />
-      <circle class="line" cx="218" cy="245" r="6" />
-      {/* The waves it sends, and the satellite that receives them. */}
-      <path
-        class="trail"
-        d="M250 220a40 40 0 0 1 22 -40M272 236a80 80 0 0 1 44 -80M294 252a120 120 0 0 1 66 -120"
-      />
-      <g class="accent" transform="translate(410 100) rotate(-30)">
-        <rect x="-16" y="-12" width="32" height="24" rx="3" />
-        <path d="M-16 0h-44M16 0h44M-60 -14v28M60 -14v28M-46 -14v28M46 -14v28" />
-      </g>
-      <g class="calc">
-        <text x="250" y="320">
-          f = 2.4 GHz
-        </text>
-        <text x="250" y="346">
-          λ = c / f
-        </text>
-        <text x="330" y="190">
-          ack
-        </text>
-      </g>
-    </svg>
-  ) : kind === 'launch' ? (
-    <svg viewBox="0 0 520 520" fill="none">
-      <g class="grid">
-        {Array.from({ length: 6 }, (_, i) => (
-          <path d={`M${40 + i * 88} 20v480M20 ${40 + i * 88}h480`} />
-        ))}
-      </g>
-      {/* Launch pad and the dotted trajectory leaving it. */}
-      <path class="line" d="M60 470h130" />
-      <path class="trail" d="M118 462C150 330 230 220 360 150S470 70 500 52" />
-      {/* Launch angle from the pad. */}
-      <path class="line" d="M118 462L300 330" />
-      <path class="line" d="M190 462a72 72 0 0 0-14-44" />
-      {/* The rocket, at the start of the arc. */}
-      <g class="accent" transform="translate(206 300) rotate(36)">
-        <path d="M0 -38C10 -26 12 -6 10 14H-10C-12 -6 -10 -26 0 -38Z" />
-        <path d="M-10 6L-20 22H-10M10 6L20 22H10M-5 14L0 26L5 14" />
-        <circle cx="0" cy="-12" r="4" />
-      </g>
-      {/* Orbit reached, top right. */}
-      <ellipse class="trail" cx="430" cy="110" rx="70" ry="26" transform="rotate(-18 430 110)" />
-      <circle class="line" cx="430" cy="110" r="16" />
-      <g class="calc">
-        <text x="210" y="456">
-          θ = 42°
-        </text>
-        <text x="300" y="404">
-          Δv = 9.4 km/s
-        </text>
-        <text x="318" y="430">
-          t₀ − 10 s
-        </text>
-        <text x="352" y="214">
-          h = 420 km
-        </text>
-      </g>
-      {/* Crosshair on the pad. */}
-      <path class="line" d="M118 446v32M102 462h32" />
-    </svg>
-  ) : kind === 'liftoff' ? (
-    <svg viewBox="0 0 520 520" fill="none">
-      <g class="grid">
-        {Array.from({ length: 6 }, (_, i) => (
-          <path d={`M${40 + i * 88} 20v480M20 ${40 + i * 88}h480`} />
-        ))}
-      </g>
-      {/* The pad and the launch tower with its arms. */}
-      <path class="line" d="M150 440h220M175 440l20-26h130l20 26" />
-      <path class="line" d="M340 414V170M372 414V170M340 200h32M340 250h32M340 300h32M340 350h32" />
-      <path class="line" d="M340 230h-48M340 320h-48" />
-      {/* The rocket, just off the pad, in lavender. */}
-      <g class="accent" transform="translate(260 270)">
-        <path d="M0 -112C26 -82 32 -30 28 30H-28C-32 -30 -26 -82 0 -112Z" />
-        <path d="M-28 4L-52 52H-28M28 4L52 52H28M-12 30L0 58L12 30" />
-        <circle cx="0" cy="-48" r="11" />
-      </g>
-      {/* Exhaust: the trail's dots spreading below the engine. */}
-      <path class="trail" d="M260 336v70M248 340l-22 64M272 340l22 64M238 344l-48 56M282 344l48 56" />
-      {/* The ascent it will follow. */}
-      <path class="trail" d="M260 150V40" />
-      <path class="line" d="M252 52l8-14 8 14" />
-      <g class="calc">
-        <text x="90" y="200">
-          T−3
-        </text>
-        <text x="90" y="236">
-          T−2
-        </text>
-        <text x="90" y="272">
-          T−1
-        </text>
-        <text x="90" y="318">
-          ignition
-        </text>
-        <text x="388" y="480">
-          pad 01
-        </text>
-      </g>
-    </svg>
-  ) : (
-    <svg viewBox="0 0 520 520" fill="none">
-      <g class="grid">
-        {Array.from({ length: 6 }, (_, i) => (
-          <path d={`M${40 + i * 88} 20v480M20 ${40 + i * 88}h480`} />
-        ))}
-      </g>
-      {/* Business → product → tools, top to bottom, joined by the trail. */}
-      <rect class="line" x="170" y="70" width="180" height="64" rx="12" />
-      <rect class="accent" x="190" y="200" width="140" height="56" rx="12" />
-      <rect class="line" x="90" y="326" width="110" height="48" rx="10" />
-      <rect class="line" x="210" y="326" width="100" height="48" rx="10" />
-      <rect class="line" x="320" y="326" width="110" height="48" rx="10" />
-      <path class="trail" d="M260 134v66M260 256v34M145 290h230M145 290v36M260 290v36M375 290v36" />
-      {/* The base everything rests on, and the growth it allows. */}
-      <path class="line" d="M60 430h400" />
-      <path class="trail" d="M60 452h400" />
-      <path class="line" d="M440 410l20 20-20 20" />
-      <g class="calc">
-        <text x="182" y="108">
-          business
-        </text>
-        <text x="212" y="234">
-          product
-        </text>
-        <text x="108" y="356">
-          tools
-        </text>
-        <text x="66" y="480">
-          base → scale
-        </text>
-      </g>
-      {/* Drafting compass arc. */}
-      <path class="line" d="M470 60a120 120 0 0 1-40 150" />
-    </svg>
-  )}
+  <svg viewBox="0 0 520 520" fill="none">
+    <g class="grid">
+      {grid.map((d) => (
+        <path d={d} />
+      ))}
+    </g>
+    <Drawing />
+  </svg>
 </div>
 
 <style>
@@ -287,25 +92,25 @@ const grid = Array.from({ length: 6 }, (_, i) => `M${40 + i * 88} 20v480M20 ${40
     stroke-width: 0.5;
     opacity: 0.6;
   }
-  .line,
-  .accent {
+  .watermark :global(.line),
+  .watermark :global(.accent) {
     stroke: currentColor;
     stroke-width: 1.6;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
   /* The one lavender piece of each drawing: the rocket, the product. */
-  .accent {
+  .watermark :global(.accent) {
     stroke: var(--color-accent);
     stroke-width: 2.2;
   }
-  .trail {
+  .watermark :global(.trail) {
     stroke: currentColor;
     stroke-width: 2.4;
     stroke-linecap: round;
     stroke-dasharray: 0.1 9;
   }
-  .calc {
+  .watermark :global(.calc) {
     fill: currentColor;
     font-family: var(--font-mono);
     font-size: 15px;
