@@ -12,6 +12,34 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- A watermark drawing on Work, Notes, About and Contact, like the home sections.
+- About rewritten: frontend and product focus, functional analysis and product ownership, an
+  engineering background and the current stack (Node.js joins the core stack).
+- Contact: icons for each channel and the real LinkedIn profile.
+- About: «What I work with» is now a tree; each technology opens into branches (routing, state,
+  patterns, versioning…) with when I reach for each one.
+
+### Changed
+
+- Content accuracy pass (all locales): «Featured project» follows the featured order; «What I
+  delivered» instead of «Outcome»; yRest explained by its needs, without the port anecdote, and with
+  simulated login named as such; links read «Explore the playground» and «View on the Marketplace»;
+  UQuiz caption, ranking and learning reworded, and its unpublished APK stated.
+- RxJS notes: when a Promise and `pipe()`/`subscribe()` start work, mapping operators as projection
+  plus concurrency policy, and linked official sources.
+- How I work: steps rewritten around need, MVP scope and growth, without project examples.
+- Notes no longer repeat the subscription form in the footer.
+- Decision blocks use one smaller text size; the decision stands out by surface, weight and a
+  lavender label.
+
+### Fixed
+
+- The hero no longer shifts while the rocket flies, and empty space beside the text is sky again.
+- The article index marks sections whose titles have accents, and the last sections at the end of
+  the page.
+
 ---
 
 ## [1.3.0] — 2026-11-15
