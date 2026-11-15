@@ -19,7 +19,7 @@ role:
   - Documentation
 periodLabel: June 2026 – present
 glance:
-  problem: "Frontend work blocks on APIs that don't exist yet, and json-server stays too shallow for real screens."
+  problem: "Frontend work blocks on APIs that don't exist yet; I needed relations, scenarios and custom routes in a mock that is easy to edit."
   contribution: "Designed and built it alone: product scope, CLI, server, the db.yml format, tests, docs and releases."
   outcome:
     - "Published on npm as @yrest/cli, released from version tags with npm provenance."
@@ -65,16 +65,14 @@ gallery:
     alt: "The Relations page of the yRest docs, explaining many2one, one2one and many2many with a _rel example."
     caption: "Docs — relations: three types and a compact DSL."
 links:
-  demo: https://yrest-docs.netlify.app/playground/
+  playground: https://yrest-docs.netlify.app/playground/
   code: https://github.com/aggiovato/yRest
   docs: https://yrest-docs.netlify.app
 ---
 
 ## Problem
 
-Frontend work often blocks on an API that doesn't exist yet. The usual workaround, `json-server`, is quick to start but stays shallow: data lives in JSON, relations are limited, and as soon as a screen needs a custom endpoint, a slow response or an error case, you end up writing a small backend anyway.
-
-I wanted the mock to be as easy to edit as a config file and still cover the cases a real interface runs into.
+Frontend work often blocks on an API that doesn't exist yet. For my cases I needed more than CRUD over a JSON file: relations, conditional responses, slow or failing endpoints and custom routes, in a format I could edit as easily as a config file. yRest was born to bring those needs together around one YAML file.
 
 ## The idea
 
@@ -96,7 +94,7 @@ posts:
 npx @yrest/cli serve db.yml
 ```
 
-Every top-level collection becomes a full CRUD resource (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) on `http://localhost:3070`. The default port is a small joke: Y + A + M + L in ASCII adds up to 307.
+Every top-level collection becomes a full CRUD resource (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) on `http://localhost:3070`.
 
 ## Solution
 
@@ -140,7 +138,7 @@ The project grew in phases, each one closing a gap I hit while using it in real 
 The suite runs with Vitest on Node 20 and 22 in CI: unit, end-to-end and dedicated security tests for XSS, ReDoS and handler functions. Releases are published from a version tag with npm provenance.
 
 {% callout type="constraint" title="Limits" %}
-yRest is a development and testing tool, not a backend. Data lives in a YAML file; there is no authentication or request validation yet, WebSocket channels are still on the roadmap and the proxy fallback is deferred.
+yRest is a development and testing tool, not a backend. Data lives in a YAML file. Login responses can be simulated with routes, scenarios and handlers, but that is not production authentication; validating requests against a schema, WebSocket channels and the proxy fallback are still on the roadmap.
 {% /callout %}
 
 ## What's next

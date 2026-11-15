@@ -62,9 +62,14 @@ const projects = defineCollection({
           .default([]),
         links: z
           .object({
+            /** A working demo of the product itself. */
             demo: z.url().optional(),
+            /** An interactive playground (not the product running): labelled as such. */
+            playground: z.url().optional(),
             code: z.url().optional(),
             docs: z.url().optional(),
+            /** Where to install it (a marketplace, a store, a package page). */
+            install: z.url().optional(),
           })
           .default({}),
         seo: z.object({ title: z.string().optional(), description: z.string().optional() }).optional(),

@@ -111,6 +111,8 @@ export const en = {
 
   // Case study
   'project.liveDemo': 'Live demo',
+  'project.playground': 'Explore the playground',
+  'project.install': 'View on the Marketplace',
   'project.sourceCode': 'Source code',
   'project.documentation': 'Documentation',
   'project.tryItLive': 'Try it live →',
@@ -135,7 +137,7 @@ export const en = {
   'glance.label': 'At a glance',
   'glance.problem': 'Problem',
   'glance.contribution': 'My part',
-  'glance.outcome': 'Outcome',
+  'glance.outcome': 'What I delivered',
   'project.meta.type': 'Type',
   'project.meta.period': 'Period',
   'project.meta.status': 'Status',

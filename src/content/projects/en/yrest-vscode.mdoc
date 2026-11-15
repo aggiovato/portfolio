@@ -23,7 +23,7 @@ glance:
   outcome:
     - "Published on the VS Code Marketplace, from version tags."
     - "Highlighting, hover docs, autocompletion and diagnostics, also inside yrest tagged templates."
-    - "45 unit tests cover the validation rules."
+    - "Unit tests cover the validation rules."
 stack:
   - name: VS Code Extension API
     layer: interface
@@ -56,7 +56,7 @@ gallery:
     caption: "Diagnostics on every keystroke (reconstruction)."
 links:
   code: https://github.com/aggiovato/yRest-vscode
-  docs: https://marketplace.visualstudio.com/items?itemName=aggiovato.yrest
+  install: https://marketplace.visualstudio.com/items?itemName=aggiovato.yrest
 ---
 
 ## Problem
@@ -83,4 +83,4 @@ yRest's `db.yml` format grew its own conventions: relations (`_rel`), custom rou
 
 ## Quality
 
-45 unit tests cover the validation rules. CI compiles, lints and packages the extension on every push; tags publish to the VS Code Marketplace.
+Unit tests cover the validation rules and the shared constants. CI compiles, lints and packages the extension on every push; tags publish to the VS Code Marketplace.

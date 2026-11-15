@@ -111,6 +111,8 @@ export const es: UiDictionary = {
 
   // Case study
   'project.liveDemo': 'Demo en vivo',
+  'project.playground': 'Explorar el playground',
+  'project.install': 'Ver en el Marketplace',
   'project.sourceCode': 'Código fuente',
   'project.documentation': 'Documentación',
   'project.tryItLive': 'Pruébalo en vivo →',
@@ -135,7 +137,7 @@ export const es: UiDictionary = {
   'glance.label': 'De un vistazo',
   'glance.problem': 'Problema',
   'glance.contribution': 'Mi parte',
-  'glance.outcome': 'Resultado',
+  'glance.outcome': 'Qué entregué',
   'project.meta.type': 'Tipo',
   'project.meta.period': 'Periodo',
   'project.meta.status': 'Estado',

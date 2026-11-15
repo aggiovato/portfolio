@@ -50,7 +50,7 @@ describe('ProjectGlance', () => {
       props: { glance: { problem: 'P', contribution: 'C', outcome: ['Shipped A', 'Shipped B'] } },
     });
     const terms = [...html.matchAll(/<dt[^>]*>([^<]+)<\/dt>/g)].map((m) => m[1]);
-    expect(terms).toEqual(['Problem', 'My part', 'Outcome']);
+    expect(terms).toEqual(['Problem', 'My part', 'What I delivered']);
     expect(html).toContain('<li');
     expect(html).toContain('Shipped B');
   });
