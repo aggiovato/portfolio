@@ -6,10 +6,11 @@
 export const en = {
   // Site-wide
   'site.role': 'Full-stack developer',
-  'site.focus': 'Frontend and product',
-  'site.tagline': 'Thoughtful interfaces. Reliable systems. Ideas brought to life.',
+  'site.focus': 'turning ideas into products that scale',
+  'site.tagline':
+    'From the first conversation to the release: product, interface, backend and the tooling that keeps it running.',
   'site.description':
-    'Alejandro Lugo is a full-stack developer focused on frontend and product: thoughtful interfaces, reliable systems and ideas brought to life.',
+    'Alejandro Lugo is a full-stack developer who turns ideas into products that scale: from the first conversation to the release.',
   'site.defaultTitle': '{person} — {role} · {brand}',
 
   // Layout and navigation
@@ -27,8 +28,6 @@ export const en = {
   'nav.language': 'Language',
   'nav.switchTo': 'Read this page in {language}',
   'footer.label': 'Footer',
-  'footer.meaning': 'means landed on Jupiter.',
-  'footer.builtBy': 'Built by {person} with Astro.',
 
   // Home
   'hero.titleLine1': 'Grounded in code.',
@@ -37,6 +36,7 @@ export const en = {
   'hero.identity': '{role}, focused on {focus}.',
   'hero.primaryCta': 'Explore my work',
   'hero.secondaryCta': 'Let’s talk',
+  'hero.latest': 'Latest project:',
   'hero.backToTop': 'Back to top',
   'hero.arrivalPoint': 'Arrival point',
   'home.workTitle': 'Things I’ve shipped.',
@@ -46,15 +46,19 @@ export const en = {
   'home.process1Title': 'Understand the problem',
   'home.process1Body':
     'Talk to the people doing the work, map the current flow and find where it actually breaks before proposing screens.',
+  'home.process1Example':
+    'frontend work blocked on APIs that did not exist yet, and json-server fell short for real screens.',
   'home.process2Title': 'Design the solution',
   'home.process2Body':
     'Sketch the main flow, agree on data contracts early and decide what to leave out of the first version.',
+  'home.process2Example': 'the scoring and the timers were formulas on paper before they were code.',
   'home.process3Title': 'Build and iterate',
   'home.process3Body':
     'Ship a usable slice, watch how it is used and refine. Interfaces and APIs evolve together.',
-  'home.aboutTitle': 'Product-minded, frontend-first.',
+  'home.process3Example': 'false positives in the first release led to diagnostics scoped to their section.',
+  'home.aboutTitle': 'Product first. Tools that grow with it.',
   'home.aboutBody':
-    'I’m {person}, a full-stack developer who spends most of his time where product decisions meet the interface. I like turning messy workflows into tools people can use without a manual, and I care just as much about the systems behind them: clear contracts, predictable data and code the next person can read.',
+    'I’m {person}, a full-stack developer. I start with the business and the product: how the work is organised and what the person behind it wants to build. The tools should be the natural expression of that order, so first we line up the ideas, then I build on a base that can grow. Scalability isn’t an afterthought; it’s part of the first design.',
   'home.coreStack': 'Core stack',
   'home.moreAboutMe': 'More about me',
 
@@ -71,8 +75,11 @@ export const en = {
 
   // Work
   'notes.title': 'Notes',
+  'notes.heading': 'Notes, {word} as I understand them.',
+  'notes.headingWord': 'drawn',
   'notes.description': 'Short technical notes: how something works, read one value at a time.',
-  'notes.intro': 'Short technical notes on what I use every day, drawn as I understand it.',
+  'notes.intro':
+    'Short technical notes on what I use every day, with diagrams you can follow one value at a time.',
   'notes.feed': 'RSS feed',
   'note.published': 'Published {date}',
   'note.updated': 'Updated {date}',
@@ -95,6 +102,8 @@ export const en = {
   'newsletter.confirmedBody': 'Each new note will reach your inbox. Every email has a link to unsubscribe.',
   'newsletter.backToNotes': 'Back to the notes',
   'work.title': 'Work',
+  'work.heading': 'Things I’ve {word}.',
+  'work.headingWord': 'shipped',
   'work.description': 'Case studies: the problem, my part, the decisions and what I learned.',
   'work.intro':
     'Each project explains the problem, my part in it, the decisions behind it and what I’d do differently.',
@@ -169,23 +178,30 @@ export const en = {
 
   // About
   'about.title': 'About',
+  'about.heading': 'Product {word}.',
+  'about.headingWord': 'first',
   'about.description': 'About {person}: {role} focused on {focus}.',
   'about.lead':
-    'I’m {person}. I build web products end to end, with most of my attention on the interface and on the product decisions behind it.',
+    'I’m {person}, a full-stack developer. Before any screen or endpoint, I want to understand the business: how the work is organised, who does what, and what the person behind it is trying to build.',
+  'about.approach':
+    'Good tools are the natural expression of that order. So the first job is to line up the ideas, the founder’s and the team’s, into a clear structure; the software grows out of it, and it is designed from the start to scale with the business instead of being rebuilt every time it grows.',
   'about.nameBefore': 'The name',
   'about.nameAfter':
     'means “landed on Jupiter”: a reminder to keep exploring, but to do it on solid ground. In practice that means curiosity about new tools and a stubborn preference for things that are tested, documented and easy to change.',
   'about.workWith': 'What I work with',
-  'about.experience': 'Experience',
-  'about.experienceSoon': 'Experience timeline coming soon.',
 
   // Contact
   'contact.title': 'Contact',
-  'contact.heading': 'Let’s talk.',
+  'contact.heading': 'Let’s {word}.',
+  'contact.headingWord': 'talk',
   'contact.description': 'How to reach {person}.',
   'contact.intro': 'Tell me what you’re building and where you’re stuck. I usually reply within a few days.',
   'contact.email': 'Email',
-  'cta.title': 'Have a product worth building? Let’s talk.',
+  'cta.titleBefore': 'Have',
+  'cta.words': 'a product|an idea|a project|a business',
+  'cta.titleAfter': 'in mind? Let’s talk.',
+  'cta.body':
+    'An idea on a napkin, a process that slows your team down, a product that needs another pair of hands: tell me about it. I read every message and answer with honest questions, not a sales pitch.',
   'cta.email': 'Email me',
   'cta.otherWays': 'Other ways to reach me',
 

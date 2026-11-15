@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import HighlightedTitle from '../../components/HighlightedTitle.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import { site } from '../../data/site';
 import { localeParams, resolveLocale, useTranslations } from '../../i18n';
@@ -24,7 +25,7 @@ const channels = [
   <section class="section">
     <div class="container">
       <SectionHeading path="contact" id="page-title" level="h1">
-        {t('contact.heading')}
+        <HighlightedTitle text={t('contact.heading')} word={t('contact.headingWord')} />
       </SectionHeading>
       <p class="intro">{t('contact.intro')}</p>
 

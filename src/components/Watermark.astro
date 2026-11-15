@@ -1,0 +1,207 @@
+---
+/**
+ * A large, faint line drawing behind a section, as a watermark: part of the section's idea, never
+ * content. Drawn with the rocket's dotted trail and thin strokes (DESIGN.md «The Landing Log»),
+ * rotated, clipped by the section, decorative (aria-hidden) and static.
+ * - `launch`: a launch blueprint (trajectory, angle, rocket, the calculations beside it). Contact.
+ * - `structure`: business → product → tools on a base that grows. About.
+ * - `liftoff`: the rocket leaving its pad, tower and countdown beside it. How I work.
+ * The parent section must be `position: relative` with `overflow: hidden` (or `clip`).
+ */
+interface Props {
+  kind: 'launch' | 'structure' | 'liftoff';
+  side: 'left' | 'right' | 'center';
+}
+
+const { kind, side } = Astro.props;
+---
+
+<div class:list={['watermark', `watermark--${side}`]} aria-hidden="true">
+  {kind === 'launch' ? (
+    <svg viewBox="0 0 520 520" fill="none">
+      <g class="grid">
+        {Array.from({ length: 6 }, (_, i) => (
+          <path d={`M${40 + i * 88} 20v480M20 ${40 + i * 88}h480`} />
+        ))}
+      </g>
+      {/* Launch pad and the dotted trajectory leaving it. */}
+      <path class="line" d="M60 470h130" />
+      <path class="trail" d="M118 462C150 330 230 220 360 150S470 70 500 52" />
+      {/* Launch angle from the pad. */}
+      <path class="line" d="M118 462L300 330" />
+      <path class="line" d="M190 462a72 72 0 0 0-14-44" />
+      {/* The rocket, at the start of the arc. */}
+      <g class="accent" transform="translate(206 300) rotate(36)">
+        <path d="M0 -38C10 -26 12 -6 10 14H-10C-12 -6 -10 -26 0 -38Z" />
+        <path d="M-10 6L-20 22H-10M10 6L20 22H10M-5 14L0 26L5 14" />
+        <circle cx="0" cy="-12" r="4" />
+      </g>
+      {/* Orbit reached, top right. */}
+      <ellipse class="trail" cx="430" cy="110" rx="70" ry="26" transform="rotate(-18 430 110)" />
+      <circle class="line" cx="430" cy="110" r="16" />
+      <g class="calc">
+        <text x="210" y="456">
+          θ = 42°
+        </text>
+        <text x="300" y="404">
+          Δv = 9.4 km/s
+        </text>
+        <text x="318" y="430">
+          t₀ − 10 s
+        </text>
+        <text x="352" y="214">
+          h = 420 km
+        </text>
+      </g>
+      {/* Crosshair on the pad. */}
+      <path class="line" d="M118 446v32M102 462h32" />
+    </svg>
+  ) : kind === 'liftoff' ? (
+    <svg viewBox="0 0 520 520" fill="none">
+      <g class="grid">
+        {Array.from({ length: 6 }, (_, i) => (
+          <path d={`M${40 + i * 88} 20v480M20 ${40 + i * 88}h480`} />
+        ))}
+      </g>
+      {/* The pad and the launch tower with its arms. */}
+      <path class="line" d="M150 440h220M175 440l20-26h130l20 26" />
+      <path class="line" d="M340 414V170M372 414V170M340 200h32M340 250h32M340 300h32M340 350h32" />
+      <path class="line" d="M340 230h-48M340 320h-48" />
+      {/* The rocket, just off the pad, in lavender. */}
+      <g class="accent" transform="translate(260 270)">
+        <path d="M0 -112C26 -82 32 -30 28 30H-28C-32 -30 -26 -82 0 -112Z" />
+        <path d="M-28 4L-52 52H-28M28 4L52 52H28M-12 30L0 58L12 30" />
+        <circle cx="0" cy="-48" r="11" />
+      </g>
+      {/* Exhaust: the trail's dots spreading below the engine. */}
+      <path class="trail" d="M260 336v70M248 340l-22 64M272 340l22 64M238 344l-48 56M282 344l48 56" />
+      {/* The ascent it will follow. */}
+      <path class="trail" d="M260 150V40" />
+      <path class="line" d="M252 52l8-14 8 14" />
+      <g class="calc">
+        <text x="90" y="200">
+          T−3
+        </text>
+        <text x="90" y="236">
+          T−2
+        </text>
+        <text x="90" y="272">
+          T−1
+        </text>
+        <text x="90" y="318">
+          ignition
+        </text>
+        <text x="388" y="480">
+          pad 01
+        </text>
+      </g>
+    </svg>
+  ) : (
+    <svg viewBox="0 0 520 520" fill="none">
+      <g class="grid">
+        {Array.from({ length: 6 }, (_, i) => (
+          <path d={`M${40 + i * 88} 20v480M20 ${40 + i * 88}h480`} />
+        ))}
+      </g>
+      {/* Business → product → tools, top to bottom, joined by the trail. */}
+      <rect class="line" x="170" y="70" width="180" height="64" rx="12" />
+      <rect class="accent" x="190" y="200" width="140" height="56" rx="12" />
+      <rect class="line" x="90" y="326" width="110" height="48" rx="10" />
+      <rect class="line" x="210" y="326" width="100" height="48" rx="10" />
+      <rect class="line" x="320" y="326" width="110" height="48" rx="10" />
+      <path class="trail" d="M260 134v66M260 256v34M145 290h230M145 290v36M260 290v36M375 290v36" />
+      {/* The base everything rests on, and the growth it allows. */}
+      <path class="line" d="M60 430h400" />
+      <path class="trail" d="M60 452h400" />
+      <path class="line" d="M440 410l20 20-20 20" />
+      <g class="calc">
+        <text x="182" y="108">
+          business
+        </text>
+        <text x="212" y="234">
+          product
+        </text>
+        <text x="108" y="356">
+          tools
+        </text>
+        <text x="66" y="480">
+          base → scale
+        </text>
+      </g>
+      {/* Drafting compass arc. */}
+      <path class="line" d="M470 60a120 120 0 0 1-40 150" />
+    </svg>
+  )}
+</div>
+
+<style>
+  .watermark {
+    position: absolute;
+    z-index: 0;
+    top: 50%;
+    width: clamp(22rem, 38vw, 34rem);
+    aspect-ratio: 1;
+    pointer-events: none;
+    color: var(--color-text);
+    opacity: 0.07;
+  }
+  /* Half out of the page on its side, tilted towards the content. */
+  .watermark--left {
+    left: clamp(-8rem, -6vw, -3rem);
+    transform: translateY(-50%) rotate(-12deg);
+  }
+  .watermark--right {
+    right: clamp(-8rem, -6vw, -3rem);
+    transform: translateY(-50%) rotate(10deg);
+  }
+  /* Centred behind the content, barely tilted: the launch sits under the three steps. */
+  .watermark--center {
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-6deg);
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .grid {
+    stroke: currentColor;
+    stroke-width: 0.5;
+    opacity: 0.6;
+  }
+  .line,
+  .accent {
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  /* The one lavender piece of each drawing: the rocket, the product. */
+  .accent {
+    stroke: var(--color-accent);
+    stroke-width: 2.2;
+  }
+  .trail {
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-dasharray: 0.1 9;
+  }
+  .calc {
+    fill: currentColor;
+    font-family: var(--font-mono);
+    font-size: 15px;
+  }
+  /* Phones: the drawing would sit under the text; keep it only where there is room beside it. */
+  @media (max-width: 767px) {
+    .watermark {
+      opacity: 0.045;
+      width: 20rem;
+    }
+  }
+  @media (forced-colors: active) {
+    .watermark {
+      display: none;
+    }
+  }
+</style>

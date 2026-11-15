@@ -188,9 +188,10 @@ A night sky with one lavender signal and a trace of Jovian warmth.
 
 ### Named Rules
 
-**The One Signal Rule.** Lavender means "you can act on this". It is never a background wash, a
-decorative fill or body text; if an element is not interactive and is not the current location, it
-is not lavender.
+**The One Signal Rule.** Lavender means "you can act on this", "you are here" or "this is the word
+to remember". It is never a background wash, a decorative fill or body text. The last role is the
+shining word (`.shine` in global.css): one per screen, in the page title or the call to action
+(«explore.», «shipped.», «a product»), and in long-form text the `highlight` tag for a key term.
 
 **The Gradual Atmosphere Rule.** Plum is never a shaped band with an edge. It appears through a long
 gradient from graphite (about 28rem) and leaves the same way, so no seam can show.
@@ -226,6 +227,10 @@ codes, labels. It is never used for sentences.
 `portfolio / work / yrest.mdoc`), never tracked uppercase labels.
 
 ## Layout
+
+On the home, every section's heading and copy start on the hero text's edge (after the log column,
+`--hero-indent`), so the log's reading line runs down the whole page; only card media extend to the
+container's edge.
 
 A centred container (max 1360px) with fluid gutters from 20–24px on phones to 72px on desktop
 (16px below 360px). Sections are separated by generous vertical space (4–6rem) and a hairline;
@@ -363,6 +368,21 @@ picture and text share one left line; the body reads in the 56ch column at 1.7 l
 figures (`![alt](path "Caption")`): the image framed by a hairline at the control radius, the caption
 in mono-size Starlight Subtle beneath. Notebook diagrams keep their light paper; they are content,
 not decoration.
+
+### Page frame
+
+Every page shares the hero's world: the night sky at the top (PageSky: stars fading towards the
+text, a plum glow from the top right; the home and case studies draw their own), a title with one
+shining word (HighlightedTitle), and the rocket back-to-top FAB, which on the home is the rocket
+itself descending and elsewhere appears past the first screen and lifts off when pressed.
+
+### Watermarks
+
+Sections that close a page carry a large line drawing as a watermark (Watermark.astro): the
+trail's dots and thin strokes, rotated about 10°, half outside the page, at 7% opacity, with one
+lavender piece. The process section has a rocket lifting off its pad in the centre, the contact call to action
+a launch blueprint on the left, the about section a business → product → tools structure on the
+right. Static, decorative.
 
 ## Do's and Don'ts
 

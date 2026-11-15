@@ -76,6 +76,7 @@ in params.items %}`, `{{ item.TITLE|LINK|DESCRIPTION|ENCLOSURE }}`, `{{ unsubscr
 | `astro`             | `src/**`, configs              | Layers, zero-JS, scripts, Astro 7 specifics, images, budgets, SEO          |
 | `i18n`              | `src/**`, `tests/**`           | Routing, `t()`, `localizePath`, hreflang, content translations, new locale |
 | `content`           | content, config, `lib/content` | Schema contract, ids/slugs, drafts, Markdoc tags, case study structure     |
+| `highlighting`      | content, UI strings            | When and how to use the lavender shine (code in headings, key words)       |
 | `styling`           | `.astro`, `src/styles`         | Tokens, scoped CSS, colour roles, breakpoints, motion                      |
 | `accessibility`     | `.astro`, styles, UI strings   | WCAG 2.2 AA rules, axe in e2e, manual checks                               |
 | `testing`           | `tests/**`, `src/**`, CI       | Five layers, when a test is required, unit/component/e2e conventions       |

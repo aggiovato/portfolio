@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import HighlightedTitle from '../../../components/HighlightedTitle.astro';
 import SectionHeading from '../../../components/SectionHeading.astro';
 import NoteCard from '../../../components/NoteCard.astro';
 import { getPublicNotes, hasNotes } from '../../../lib/content/notes';
@@ -19,7 +20,7 @@ const notes = await getPublicNotes(locale);
   <section class="section">
     <div class="container">
       <SectionHeading path="notes" id="page-title" level="h1">
-        {t('notes.title')}
+        <HighlightedTitle text={t('notes.heading')} word={t('notes.headingWord')} />
       </SectionHeading>
       <p class="intro">{t('notes.intro')}</p>
       <ol class="list" reversed>

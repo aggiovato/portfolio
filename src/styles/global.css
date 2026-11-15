@@ -322,3 +322,50 @@ samp {
     animation: none;
   }
 }
+
+/*
+ * The site's highlighted word: lavender, with a light that sweeps across it every few seconds
+ * (hero «explore.», the contact call to action). One per screen at most.
+ */
+.shine {
+  font-style: normal;
+  color: var(--color-accent);
+  background: linear-gradient(
+    100deg,
+    var(--color-accent) 0%,
+    var(--color-accent) 42%,
+    #f6efff 50%,
+    var(--color-accent) 58%,
+    var(--color-accent) 100%
+  );
+  background-size: 260% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  /* Keeps the clip from cutting descenders (the «p» in «explore»). */
+  padding-bottom: 0.08em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shine {
+    animation: shine 6s ease-in-out 1.2s infinite;
+  }
+}
+
+@media (forced-colors: active) {
+  .shine {
+    -webkit-text-fill-color: currentColor;
+    background: none;
+  }
+}
+
+@keyframes shine {
+  0% {
+    background-position: 100% 0;
+  }
+  28%,
+  100% {
+    background-position: 0% 0;
+  }
+}

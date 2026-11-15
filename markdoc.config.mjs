@@ -14,6 +14,11 @@ export default defineMarkdocConfig({
     },
   },
   tags: {
+    // Inline: {% highlight %}pipe(){% /highlight %} → the key term in lavender (Highlight.astro).
+    highlight: {
+      render: component('./src/components/Highlight.astro'),
+      inline: true,
+    },
     callout: {
       render: component('./src/components/Callout.astro'),
       attributes: {

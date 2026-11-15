@@ -21,9 +21,7 @@ const year = new Date().getFullYear();
     <div class="sign">
       <LogoMark size={32} class="sign-mark" />
       <p>
-        <strong>{site.brand}</strong> {t('footer.meaning')}
-        <br />
-        <span class="muted">{t('footer.builtBy', { person: site.person })}</span>
+        <strong>{site.brand}</strong>
       </p>
     </div>
 
@@ -78,13 +76,12 @@ const year = new Date().getFullYear();
   .sign {
     display: flex;
     gap: var(--space-4);
-    align-items: flex-start;
+    align-items: center;
   }
 
   .sign :global(.sign-mark) {
     color: var(--color-accent);
     flex-shrink: 0;
-    margin-top: 2px;
   }
 
   .sign strong {
@@ -97,7 +94,6 @@ const year = new Date().getFullYear();
     border-top: 1px solid var(--color-border);
   }
 
-  .muted,
   .legal {
     color: var(--color-text-subtle);
   }

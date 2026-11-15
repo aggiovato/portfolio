@@ -17,10 +17,10 @@ cover:
 What should happen when another request arrives before the current one finishes? The four
 higher-order mapping operators answer that question in four different ways:
 
-- **switchMap**: switch to the latest.
-- **concatMap**: queue it and keep the order.
-- **mergeMap**: let operations overlap.
-- **exhaustMap**: ignore it while busy.
+- {% highlight %}switchMap{% /highlight %}: switch to the latest.
+- {% highlight %}concatMap{% /highlight %}: queue it and keep the order.
+- {% highlight %}mergeMap{% /highlight %}: let operations overlap.
+- {% highlight %}exhaustMap{% /highlight %}: ignore it while busy.
 
 Same inputs, same durations. Only the operator changes.
 
@@ -42,7 +42,7 @@ timeline uses the same scale.
 events$.pipe(operator((id) => request$(id)));
 ```
 
-## switchMap: follow the latest
+## {% highlight %}switchMap{% /highlight %}: follow the latest
 
 A new event unsubscribes the previous inner stream.
 
@@ -51,7 +51,7 @@ A new event unsubscribes the previous inner stream.
 A stops at 1s, B stops at 2s, and only C responds, at 3s. Use it for search results that must
 follow the latest query. Unsubscribing does not undo server-side changes.
 
-## concatMap: wait your turn
+## {% highlight %}concatMap{% /highlight %}: wait your turn
 
 New values wait in a queue; each starts after the previous one completes.
 
@@ -60,7 +60,7 @@ New values wait in a queue; each starts after the previous one completes.
 A responds at 5s, then B at 8s, then C at 9s. Use it for ordered saves that must all run. If an
 inner stream never completes, the queue stalls.
 
-## mergeMap: let work overlap
+## {% highlight %}mergeMap{% /highlight %}: let work overlap
 
 Subscribe as events arrive and forward responses as they arrive.
 
@@ -69,7 +69,7 @@ Subscribe as events arrive and forward responses as they arrive.
 Responses arrive C, B, A: input order is not preserved. Use it for independent requests that can
 overlap. Concurrency is unlimited by default; pass a limit if you need one.
 
-## exhaustMap: busy? Ignore it
+## {% highlight %}exhaustMap{% /highlight %}: busy? Ignore it
 
 New events are ignored until the active inner stream completes.
 

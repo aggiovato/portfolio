@@ -113,7 +113,7 @@ test.describe('translated notes', () => {
 
   test('the Spanish index links to the Spanish article', async ({ page }) => {
     await page.goto('/es/notes/');
-    await expect(page.locator('h1')).toHaveText('Notas');
+    await expect(page.locator('h1')).toHaveText('Notas, dibujadas como las entiendo.');
     const link = page.getByRole('link', { name: '¿switchMap, concatMap, mergeMap o exhaustMap?' });
     await expect(link).toHaveAttribute('href', '/es/notes/rxjs-mapping-operators/');
     await link.click();

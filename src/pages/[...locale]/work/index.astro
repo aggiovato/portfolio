@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import HighlightedTitle from '../../../components/HighlightedTitle.astro';
 import SectionHeading from '../../../components/SectionHeading.astro';
 import ProjectCard from '../../../components/ProjectCard.astro';
 import { getPublicProjects } from '../../../lib/content/projects';
@@ -17,7 +18,7 @@ const projects = await getPublicProjects(locale);
   <section class="section">
     <div class="container">
       <SectionHeading path="work" id="page-title" level="h1">
-        {t('work.title')}
+        <HighlightedTitle text={t('work.heading')} word={t('work.headingWord')} />
       </SectionHeading>
       <p class="intro">{t('work.intro')}</p>
 

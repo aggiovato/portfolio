@@ -49,7 +49,7 @@ El tiempo avanza de izquierda a derecha. Cada punto es un valor; cada línea, un
 Después de complete o error no llegan más valores. Estas líneas no son hilos de ejecución: solo
 muestran cuándo ocurren los valores.
 
-## pipe() compone, subscribe() conecta
+## {% highlight %}pipe(){% /highlight %} compone, {% highlight %}subscribe(){% /highlight %} conecta
 
 ```ts
 const doubled$ = source$.pipe(map((n) => n * 2));
@@ -57,12 +57,12 @@ const doubled$ = source$.pipe(map((n) => n * 2));
 doubled$.subscribe(console.log);
 ```
 
-`pipe()` construye un Observable nuevo a partir de `source$` y sus operadores; todavía no se ejecuta
-nada. `subscribe()` conecta un consumidor y pone el trabajo en marcha. Con el `HttpClient` de
+{% highlight %}`pipe()`{% /highlight %} construye un Observable nuevo a partir de `source$` y sus operadores; todavía no se ejecuta
+nada. {% highlight %}`subscribe()`{% /highlight %} conecta un consumidor y pone el trabajo en marcha. Con el `HttpClient` de
 Angular, cada suscripción envía una petición. El pipe `async` de Angular puede gestionar la
 suscripción por ti.
 
-## map cambia el valor, filter decide qué pasa
+## {% highlight %}map{% /highlight %} cambia el valor, {% highlight %}filter{% /highlight %} decide qué pasa
 
 ![Diagrama de canicas: map(n => n * 10) convierte 1, 2 y 3 en 10, 20 y 30.](../../../assets/notes/rxjs-fundamentals/map.webp "map cambia cada valor.")
 
@@ -70,7 +70,7 @@ suscripción por ti.
 
 `filter` descarta emisiones; no emite `true` ni `false`.
 
-## tap observa sin transformar
+## {% highlight %}tap{% /highlight %} observa sin transformar
 
 ![Diagrama de canicas: 20 y 30 entran en tap, la consola registra 20 y después 30, y los mismos 20 y 30 salen sin cambios.](../../../assets/notes/rxjs-fundamentals/tap.webp "tap registra cada valor; el flujo sigue igual.")
 
@@ -97,7 +97,7 @@ source$
 
 `2` se convierte en `20`. Pasa el filtro. `tap` registra `20` y el suscriptor recibe `20`.
 
-**map** transforma, **filter** selecciona, **tap** observa.
+{% highlight %}map{% /highlight %} transforma, {% highlight %}filter{% /highlight %} selecciona, {% highlight %}tap{% /highlight %} observa.
 
 Fuentes: la documentación de RxJS sobre Observables y operadores, y la guía de `HttpClient` de
 Angular.

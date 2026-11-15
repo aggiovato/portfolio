@@ -1,5 +1,6 @@
 import { collection, config, fields, type ComponentSchema } from '@keystatic/core';
-import { block, wrapper } from '@keystatic/core/content-components';
+import { block, mark, wrapper } from '@keystatic/core/content-components';
+import { createElement } from 'react';
 import { locales, type Locale } from './src/i18n/config';
 
 /**
@@ -85,6 +86,13 @@ const link = (label: string) =>
 
 /** Markdoc tags of markdoc.config.mjs, shared by case studies and notes. */
 const editorialTags = {
+  // Select words and apply it from the toolbar: {% highlight %}…{% /highlight %} (Highlight.astro).
+  highlight: mark({
+    label: 'Highlight',
+    icon: createElement('span', { 'aria-hidden': true, style: { color: '#c6a5ff', fontWeight: 700 } }, 'A'),
+    tag: 'mark',
+    schema: {},
+  }),
   callout: wrapper({
     label: 'Callout',
     schema: {

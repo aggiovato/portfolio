@@ -1,15 +1,40 @@
 ---
+/**
+ * Closing call to action of most pages. The thing worth building rotates through a few words
+ * (`cta.words`, first one = the resting word) in the site's shining lavender, behind it a launch
+ * blueprint as a watermark.
+ *
+ * The word sits on its own line, so changing it never reflows the sentence. Motion (WCAG 2.2.2):
+ * the words cycle once each time the section comes into view, with a soft crossfade, and rest on
+ * the first, all in under five seconds. Screen readers get the whole
+ * sentence (the resting word is in the HTML; the swap is not announced). Without JS or with
+ * reduced motion the resting word just stays.
+ */
+import Watermark from './Watermark.astro';
 import { site } from '../data/site';
 import { localizePath, resolveLocale, useTranslations } from '../i18n';
 
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
+const words = t('cta.words').split('|');
 ---
 
 <section class="section contact-cta" aria-labelledby="cta-title">
+  <Watermark kind="launch" side="left" />
   <div class="container inner">
-    <h2 id="cta-title">{t('cta.title')}</h2>
-    <div class="actions">
+    <div class="copy">
+      <h2 id="cta-title">
+        {t('cta.titleBefore')}{' '}
+        <span class="rotator" data-cta-words={JSON.stringify(words)}>
+          <em class="shine" data-cta-word>
+            {words[0]}
+          </em>
+        </span>{' '}
+        {t('cta.titleAfter')}
+      </h2>
+      <p class="body">{t('cta.body')}</p>
+    </div>
+    <div class="actions" data-fab-avoid>
       <a class="btn btn-primary" href={`mailto:${site.email}`}>
         {t('cta.email')}
       </a>
@@ -20,14 +45,89 @@ const t = useTranslations(locale);
   </div>
 </section>
 
+<script>
+  // Four words at ~1.1 s each: the cycle ends in under five seconds (WCAG 2.2.2).
+  const STEP = 1100;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-cta-words]').forEach((rotator) => {
+    const word = rotator.querySelector<HTMLElement>('[data-cta-word]');
+    const words = JSON.parse(rotator.dataset.ctaWords ?? '[]') as string[];
+    if (!word || words.length < 2 || reduce.matches) return;
+
+    let running = false;
+    // The word has its own line, so only it changes: fade out, swap, fade in.
+    const show = (text: string) => {
+      word.classList.add('is-out');
+      setTimeout(() => {
+        word.textContent = text;
+        word.classList.remove('is-out');
+      }, 220);
+    };
+    const cycle = () => {
+      if (running) return;
+      running = true;
+      const sequence = [...words.slice(1), words[0]];
+      sequence.forEach((text, i) =>
+        setTimeout(
+          () => {
+            show(text);
+            if (i === sequence.length - 1) running = false;
+          },
+          (i + 1) * STEP,
+        ),
+      );
+    };
+    new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) cycle();
+      },
+      { threshold: 0.6 },
+    ).observe(rotator);
+  });
+</script>
+
 <style>
+  .contact-cta {
+    position: relative;
+    overflow: clip;
+  }
   .inner {
+    position: relative;
+    z-index: 1;
     display: grid;
     gap: var(--space-8);
   }
+  .copy {
+    display: grid;
+    gap: var(--space-6);
+  }
   h2 {
     font-size: var(--text-h2);
-    max-width: 18ch;
+    max-width: 20ch;
+  }
+  /* The rotating word on its own line: the rest of the sentence never moves. */
+  .rotator {
+    display: block;
+    white-space: nowrap;
+  }
+  .rotator :global(.shine) {
+    transition:
+      opacity 220ms var(--ease-out),
+      filter 220ms var(--ease-out);
+  }
+  .rotator :global(.is-out) {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  .shine {
+    display: inline-block;
+  }
+  .body {
+    max-width: 52ch;
+    font-size: var(--text-lead);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
   }
   .actions {
     display: flex;
@@ -39,6 +139,7 @@ const t = useTranslations(locale);
     .inner {
       grid-template-columns: 1fr auto;
       align-items: end;
+      gap: var(--space-16);
     }
   }
 </style>

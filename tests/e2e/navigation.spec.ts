@@ -45,7 +45,7 @@ test.describe('work', () => {
 test.describe('notes', () => {
   test('the menu links to notes and a note opens its own URL with an index', async ({ page, isMobile }) => {
     await page.goto('/notes/');
-    await expect(page.locator('h1')).toHaveText('Notes');
+    await expect(page.locator('h1')).toHaveText('Notes, drawn as I understand them.');
     if (!isMobile) {
       await expect(
         page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Notes' }),
@@ -87,4 +87,30 @@ test.describe('static pages', () => {
       await expect(page.locator('h1')).toHaveCount(1);
     });
   }
+});
+
+test.describe('contact call to action', () => {
+  test('reads as one still sentence and rests on its first word after the cycle', async ({ page }) => {
+    await page.goto('/');
+    const heading = page.getByRole('heading', { name: 'Have a product in mind? Let’s talk.' });
+    await heading.scrollIntoViewIfNeeded();
+    await expect(heading).toBeVisible();
+    // The cycle runs once (five words, under five seconds) and comes back to the resting word.
+    await expect(page.locator('[data-cta-word]')).toHaveText('a product', { timeout: 8000 });
+  });
+});
+
+test.describe('back to top', () => {
+  test('every page offers the rocket FAB once the reader scrolls, and it returns to the top', async ({
+    page,
+  }) => {
+    await page.goto('/about/');
+    const fab = page.getByRole('button', { name: 'Back to top' });
+    await expect(fab).toBeHidden();
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect(fab).toBeVisible();
+    await fab.click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page.locator('#main')).toBeFocused();
+  });
 });

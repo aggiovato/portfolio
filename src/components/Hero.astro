@@ -5,6 +5,12 @@ import LogoMark from './LogoMark.astro';
 import { site } from '../data/site';
 import { localizePath, resolveLocale, useTranslations } from '../i18n';
 
+interface Props {
+  /** The most recent case study: concrete proof right under the tagline, updated as projects are added. */
+  latest?: { title: string; href: string };
+}
+
+const { latest } = Astro.props;
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 // The `mission` object, flight notes and log are decorative code: they stay in English in every locale.
@@ -59,6 +65,14 @@ const t = useTranslations(locale);
           <span>{t('hero.identity', { role: t('site.role'), focus: t('site.focus').toLowerCase() })}</span>
         </p>
         <p class="tagline">{t('site.tagline')}</p>
+        {latest && (
+          <p class="latest">
+            {t('hero.latest')}{' '}
+            <a class="link-underline" href={latest.href}>
+              {latest.title}
+            </a>
+          </p>
+        )}
 
         <div class="cta-row">
           <div class="actions">
@@ -85,10 +99,10 @@ const t = useTranslations(locale);
           </div>
 
           <pre class="mission" aria-hidden="true"><code><span class="k">const</span> mission = {'{'}
-  craft: <span class="s" data-field="craft">'web experiences'</span>,
+  craft: <span class="s" data-field="craft">'products'</span>,
   target: <span class="n" data-field="target">'jupiter'</span>,
   status: <span class="s" data-field="status">'building'</span>,
-{'}'}; <span class="c">// click anywhere to launch</span></code></pre>
+{'}'}; <span class="c">// click the sky to launch</span></code></pre>
         </div>
       </div>
     </div>
@@ -97,7 +111,7 @@ const t = useTranslations(locale);
 
 <!--
   Outside the hero on purpose: the hero isolates its stacking context (isolation) and the projects
-  section (z-index: 1) would sit above it. Fixed decorative layer for the rocket in transit + real FAB.
+  section (z-index: 1) would sit above it. Fixed decorative layer for the rocket in transit; the FAB itself is BackToTop.astro (every page).
 -->
 <div class="sky" aria-hidden="true">
   <svg class="sky-trail"></svg>
@@ -105,11 +119,6 @@ const t = useTranslations(locale);
     <LogoMark size={52} />
   </div>
 </div>
-<button class="fab" type="button" aria-label={t('hero.backToTop')} hidden>
-  <span class="fab-icon">
-    <LogoMark size={26} />
-  </span>
-</button>
 
 <script>
   /**
@@ -146,7 +155,7 @@ const t = useTranslations(locale);
     '// deploy: green',
   ];
   const CRAFTS = [
-    'web experiences',
+    'products',
     'design systems',
     'reliable APIs',
     'product decisions',
@@ -535,6 +544,8 @@ const t = useTranslations(locale);
       if (!desktop.matches) return;
       const target = event.target as Element;
       if (target.closest('a, button, input, textarea, select, summary')) return;
+      // The text column is for reading: a click there (to focus, to select) never launches.
+      if (target.closest('.content, .log')) return;
       if (window.getSelection()?.toString()) return; // do not interfere with text selection
       launch(clampAboveHorizon(heroPoint(event.clientX, event.clientY)));
     });
@@ -845,48 +856,9 @@ const t = useTranslations(locale);
     display: block;
   }
 
-  /* The highlighted word in lavender with a shine that sweeps across it every few seconds. */
+  /* .shine (the lavender word with its sweeping light) lives in global.css: CTA and titles use it. */
   .shine {
     font-style: normal;
-    color: var(--color-accent);
-    background: linear-gradient(
-      100deg,
-      var(--color-accent) 0%,
-      var(--color-accent) 42%,
-      #f6efff 50%,
-      var(--color-accent) 58%,
-      var(--color-accent) 100%
-    );
-    background-size: 260% 100%;
-    background-position: 100% 0;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    /* Keeps the clip from cutting descenders (the «p» in «explore»). */
-    padding-bottom: 0.08em;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .shine {
-      animation: shine 6s ease-in-out 1.2s infinite;
-    }
-  }
-
-  @media (forced-colors: active) {
-    .shine {
-      -webkit-text-fill-color: currentColor;
-      background: none;
-    }
-  }
-
-  @keyframes shine {
-    0% {
-      background-position: 100% 0;
-    }
-    28%,
-    100% {
-      background-position: 0% 0;
-    }
   }
 
   .identity,
@@ -909,6 +881,24 @@ const t = useTranslations(locale);
   .tagline {
     margin-top: var(--space-2);
     color: var(--color-text-muted);
+  }
+
+  /* The evidence line: mono label, the project as a link. */
+  .latest {
+    margin-top: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-text-subtle);
+  }
+
+  .latest a {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    min-height: 0;
   }
 
   /* CTAs and the `mission` block share a row when there is room; otherwise the code wraps below. */
@@ -1177,9 +1167,14 @@ const t = useTranslations(locale);
     }
   }
 
+  /* The sky is the launch area: crosshair there, the normal cursor over the text column. */
   @media (min-width: 1024px) and (pointer: fine) {
     .hero {
       cursor: crosshair;
+    }
+
+    .hero :is(.content, .log) {
+      cursor: auto;
     }
   }
 
@@ -1218,73 +1213,5 @@ const t = useTranslations(locale);
 
   .sky-rocket[hidden] {
     display: none;
-  }
-
-  /* Dark surface with the lavender rocket: lavender stays reserved for actions without competing
-     with the hero CTAs. 56 px touch target; respects safe areas. */
-  .fab {
-    position: fixed;
-    right: max(1.5rem, calc(env(safe-area-inset-right) + 1rem));
-    bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
-    z-index: 60;
-    display: grid;
-    place-items: center;
-    width: 56px;
-    height: 56px;
-    padding: 0;
-    border: 1px solid var(--color-card-border);
-    border-radius: 50%;
-    background: var(--color-card);
-    color: var(--color-accent);
-    cursor: pointer;
-    box-shadow:
-      0 10px 28px rgb(0 0 0 / 0.4),
-      0 0 22px rgb(121 80 232 / 0.22);
-    transition:
-      border-color var(--duration-fast) var(--ease-out),
-      box-shadow var(--duration-fast) var(--ease-out);
-  }
-
-  .fab[hidden] {
-    display: none;
-  }
-
-  .fab-icon {
-    display: grid;
-    transition: transform var(--duration-fast) var(--ease-out);
-  }
-
-  .fab:hover {
-    border-color: var(--color-accent);
-    box-shadow:
-      0 10px 28px rgb(0 0 0 / 0.4),
-      0 0 28px rgb(121 80 232 / 0.38);
-  }
-
-  .fab:hover .fab-icon {
-    transform: translateY(-2px);
-  }
-
-  .fab:focus-visible {
-    outline: 2px solid var(--color-focus);
-    outline-offset: 4px;
-  }
-
-  .fab.is-entering {
-    animation: fab-in 0.35s var(--ease-out) both;
-  }
-
-  @keyframes fab-in {
-    from {
-      opacity: 0;
-      transform: translateY(8px) scale(0.85);
-    }
-  }
-
-  @media (max-width: 767px) {
-    .fab {
-      width: 52px;
-      height: 52px;
-    }
   }
 </style>

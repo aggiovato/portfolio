@@ -6,6 +6,8 @@ import ogDefaultEs from '../assets/og/default-es.png';
 import ogDefaultIt from '../assets/og/default-it.png';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import BackToTop from '../components/BackToTop.astro';
+import PageSky from '../components/PageSky.astro';
 import { nav, site } from '../data/site';
 import { hasNotes } from '../lib/content/notes';
 import { shareImage } from '../lib/share-image';
@@ -28,6 +30,8 @@ interface Props {
   article?: { publishedTime?: Date; modifiedTime?: Date; tags?: readonly string[] };
   /** Structured data for this page, added to the site's graph (WebSite + Person). */
   jsonLd?: Record<string, unknown>;
+  /** The shared night sky behind the top of the page; the home and case studies draw their own. */
+  sky?: boolean;
   noindex?: boolean;
   /**
    * URL of this page in each locale where it exists (hreflang + language switcher).
@@ -44,6 +48,7 @@ const {
   ogImage,
   article,
   jsonLd,
+  sky = true,
   noindex = false,
   alternates = alternatesFor(Astro.url.pathname),
 } = Astro.props;
@@ -171,9 +176,20 @@ const xDefault = alternates[defaultLocale];
       {t('a11y.skipToContent')}
     </a>
     <SiteHeader alternates={alternates} nav={navItems} />
-    <main id="main" tabindex="-1">
+    <main id="main" tabindex="-1" class:list={[sky && 'has-sky']}>
+      {sky && <PageSky />}
       <slot />
     </main>
     <SiteFooter nav={navItems} />
+    <BackToTop />
   </body>
 </html>
+
+<style>
+  /* Positioning context for the page sky, behind the first section. Not on the home: its rocket
+     flies above the footer, which an isolated <main> would prevent. */
+  main.has-sky {
+    position: relative;
+    isolation: isolate;
+  }
+</style>

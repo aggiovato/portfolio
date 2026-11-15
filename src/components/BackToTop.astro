@@ -1,0 +1,181 @@
+---
+/**
+ * «Back to top» FAB with the logo's rocket, on every page (BaseLayout).
+ * - Home: the hero's rocket descends into this button and flies back to the hero; Hero.astro drives
+ *   it (it finds the button by `.fab`), so this script stays out when there is a [data-launchpad].
+ * - Other pages: the FAB appears once the reader is past the first screen; on click the rocket lifts
+ *   off (a short rise and fade) while the page scrolls to the top, and focus returns to #main.
+ * Reduced motion: no lift-off, an instant jump.
+ */
+import LogoMark from './LogoMark.astro';
+import { resolveLocale, useTranslations } from '../i18n';
+
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+---
+
+<button class="fab" type="button" aria-label={t('hero.backToTop')} hidden data-fab>
+  <span class="fab-icon">
+    <LogoMark size={26} />
+  </span>
+</button>
+
+<script>
+  // The FAB steps aside only while it actually overlaps something it would cover (the call to
+  // action's buttons, the subscription form: elements marked [data-fab-avoid]), so it never hides
+  // an action and is still there at the bottom of every page.
+  {
+    const button = document.querySelector<HTMLButtonElement>('[data-fab]');
+    const avoid = [...document.querySelectorAll<HTMLElement>('[data-fab-avoid]')];
+    if (button && avoid.length) {
+      const overlaps = (a: DOMRect, b: DOMRect) =>
+        a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+      let frame = 0;
+      const check = () => {
+        frame = 0;
+        if (button.hidden) return;
+        // Measure where the button sits even while it is tucked (transform is not layout).
+        const fabBox = button.getBoundingClientRect();
+        button.classList.toggle(
+          'is-tucked',
+          avoid.some((el) => overlaps(fabBox, el.getBoundingClientRect())),
+        );
+      };
+      const schedule = () => (frame ||= requestAnimationFrame(check));
+      addEventListener('scroll', schedule, { passive: true });
+      addEventListener('resize', schedule);
+      new MutationObserver(schedule).observe(button, { attributes: true, attributeFilter: ['hidden'] });
+    }
+  }
+
+  const fab = document.querySelector<HTMLButtonElement>('[data-fab]');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (fab && !document.querySelector('[data-launchpad]')) {
+    let shown = false;
+    const update = () => {
+      const past = window.scrollY > window.innerHeight * 0.6;
+      if (past === shown) return;
+      shown = past;
+      if (past) {
+        fab.hidden = false;
+        fab.classList.remove('is-launching', 'is-entering');
+        if (!reduced.matches) {
+          void fab.offsetWidth;
+          fab.classList.add('is-entering');
+        }
+      } else {
+        // Do not drop keyboard focus on <body> when the button goes away.
+        if (document.activeElement === fab) document.getElementById('main')?.focus({ preventScroll: true });
+        fab.hidden = true;
+      }
+    };
+    let frame = 0;
+    addEventListener('scroll', () => (frame ||= requestAnimationFrame(() => ((frame = 0), update()))), {
+      passive: true,
+    });
+    update();
+
+    fab.addEventListener('click', () => {
+      if (!reduced.matches) fab.classList.add('is-launching');
+      window.scrollTo({ top: 0, behavior: reduced.matches ? 'auto' : 'smooth' });
+      document.getElementById('main')?.focus({ preventScroll: true });
+    });
+  }
+</script>
+
+<style>
+  /* Dark surface with the lavender rocket: lavender stays reserved for actions without competing
+     with the hero CTAs. 56 px touch target; respects safe areas. */
+  .fab {
+    position: fixed;
+    right: max(1.5rem, calc(env(safe-area-inset-right) + 1rem));
+    bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
+    z-index: 60;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: 1px solid var(--color-card-border);
+    border-radius: 50%;
+    background: var(--color-card);
+    color: var(--color-accent);
+    cursor: pointer;
+    box-shadow:
+      0 10px 28px rgb(0 0 0 / 0.4),
+      0 0 22px rgb(121 80 232 / 0.22);
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
+  }
+
+  .fab[hidden] {
+    display: none;
+  }
+
+  .fab-icon {
+    display: grid;
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+
+  .fab:hover {
+    border-color: var(--color-accent);
+    box-shadow:
+      0 10px 28px rgb(0 0 0 / 0.4),
+      0 0 28px rgb(121 80 232 / 0.38);
+  }
+
+  .fab:hover .fab-icon {
+    transform: translateY(-2px);
+  }
+
+  .fab:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 4px;
+  }
+
+  .fab.is-entering {
+    animation: fab-in 0.35s var(--ease-out) both;
+  }
+
+  @keyframes fab-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.85);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .fab {
+      width: 52px;
+      height: 52px;
+    }
+  }
+
+  /* Out of the way while it would cover an action (see [data-fab-avoid]). */
+  .fab.is-tucked {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+  }
+
+  .fab {
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
+  }
+
+  /* Lift-off on click (pages without the hero's flight): the rocket rises out of the button. */
+  .fab.is-launching .fab-icon {
+    animation: fab-launch 0.6s cubic-bezier(0.55, 0, 0.75, 0.2) forwards;
+  }
+
+  @keyframes fab-launch {
+    to {
+      opacity: 0;
+      transform: translateY(-48px) scale(0.8);
+    }
+  }
+</style>

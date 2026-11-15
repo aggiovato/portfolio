@@ -196,6 +196,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   /* ---------- Prose ---------- */
   .prose {
     max-width: var(--measure);
+    font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
   }
   .prose :global(h2) {
     margin-top: var(--space-16);

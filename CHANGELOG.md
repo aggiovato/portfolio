@@ -12,6 +12,22 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- **Back to top everywhere:** the rocket button now appears on every page once you scroll, and lifts off when it takes you up.
+- **Highlighted terms in notes and case studies:** key words can shine in the site's lavender, like `pipe()` and `subscribe()` in the RxJS fundamentals note.
+
+### Changed
+
+- **One world on every page:** Work, Notes, About, Contact and the 404 carry the home's night sky, and their titles have one shining word, like “explore.” on the home.
+- **Contact call to action:** “Have a product in mind?”: the word cycles once through an idea, a project and a business before landing on “a product”, on its own line so nothing else moves, with a launch blueprint behind it and a short invitation to write.
+- **About:** the home section and the About page now say how I work: product first, tools as the expression of that order, and scalability from the first design. The “experience coming soon” placeholder is gone.
+- **Home, clearer about the work:** the hero says what I do from the first conversation to the release and links the latest project; each “How I work” step shows where it happened, with a link to that case study; the featured projects sit side by side as a still grid with the screenshot on top (controls appear only when there are more than fit); every section starts on the same edge as the hero's text.
+- **One main action at the end:** “Email me” is the only filled button; the footer's subscribe button is outlined, and the back-to-top button steps aside instead of covering an action.
+- **Hero:** the rocket launches from the sky, not from the text column, so clicking to read or select never launches it. On phones the header is opaque.
+- **Reading:** notes and case studies read in a wider column with slightly larger text; the subscription box matches it.
+- **How I work:** the step numbers are larger, over a rocket lifting off its pad.
+
 ---
 
 ## [1.2.0] — 2026-11-15

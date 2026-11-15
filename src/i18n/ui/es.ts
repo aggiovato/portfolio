@@ -4,10 +4,11 @@ import type { UiDictionary } from './index';
 export const es: UiDictionary = {
   // Site-wide
   'site.role': 'Desarrollador full-stack',
-  'site.focus': 'Frontend y producto',
-  'site.tagline': 'Interfaces cuidadas. Sistemas fiables. Ideas hechas realidad.',
+  'site.focus': 'convertir ideas en productos que escalan',
+  'site.tagline':
+    'De la primera conversación al lanzamiento: producto, interfaz, backend y las herramientas que lo mantienen en marcha.',
   'site.description':
-    'Alejandro Lugo es desarrollador full-stack centrado en frontend y producto: interfaces cuidadas, sistemas fiables e ideas hechas realidad.',
+    'Alejandro Lugo es desarrollador full-stack y convierte ideas en productos que escalan: de la primera conversación al lanzamiento.',
   'site.defaultTitle': '{person} — {role} · {brand}',
 
   // Layout and navigation
@@ -25,8 +26,6 @@ export const es: UiDictionary = {
   'nav.language': 'Idioma',
   'nav.switchTo': 'Leer esta página en {language}',
   'footer.label': 'Pie de página',
-  'footer.meaning': 'significa «aterrizado en Júpiter».',
-  'footer.builtBy': 'Hecho por {person} con Astro.',
 
   // Home
   'hero.titleLine1': 'Anclado en el código.',
@@ -35,6 +34,7 @@ export const es: UiDictionary = {
   'hero.identity': '{role}, centrado en {focus}.',
   'hero.primaryCta': 'Ver mis proyectos',
   'hero.secondaryCta': 'Hablemos',
+  'hero.latest': 'Último proyecto:',
   'hero.backToTop': 'Volver arriba',
   'hero.arrivalPoint': 'Punto de llegada',
   'home.workTitle': 'Cosas que he lanzado.',
@@ -44,15 +44,20 @@ export const es: UiDictionary = {
   'home.process1Title': 'Entender el problema',
   'home.process1Body':
     'Hablar con quien hace el trabajo, mapear el flujo actual y encontrar dónde falla de verdad antes de proponer pantallas.',
+  'home.process1Example':
+    'el frontend se bloqueaba esperando APIs que aún no existían, y json-server se quedaba corto para pantallas reales.',
   'home.process2Title': 'Diseñar la solución',
   'home.process2Body':
     'Esbozar el flujo principal, acordar pronto los contratos de datos y decidir qué se queda fuera de la primera versión.',
+  'home.process2Example': 'la puntuación y los temporizadores fueron fórmulas en papel antes de ser código.',
   'home.process3Title': 'Construir e iterar',
   'home.process3Body':
     'Entregar una parte usable, observar cómo se usa y refinar. Interfaces y APIs evolucionan juntas.',
-  'home.aboutTitle': 'Mentalidad de producto, frontend primero.',
+  'home.process3Example':
+    'los falsos positivos de la primera versión llevaron a limitar cada diagnóstico a su sección.',
+  'home.aboutTitle': 'Primero el producto. Herramientas que crecen con él.',
   'home.aboutBody':
-    'Soy {person}, desarrollador full-stack. Paso la mayor parte del tiempo donde las decisiones de producto se encuentran con la interfaz. Me gusta convertir flujos de trabajo caóticos en herramientas que se usan sin manual, y me importan igual los sistemas que hay detrás: contratos claros, datos predecibles y código que la siguiente persona pueda leer.',
+    'Soy {person}, desarrollador full-stack. Empiezo por el negocio y el producto: cómo se organiza el trabajo y qué quiere construir la persona que está detrás. Las herramientas deberían ser la expresión natural de ese orden, así que primero alineamos las ideas y después construyo sobre una base que pueda crecer. La escalabilidad no es un añadido final: forma parte del primer diseño.',
   'home.coreStack': 'Stack principal',
   'home.moreAboutMe': 'Más sobre mí',
 
@@ -69,8 +74,11 @@ export const es: UiDictionary = {
 
   // Work
   'notes.title': 'Notas',
+  'notes.heading': 'Notas, {word} como las entiendo.',
+  'notes.headingWord': 'dibujadas',
   'notes.description': 'Notas técnicas breves: cómo funciona algo, un valor cada vez.',
-  'notes.intro': 'Notas técnicas breves sobre lo que uso a diario, dibujadas como yo lo entiendo.',
+  'notes.intro':
+    'Notas técnicas breves sobre lo que uso a diario, con diagramas que se siguen valor a valor.',
   'notes.feed': 'Feed RSS',
   'note.published': 'Publicada el {date}',
   'note.updated': 'Actualizada el {date}',
@@ -94,6 +102,8 @@ export const es: UiDictionary = {
     'Cada nota nueva llegará a tu correo. Todos los correos tienen un enlace para darte de baja.',
   'newsletter.backToNotes': 'Volver a las notas',
   'work.title': 'Proyectos',
+  'work.heading': 'Cosas que he {word}.',
+  'work.headingWord': 'lanzado',
   'work.description': 'Casos de estudio: el problema, mi parte, las decisiones y lo que aprendí.',
   'work.intro':
     'Cada proyecto explica el problema, mi papel, las decisiones que lo sostienen y qué haría de otra manera.',
@@ -168,23 +178,30 @@ export const es: UiDictionary = {
 
   // About
   'about.title': 'Sobre mí',
+  'about.heading': 'Primero el {word}.',
+  'about.headingWord': 'producto',
   'about.description': 'Sobre {person}: {role} centrado en {focus}.',
   'about.lead':
-    'Soy {person}. Construyo productos web de principio a fin, con la mayor parte de mi atención en la interfaz y en las decisiones de producto que hay detrás.',
+    'Soy {person}, desarrollador full-stack. Antes de cualquier pantalla o endpoint, quiero entender el negocio: cómo se organiza el trabajo, quién hace qué y qué intenta construir la persona que está detrás.',
+  'about.approach':
+    'Las buenas herramientas son la expresión natural de ese orden. Por eso lo primero es alinear las ideas, las del emprendedor y las del equipo, en una estructura clara; el software nace de ahí y se diseña desde el principio para escalar con el negocio, en lugar de rehacerse cada vez que crece.',
   'about.nameBefore': 'El nombre',
   'about.nameAfter':
     'significa «aterrizado en Júpiter»: un recordatorio de seguir explorando, pero con los pies en el suelo. En la práctica, curiosidad por las herramientas nuevas y una preferencia testaruda por lo que está probado, documentado y es fácil de cambiar.',
   'about.workWith': 'Con qué trabajo',
-  'about.experience': 'Experiencia',
-  'about.experienceSoon': 'La trayectoria profesional llegará pronto.',
 
   // Contact
   'contact.title': 'Contacto',
-  'contact.heading': 'Hablemos.',
+  'contact.heading': '{word}.',
+  'contact.headingWord': 'Hablemos',
   'contact.description': 'Cómo contactar con {person}.',
   'contact.intro': 'Cuéntame qué estás construyendo y dónde te has atascado. Suelo responder en pocos días.',
   'contact.email': 'Email',
-  'cta.title': '¿Tienes un producto que merece construirse? Hablemos.',
+  'cta.titleBefore': '¿Tienes',
+  'cta.words': 'un producto|una idea|un proyecto|un negocio',
+  'cta.titleAfter': 'en mente? Hablemos.',
+  'cta.body':
+    'Una idea apuntada en una servilleta, un proceso que frena a tu equipo, un producto que necesita otras manos: cuéntamelo. Leo cada mensaje y respondo con preguntas honestas, no con un discurso de ventas.',
   'cta.email': 'Escríbeme',
   'cta.otherWays': 'Otras formas de contactar',
 
