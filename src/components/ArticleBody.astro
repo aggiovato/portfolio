@@ -52,24 +52,34 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
    * (the ◆ on the dotted line). Without JS the index is a plain list of anchors.
    */
   const trail = document.querySelector<HTMLElement>('[data-toc-trail]');
-  const links = [...(trail?.querySelectorAll<HTMLAnchorElement>('a') ?? [])];
-  const targets = links
-    .map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))))
-    .filter((el): el is HTMLElement => el !== null);
+  // Pair each link with its heading by element, not by comparing `a.hash` with the id: the hash is
+  // percent-encoded («#soluci%C3%B3n») while the id is not («solución»).
+  const entries = [...(trail?.querySelectorAll<HTMLAnchorElement>('a') ?? [])]
+    .map((link) => ({ link, target: document.getElementById(decodeURIComponent(link.hash.slice(1))) }))
+    .filter((e): e is { link: HTMLAnchorElement; target: HTMLElement } => e.target !== null);
 
-  if (targets.length > 0) {
+  if (entries.length > 0) {
     let frame = 0;
     const update = () => {
       frame = 0;
-      // The section being read is the last heading above the top quarter of the viewport.
+      // The section being read is the last heading above the top quarter of the viewport; before
+      // the first one, the first entry. At the end of the page the last sections are too short to
+      // reach that line, so the last heading in view wins.
       const line = innerHeight * 0.25;
-      const current = targets.filter((el) => el.getBoundingClientRect().top <= line).pop();
-      links.forEach((a) => {
-        if (current && a.hash === `#${current.id}`) a.setAttribute('aria-current', 'location');
-        else a.removeAttribute('aria-current');
+      const atEnd = innerHeight + scrollY >= document.documentElement.scrollHeight - 2;
+      const inView = (e: (typeof entries)[number]) => e.target.getBoundingClientRect().top < innerHeight;
+      const current =
+        (atEnd && entries.filter(inView).pop()) ||
+        entries.filter((e) => e.target.getBoundingClientRect().top <= line).pop() ||
+        entries[0];
+      entries.forEach((e) => {
+        if (e === current) e.link.setAttribute('aria-current', 'location');
+        else e.link.removeAttribute('aria-current');
       });
     };
-    addEventListener('scroll', () => (frame ||= requestAnimationFrame(update)), { passive: true });
+    const schedule = () => (frame ||= requestAnimationFrame(update));
+    addEventListener('scroll', schedule, { passive: true });
+    addEventListener('resize', schedule);
     update();
   }
 </script>

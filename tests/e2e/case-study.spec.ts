@@ -17,6 +17,20 @@ test.describe('case study index', () => {
     await expect(first).not.toHaveAttribute('aria-current', 'location');
   });
 
+  test('follows headings with accented ids, and reaches the last section at the end', async ({ page }) => {
+    await page.goto('/es/work/uquiz/');
+    const trail = page.locator('[data-toc-trail]');
+    // «Solución»: its id has an accent, so the link's hash is percent-encoded.
+    const solution = trail.getByRole('link', { name: 'Solución' });
+    await page.locator('[id="solución"]').evaluate((el) => el.scrollIntoView({ block: 'start' }));
+    await expect(solution).toHaveAttribute('aria-current', 'location');
+
+    // At the bottom, the last entry is marked even though its heading never reaches the top.
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await expect(trail.getByRole('link').last()).toHaveAttribute('aria-current', 'location');
+    await expect(trail.locator('[aria-current]')).toHaveCount(1);
+  });
+
   test.describe('without JavaScript', () => {
     test.use({ javaScriptEnabled: false });
 
