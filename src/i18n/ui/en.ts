@@ -52,9 +52,9 @@ export const en = {
   'home.process3Title': 'Build and iterate',
   'home.process3Body':
     'Ship a usable slice, watch how it is used and refine. Interfaces and APIs evolve together.',
-  'home.aboutTitle': 'Product-minded, frontend-first.',
+  'home.aboutTitle': 'Product first. Tools that grow with it.',
   'home.aboutBody':
-    'I’m {person}, a full-stack developer who spends most of his time where product decisions meet the interface. I like turning messy workflows into tools people can use without a manual, and I care just as much about the systems behind them: clear contracts, predictable data and code the next person can read.',
+    'I’m {person}, a full-stack developer. I start with the business and the product: how the work is organised and what the person behind it wants to build. The tools should be the natural expression of that order, so first we line up the ideas, then I build on a base that can grow. Scalability isn’t an afterthought; it’s part of the first design.',
   'home.coreStack': 'Core stack',
   'home.moreAboutMe': 'More about me',
 
@@ -185,7 +185,11 @@ export const en = {
   'contact.description': 'How to reach {person}.',
   'contact.intro': 'Tell me what you’re building and where you’re stuck. I usually reply within a few days.',
   'contact.email': 'Email',
-  'cta.title': 'Have a product worth building? Let’s talk.',
+  'cta.titleBefore': 'Have',
+  'cta.words': 'a product|an idea|a project|a dream|a business',
+  'cta.titleAfter': 'worth building? Let’s talk.',
+  'cta.body':
+    'An idea on a napkin, a process that slows your team down, a product that needs another pair of hands: tell me about it. I read every message and answer with honest questions, not a sales pitch.',
   'cta.email': 'Email me',
   'cta.otherWays': 'Other ways to reach me',
 

@@ -1,14 +1,37 @@
 ---
+/**
+ * Closing call to action of most pages. The thing worth building rotates through a few words
+ * (`cta.words`, first one = the resting word) in the site's shining lavender, behind it a launch
+ * blueprint as a watermark.
+ *
+ * Motion (WCAG 2.2.2): the words cycle once, quickly, each time the section comes into view, then
+ * rest on the first; nothing changes for more than five seconds. Screen readers get the whole
+ * sentence, still. Without JS or with reduced motion the resting word just stays.
+ */
+import Watermark from './Watermark.astro';
 import { site } from '../data/site';
 import { localizePath, resolveLocale, useTranslations } from '../i18n';
 
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
+const words = t('cta.words').split('|');
 ---
 
 <section class="section contact-cta" aria-labelledby="cta-title">
+  <Watermark kind="launch" side="left" />
   <div class="container inner">
-    <h2 id="cta-title">{t('cta.title')}</h2>
+    <div class="copy">
+      <h2 id="cta-title">
+        {t('cta.titleBefore')}{' '}
+        <span class="rotator" aria-hidden="true" data-cta-words={JSON.stringify(words)}>
+          <em class="shine" data-cta-word>
+            {words[0]}
+          </em>
+        </span>
+        <span class="visually-hidden">{words[0]}</span> {t('cta.titleAfter')}
+      </h2>
+      <p class="body">{t('cta.body')}</p>
+    </div>
     <div class="actions">
       <a class="btn btn-primary" href={`mailto:${site.email}`}>
         {t('cta.email')}
@@ -20,14 +43,87 @@ const t = useTranslations(locale);
   </div>
 </section>
 
+<script>
+  const STEP = 900; // ms per word: five words ≈ 4.5 s, under WCAG's five seconds
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-cta-words]').forEach((rotator) => {
+    const word = rotator.querySelector<HTMLElement>('[data-cta-word]');
+    const words = JSON.parse(rotator.dataset.ctaWords ?? '[]') as string[];
+    if (!word || words.length < 2 || reduce.matches) return;
+
+    let running = false;
+    const show = (text: string) => {
+      word.classList.remove('is-in');
+      // Restart the entrance animation for the new word.
+      void word.offsetWidth;
+      word.textContent = text;
+      word.classList.add('is-in');
+    };
+    // The rest of the list, then back to the resting word.
+    const cycle = () => {
+      if (running) return;
+      running = true;
+      const sequence = [...words.slice(1), words[0]];
+      sequence.forEach((text, i) =>
+        setTimeout(
+          () => {
+            show(text);
+            if (i === sequence.length - 1) running = false;
+          },
+          (i + 1) * STEP,
+        ),
+      );
+    };
+    new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) cycle();
+      },
+      { threshold: 0.6 },
+    ).observe(rotator);
+  });
+</script>
+
 <style>
+  .contact-cta {
+    position: relative;
+    overflow: clip;
+  }
   .inner {
+    position: relative;
+    z-index: 1;
     display: grid;
     gap: var(--space-8);
   }
+  .copy {
+    display: grid;
+    gap: var(--space-6);
+  }
   h2 {
     font-size: var(--text-h2);
-    max-width: 18ch;
+    max-width: 20ch;
+  }
+  /* The rotating word keeps the shine's baseline; a short rise marks each change. */
+  .rotator {
+    display: inline-block;
+  }
+  .rotator :global(.is-in) {
+    animation: word-in 320ms var(--ease-out);
+  }
+  @keyframes word-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.35em);
+    }
+  }
+  .shine {
+    display: inline-block;
+  }
+  .body {
+    max-width: 52ch;
+    font-size: var(--text-lead);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
   }
   .actions {
     display: flex;
@@ -39,6 +135,7 @@ const t = useTranslations(locale);
     .inner {
       grid-template-columns: 1fr auto;
       align-items: end;
+      gap: var(--space-16);
     }
   }
 </style>

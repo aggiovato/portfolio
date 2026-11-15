@@ -50,9 +50,9 @@ export const it: UiDictionary = {
   'home.process3Title': 'Costruire e iterare',
   'home.process3Body':
     'Rilascio una parte utilizzabile, osservo come viene usata e la rifinisco. Interfacce e API evolvono insieme.',
-  'home.aboutTitle': 'Orientato al prodotto, frontend prima di tutto.',
+  'home.aboutTitle': 'Prima il prodotto. Strumenti che crescono con lui.',
   'home.aboutBody':
-    'Sono {person}, uno sviluppatore full-stack che passa la maggior parte del tempo dove le decisioni di prodotto incontrano l’interfaccia. Mi piace trasformare processi confusi in strumenti che si usano senza manuale, e mi interessano allo stesso modo i sistemi che li sostengono: contratti chiari, dati prevedibili e codice che chi viene dopo possa leggere.',
+    'Sono {person}, sviluppatore full-stack. Parto dal business e dal prodotto: come è organizzato il lavoro e cosa vuole costruire la persona che c’è dietro. Gli strumenti dovrebbero essere l’espressione naturale di quell’ordine, quindi prima allineiamo le idee e poi costruisco su una base che possa crescere. La scalabilità non è un ripensamento: fa parte del primo progetto.',
   'home.coreStack': 'Stack principale',
   'home.moreAboutMe': 'Di più su di me',
 
@@ -184,7 +184,11 @@ export const it: UiDictionary = {
   'contact.description': 'Come contattare {person}.',
   'contact.intro': 'Raccontami cosa stai costruendo e dove sei bloccato. Di solito rispondo in pochi giorni.',
   'contact.email': 'Email',
-  'cta.title': 'Hai un prodotto che vale la pena costruire? Parliamone.',
+  'cta.titleBefore': 'Hai',
+  'cta.words': 'un prodotto|un’idea|un progetto|un sogno|un’attività',
+  'cta.titleAfter': 'che valga la pena costruire? Parliamone.',
+  'cta.body':
+    'Un’idea scritta su un tovagliolo, un processo che rallenta il tuo team, un prodotto che ha bisogno di altre mani: raccontamelo. Leggo ogni messaggio e rispondo con domande sincere, non con un discorso di vendita.',
   'cta.email': 'Scrivimi',
   'cta.otherWays': 'Altri modi per contattarmi',
 

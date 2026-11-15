@@ -50,9 +50,9 @@ export const es: UiDictionary = {
   'home.process3Title': 'Construir e iterar',
   'home.process3Body':
     'Entregar una parte usable, observar cómo se usa y refinar. Interfaces y APIs evolucionan juntas.',
-  'home.aboutTitle': 'Mentalidad de producto, frontend primero.',
+  'home.aboutTitle': 'Primero el producto. Herramientas que crecen con él.',
   'home.aboutBody':
-    'Soy {person}, desarrollador full-stack. Paso la mayor parte del tiempo donde las decisiones de producto se encuentran con la interfaz. Me gusta convertir flujos de trabajo caóticos en herramientas que se usan sin manual, y me importan igual los sistemas que hay detrás: contratos claros, datos predecibles y código que la siguiente persona pueda leer.',
+    'Soy {person}, desarrollador full-stack. Empiezo por el negocio y el producto: cómo se organiza el trabajo y qué quiere construir la persona que está detrás. Las herramientas deberían ser la expresión natural de ese orden, así que primero alineamos las ideas y después construyo sobre una base que pueda crecer. La escalabilidad no es un añadido final: forma parte del primer diseño.',
   'home.coreStack': 'Stack principal',
   'home.moreAboutMe': 'Más sobre mí',
 
@@ -184,7 +184,11 @@ export const es: UiDictionary = {
   'contact.description': 'Cómo contactar con {person}.',
   'contact.intro': 'Cuéntame qué estás construyendo y dónde te has atascado. Suelo responder en pocos días.',
   'contact.email': 'Email',
-  'cta.title': '¿Tienes un producto que merece construirse? Hablemos.',
+  'cta.titleBefore': '¿Tienes',
+  'cta.words': 'un producto|una idea|un proyecto|un sueño|un negocio',
+  'cta.titleAfter': 'que merezca construirse? Hablemos.',
+  'cta.body':
+    'Una idea apuntada en una servilleta, un proceso que frena a tu equipo, un producto que necesita otras manos: cuéntamelo. Leo cada mensaje y respondo con preguntas honestas, no con un discurso de ventas.',
   'cta.email': 'Escríbeme',
   'cta.otherWays': 'Otras formas de contactar',
 

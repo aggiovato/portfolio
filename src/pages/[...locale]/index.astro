@@ -5,6 +5,7 @@ import Hero from '../../components/Hero.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import ProjectCarousel from '../../components/ProjectCarousel.astro';
 import ContactCTA from '../../components/ContactCTA.astro';
+import Watermark from '../../components/Watermark.astro';
 import HorizonArc from '../../components/HorizonArc.astro';
 import { getFeaturedProjects } from '../../lib/content/projects';
 import { site } from '../../data/site';
@@ -73,13 +74,13 @@ const process = [
     </div>
   </section>
 
-  <section class="section" aria-labelledby="about-title">
+  <section class="section about-section" aria-labelledby="about-title">
+    <Watermark kind="structure" side="right" />
     <div class="container about">
       <SectionHeading path="about" id="about-title">
         {t('home.aboutTitle')}
       </SectionHeading>
       <div class="about-body">
-        <!-- TODO: real 80–120 word summary (§8.5). -->
         <p>{t('home.aboutBody', { person: site.person })}</p>
         <ul class="chip-list" aria-label={t('home.coreStack')}>
           {site.coreStack.map((tech) => (
@@ -130,13 +131,17 @@ const process = [
     max-width: 36ch;
   }
 
+  /* The steps are a real sequence, so the numbers carry it: large mono numerals in peach. */
   .step {
     display: block;
     font-family: var(--font-mono);
-    font-size: var(--text-meta);
+    font-size: clamp(2.25rem, 1.7rem + 1.8vw, 3.25rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.02em;
     color: var(--color-jupiter);
-    padding-bottom: var(--space-3);
-    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-6);
     border-bottom: 1px solid var(--color-border);
   }
 
@@ -154,6 +159,15 @@ const process = [
       grid-template-columns: repeat(3, 1fr);
       gap: var(--space-8);
     }
+  }
+
+  .about-section {
+    position: relative;
+    overflow: clip;
+  }
+  .about {
+    position: relative;
+    z-index: 1;
   }
 
   .about-body {
