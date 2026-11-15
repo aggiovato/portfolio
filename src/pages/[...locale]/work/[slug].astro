@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Watermark from '../../../components/Watermark.astro';
 import ProjectMeta from '../../../components/ProjectMeta.astro';
 import ProjectGlance from '../../../components/ProjectGlance.astro';
 import TechList from '../../../components/TechList.astro';
@@ -80,8 +81,9 @@ const links = [
 >
   <article>
     <!-- Header in the hero's sky (§3); the stars stay clear of the text and are hidden on phones. -->
-    <div class="approach">
+    <div class="approach has-watermark">
       <StarField count={90} seed={11} />
+      <Watermark kind="orbits" side="right" anchor="top" />
       <header class="container head">
         <div class="head-main">
           <p class="path-label">

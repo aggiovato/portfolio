@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Watermark from '../../../components/Watermark.astro';
 import HighlightedTitle from '../../../components/HighlightedTitle.astro';
 import SectionHeading from '../../../components/SectionHeading.astro';
 import ProjectCard from '../../../components/ProjectCard.astro';
@@ -15,7 +16,8 @@ const projects = await getPublicProjects(locale);
 ---
 
 <BaseLayout title={t('work.title')} description={t('work.description')}>
-  <section class="section">
+  <section class="section has-watermark">
+    <Watermark kind="orbits" side="right" anchor="top" />
     <div class="container">
       <SectionHeading path="work" id="page-title" level="h1">
         <HighlightedTitle text={t('work.heading')} word={t('work.headingWord')} />

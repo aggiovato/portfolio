@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Watermark from '../../components/Watermark.astro';
 import HighlightedTitle from '../../components/HighlightedTitle.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import ContactCTA from '../../components/ContactCTA.astro';
@@ -24,7 +25,8 @@ const skills = await getSkillTree(locale);
     focus: t('site.focus').toLowerCase(),
   })}
 >
-  <section class="section">
+  <section class="section has-watermark">
+    <Watermark kind="structure" side="right" anchor="top" />
     <div class="container">
       <SectionHeading path="about" id="page-title" level="h1">
         <HighlightedTitle text={t('about.heading')} word={t('about.headingWord')} />

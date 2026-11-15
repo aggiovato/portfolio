@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Watermark from '../../../components/Watermark.astro';
 import HighlightedTitle from '../../../components/HighlightedTitle.astro';
 import SectionHeading from '../../../components/SectionHeading.astro';
 import NoteCard from '../../../components/NoteCard.astro';
@@ -17,7 +18,8 @@ const notes = await getPublicNotes(locale);
 ---
 
 <BaseLayout title={t('notes.title')} description={t('notes.description')}>
-  <section class="section">
+  <section class="section has-watermark">
+    <Watermark kind="marbles" side="right" anchor="top" />
     <div class="container">
       <SectionHeading path="notes" id="page-title" level="h1">
         <HighlightedTitle text={t('notes.heading')} word={t('notes.headingWord')} />
