@@ -1,0 +1,117 @@
+---
+slug: rxjs-combining-streams
+title: ¿combineLatest, withLatestFrom, zip o forkJoin?
+summary: >-
+  Dos flujos, cuatro formas de combinarlos. El mismo experimento con combineLatest, withLatestFrom,
+  zip y forkJoin: solo cambia la regla que decide cuándo valores de fuentes distintas forman un resultado.
+publicationStatus: published
+publishedAt: 2026-11-15
+tags:
+  - RxJS
+  - Angular
+cover:
+  src: ../../../assets/notes/rxjs-combining-streams/cover.webp
+  alt: 'Las cuatro formas de combinar: combineLatest cuando cambia cualquier entrada, withLatestFrom cuando una fuente manda, zip para emparejar por posición y forkJoin para esperar los valores finales.'
+---
+
+¿Cuándo deberían los valores de fuentes distintas convertirse en un único resultado? Cuatro
+operadores responden a esa pregunta de cuatro formas distintas:
+
+- {% highlight %}combineLatest{% /highlight %}: cambia cualquier entrada.
+- {% highlight %}withLatestFrom{% /highlight %}: una fuente manda.
+- {% highlight %}zip{% /highlight %}: empareja por posición.
+- {% highlight %}forkJoin{% /highlight %}: espera los valores finales.
+
+Mismas entradas, misma línea de tiempo. Solo cambia la regla de combinación.
+
+## El experimento
+
+Dos entradas, un mismo reloj. Todos los ejemplos se suscriben en 0 s. Cada entrada emite dos
+valores y después se completa. No hay errores.
+
+| Entrada | Emite | Se completa |
+| --- | --- | --- |
+| A | A1 a los 1 s, A2 a los 4 s | 6 s |
+| B | B1 a los 2 s, B2 a los 5 s | 7 s |
+
+![Línea de tiempo de las dos entradas: A emite A1 a los 1 s y A2 a los 4 s y se completa a los 6 s; B emite B1 a los 2 s y B2 a los 5 s y se completa a los 7 s.](../../../assets/notes/rxjs-combining-streams/experiment.webp "El tiempo avanza de izquierda a derecha; una barra vertical marca la finalización.")
+
+En las salidas, `[A2,B1]` significa un par emitido. Las líneas muestran eventos en el tiempo, no
+hilos separados, y todos los diagramas usan la misma escala.
+
+## {% highlight %}combineLatest{% /highlight %}: cualquier entrada puede disparar
+
+Espera a que las dos entradas emitan una vez. Después emite sus últimos valores cada vez que
+cambia cualquiera de ellas.
+
+```ts
+combineLatest([a$, b$]);
+```
+
+![Línea de tiempo de combineLatest: la salida emite [A1,B1] a los 2 s, [A2,B1] a los 4 s y [A2,B2] a los 5 s, y se completa a los 7 s.](../../../assets/notes/rxjs-combining-streams/combinelatest.webp "Los valores son pares: cada punto en Out es una emisión.")
+
+Primer resultado a los 2 s; los siguientes, a los 4 s y a los 5 s. ¿Una entrada sin valor inicial?
+Todavía no hay valor combinado. Aquí, la salida se completa a los 7 s, después de las dos entradas.
+Úsalo para un view model construido a partir de varias entradas que cambian.
+
+## {% highlight %}withLatestFrom{% /highlight %}: una fuente manda
+
+Solo A puede disparar. B actualiza el valor guardado; nunca dispara una salida por sí sola. Aquí,
+A es la fuente.
+
+```ts
+a$.pipe(withLatestFrom(b$));
+```
+
+![Línea de tiempo de withLatestFrom: A1 a los 1 s no produce nada porque B aún no ha emitido; A2 a los 4 s emite [A2,B1]; B2 a los 5 s no produce salida; la salida se completa con A a los 6 s.](../../../assets/notes/rxjs-combining-streams/withlatestfrom.webp "Solo las emisiones de A pueden producir una salida.")
+
+A1 se descarta: B todavía no ha emitido. No se pone en cola. A los 4 s, A2 usa B1. B2, a los 5 s,
+no produce salida. Aquí, la salida se completa con A a los 6 s. Úsalo para un evento de envío que
+lee el último estado del formulario.
+
+## {% highlight %}zip{% /highlight %}: el primero con el primero
+
+Espera hasta que cada entrada tenga un valor para el siguiente par. Consume cada valor una sola
+vez, en el orden de entrada.
+
+```ts
+zip(a$, b$);
+```
+
+![Línea de tiempo de zip: la salida emite [A1,B1] a los 2 s y [A2,B2] a los 5 s; A2 espera a B2 de los 4 s a los 5 s.](../../../assets/notes/rxjs-combining-streams/zip.webp "Cada valor se usa en exactamente un par.")
+
+A2 espera a B2 de los 4 s a los 5 s. No reutiliza B1. A los 6 s, A se ha completado y su cola está
+vacía: terminado. Una entrada mucho más rápida puede acumular una cola grande. Úsalo para dos
+secuencias que deben emparejarse por índice.
+
+## {% highlight %}forkJoin{% /highlight %}: una única instantánea final
+
+Espera a que cada entrada emita y se complete. Después emite sus últimos valores una vez y se
+completa.
+
+```ts
+forkJoin([a$, b$]);
+```
+
+![Línea de tiempo de forkJoin: una única salida, [A2,B2], a los 7 s, cuando B se completa, y después la salida se completa.](../../../assets/notes/rxjs-combining-streams/forkjoin.webp "Una sola emisión, solo cuando todas las entradas se han completado.")
+
+Que A termine a los 6 s no basta: B termina a los 7 s. Una entrada que nunca se completa puede
+dejarte esperando. En RxJS 7, una entrada vacía completa la unión sin ningún valor. Úsalo para
+varias peticiones HTTP finitas que se necesitan juntas.
+
+## Elige el disparador
+
+Pregúntate cuándo emitir y después elige la herramienta. Los mismos valores pueden dar salidas muy
+distintas.
+
+| ¿Cuándo debe emitir? | Operador | Salidas |
+| --- | --- | --- |
+| Cuando cambia cualquier entrada | `combineLatest` | 2 s, 4 s, 5 s |
+| Solo cuando emite la fuente | `withLatestFrom` | 4 s |
+| Cuando el siguiente par está listo | `zip` | 2 s, 5 s |
+| Cuando todas las entradas se completan | `forkJoin` | 7 s |
+
+Estas herramientas combinan flujos; no crean hilos. Un error no gestionado en cualquier entrada hace
+fallar la salida combinada.
+
+Fuentes: la API de RxJS 7 de [combineLatest](https://rxjs.dev/api/index/function/combineLatest), [withLatestFrom](https://rxjs.dev/api/operators/withLatestFrom), [zip](https://rxjs.dev/api/index/function/zip) y [forkJoin](https://rxjs.dev/api/index/function/forkJoin).
