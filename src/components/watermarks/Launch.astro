@@ -1,5 +1,6 @@
 ---
 /** Watermark drawing (Watermark.astro draws the grid, places and styles it): A launch blueprint: trajectory, angle, rocket and the calculations beside it. Contact CTA. */
+import { MARK } from '../../lib/brand/mark';
 ---
 
 {/* Launch pad and the dotted trajectory leaving it. */}
@@ -9,10 +10,13 @@
 <path class="line" d="M118 462L300 330" />
 <path class="line" d="M190 462a72 72 0 0 0-14-44" />
 {/* The rocket, at the start of the arc. */}
-<g class="accent" transform="translate(206 300) rotate(36)">
-  <path d="M0 -38C10 -26 12 -6 10 14H-10C-12 -6 -10 -26 0 -38Z" />
-  <path d="M-10 6L-20 22H-10M10 6L20 22H10M-5 14L0 26L5 14" />
-  <circle cx="0" cy="-12" r="4" />
+<g
+  class="accent"
+  transform={`translate(206 300) rotate(36) scale(0.6) translate(-${MARK.centre.x} -${MARK.centre.y})`}
+>
+  <path d={MARK.body} vector-effect="non-scaling-stroke" />
+  <path d={MARK.bar} vector-effect="non-scaling-stroke" />
+  <path d={MARK.flames} vector-effect="non-scaling-stroke" />
 </g>
 {/* Orbit reached, top right. */}
 <ellipse class="trail" cx="430" cy="110" rx="70" ry="26" transform="rotate(-18 430 110)" />

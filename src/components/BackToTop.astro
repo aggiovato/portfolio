@@ -14,9 +14,16 @@ import { resolveLocale, useTranslations } from '../i18n';
 const t = useTranslations(resolveLocale(Astro.currentLocale));
 ---
 
-<button class="fab" type="button" aria-label={t('hero.backToTop')} hidden data-fab>
+<button
+  class="fab"
+  type="button"
+  aria-label={t('hero.backToTop')}
+  title={t('hero.backToTop')}
+  hidden
+  data-fab
+>
   <span class="fab-icon">
-    <LogoMark size={26} />
+    <LogoMark size={26} variant="micro" />
   </span>
 </button>
 
@@ -102,9 +109,26 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     display: none;
   }
 
+  /* The rocket sits a little high with a short dotted exhaust under it: it reads as «taking off»,
+     the up cue the brand mark alone does not give outside the home's hand-over. */
   .fab-icon {
     display: grid;
+    transform: translateY(-3px);
     transition: transform var(--duration-fast) var(--ease-out);
+  }
+
+  .fab::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    width: 3px;
+    height: 10px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, var(--color-accent) 0.9px, transparent 1.3px) center top / 3px 4px
+      repeat-y;
+    opacity: 0.7;
+    mask-image: linear-gradient(to bottom, black, transparent);
   }
 
   .fab:hover {
@@ -115,7 +139,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   }
 
   .fab:hover .fab-icon {
-    transform: translateY(-2px);
+    transform: translateY(-5px);
   }
 
   .fab:focus-visible {

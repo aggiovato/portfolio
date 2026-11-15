@@ -1,5 +1,5 @@
 ---
-import LogoMark from './LogoMark.astro';
+import Lockup from './Lockup.astro';
 import { site, type NavItem } from '../data/site';
 import {
   localeNames,
@@ -37,8 +37,7 @@ const languages = locales.map((l) => ({
 <header class="site-header">
   <div class="container bar">
     <a class="brand" href={localizePath('/', locale)} aria-label={t('nav.home', { brand: site.brand })}>
-      <LogoMark size={44} class="brand-mark" />
-      <span class="brand-word">{site.brand}</span>
+      <Lockup height={28} />
     </a>
 
     <!--
@@ -271,16 +270,6 @@ const languages = locales.map((l) => ({
     gap: var(--space-3);
     min-height: 44px;
     text-decoration: none;
-  }
-
-  .brand :global(.brand-mark) {
-    color: var(--color-accent);
-  }
-
-  .brand-word {
-    font-size: 1.5rem;
-    font-weight: 750;
-    letter-spacing: -0.03em;
   }
 
   .nav ul {
@@ -552,8 +541,9 @@ const languages = locales.map((l) => ({
   }
 
   @media (max-width: 767px) {
-    .brand-word {
-      font-size: 1.3rem;
+    .brand :global(.lockup) {
+      width: auto;
+      height: 24px;
     }
   }
 </style>

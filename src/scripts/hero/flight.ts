@@ -17,6 +17,8 @@ import {
   curveFor,
   easeInOut,
   headingDeg,
+  landingPose,
+  onLimb,
   polylineData,
   timedPath,
   waypointSpot,
@@ -25,7 +27,7 @@ import {
 } from '../../lib/flight/path';
 
 /** Size of the rocket icon, in px. */
-export const ROCKET = 52;
+export const ROCKET = 40;
 const TAIL = 140; // px of solid trail behind the rocket
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -67,6 +69,11 @@ export interface HeroFlight {
   angle(): number;
   /** Stops a flight in progress where it is. */
   stop(): void;
+  /**
+   * Fades the trails and the waypoint left in the hero: the rocket is leaving, and only its real
+   * movement draws a trail (its way down to the FAB, then its way back up draw their own).
+   */
+  clearTrail(): void;
 }
 
 export const svgEl = <K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string>) => {
@@ -228,6 +235,7 @@ export function initHeroFlight(): HeroFlight | null {
     cancelAnimationFrame(frame);
 
     flyer.hidden = false;
+    flyer.classList.remove('is-landing'); // in flight the heading follows every frame, no easing
     flights++;
     layer.setAttribute('viewBox', `0 0 ${hero.clientWidth} ${hero.clientHeight}`);
     waypoint.classList.remove('is-visible');
@@ -285,9 +293,21 @@ export function initHeroFlight(): HeroFlight | null {
 
     const land = () => {
       rocket = target;
-      placeFlyer(target, finalAngle); // keeps pointing in the flight direction
+      placeFlyer(target, finalAngle); // arrives pointing in the flight direction
+      const pose = landingPose(target, planetBody(), ROCKET);
+      if (pose.onPlanet && pose.angle !== null) {
+        // On Jupiter it stands on its pads along the surface normal, turning the short way
+        // (Hero.astro eases the turn; reduced motion: at once).
+        const upright = finalAngle + ((((pose.angle - finalAngle) % 360) + 540) % 360) - 180;
+        delete flyer.dataset.flying;
+        requestAnimationFrame(() => {
+          flyer.classList.add('is-landing');
+          placeFlyer(target, upright);
+        });
+      }
+      // In open sky there is no ground: it hovers in its flight pose, engines on.
       showWaypoint(target, approach, note);
-      typeField('status', "'landed'");
+      typeField('status', pose.onPlanet ? "'landed'" : "'hovering'");
     };
 
     if (opts.instant || reduced.matches) {
@@ -297,6 +317,7 @@ export function initHeroFlight(): HeroFlight | null {
     }
 
     typeField('status', "'in flight'");
+    flyer.dataset.flying = ''; // the mark shows its flames while it flies (LogoMark)
     placeFlyer(start, stateAt(0).angle);
     const duration = Math.min(2000, Math.max(800, total * 1.35));
     const settle = 1100; // time for the solid trail to finish turning dotted
@@ -327,15 +348,19 @@ export function initHeroFlight(): HeroFlight | null {
 
   /** Entrance flight: same engine as clicks, from the `mission` block to the limb. */
   const entrance = (instant = false) => {
-    const to = arrivalPoint();
+    const arrival = arrivalPoint();
     const from = launchPoint();
-    if (!to || !from) return;
+    if (!arrival || !from) return;
+    // The static rocket marks the arrival area; the flight lands on the limb itself, pads on the rim.
+    const body = planetBody();
+    const to = body ? onLimb(arrival, body, ROCKET * 0.45) : arrival;
     rocket = null;
     launch(to, { from, instant, entrance: true, note: '// arrival point' });
   };
 
   const reset = () => {
     cancelAnimationFrame(frame);
+    delete flyer.dataset.flying;
     rocket = null;
     flyer.hidden = true;
     waypoint.hidden = true;
@@ -354,13 +379,29 @@ export function initHeroFlight(): HeroFlight | null {
     return aboveHorizon(p, { width: hero.clientWidth, height: hero.clientHeight }, horizon, ROCKET / 2 + 10);
   };
 
+  /**
+   * Whether a point is on visible text: one rect per line of each text element (not its box, which
+   * spans the whole column), grown by 4 px. The blank space beside short lines stays sky.
+   */
+  const overText = (x: number, y: number) =>
+    crossesRects(
+      [{ x, y }],
+      [...hero.querySelectorAll<HTMLElement>('h1, p, pre, .log')]
+        .filter((n) => n.offsetParent !== null && getComputedStyle(n).visibility !== 'hidden')
+        .flatMap((n) => {
+          const range = document.createRange();
+          range.selectNodeContents(n);
+          return [...range.getClientRects()].map((r) => ({ l: r.left, t: r.top, r: r.right, b: r.bottom }));
+        }),
+      4,
+    );
+
   hero.addEventListener('click', (event) => {
     if (!desktop.matches) return;
     const target = event.target as Element;
     if (target.closest('a, button, input, textarea, select, summary')) return;
-    // Text is for reading: a click on it (to focus, to select) never launches. Empty space in the
-    // text column is still sky.
-    if (target.closest('h1, p, pre, .actions, .log')) return;
+    // Text is for reading: a click on it (to focus, to select) never launches.
+    if (overText(event.clientX, event.clientY)) return;
     if (window.getSelection()?.toString()) return; // do not interfere with text selection
     launch(clampAboveHorizon(heroPoint(event.clientX, event.clientY)));
   });
@@ -394,6 +435,11 @@ export function initHeroFlight(): HeroFlight | null {
     position: () => rocket ?? arrivalPoint(),
     hasPosition: () => rocket !== null,
     angle: () => rocketAngle,
+    // A flight stopped half way leaves the rocket hovering (engines on) until it flies again.
     stop: () => cancelAnimationFrame(frame),
+    clearTrail: () => {
+      fadeOldTrails();
+      waypoint.classList.remove('is-visible');
+    },
   };
 }

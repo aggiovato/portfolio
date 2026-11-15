@@ -19,7 +19,7 @@ const FAB_ICON = 26 / ROCKET; // rocket scale once it becomes the FAB icon
 const DOTS = 16;
 
 export function initRocketFab(flight: HeroFlight): void {
-  const { hero, flyer, waypoint, desktop, reduced } = flight;
+  const { hero, flyer, desktop, reduced } = flight;
   const sky = document.querySelector<HTMLElement>('.sky');
   const skyRocket = sky?.querySelector<HTMLElement>('.sky-rocket');
   const skyTrail = sky?.querySelector<SVGSVGElement>('.sky-trail');
@@ -45,7 +45,8 @@ export function initRocketFab(flight: HeroFlight): void {
     const r = fab.getBoundingClientRect();
     fab.style.visibility = '';
     fab.hidden = wasHidden;
-    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    // The icon sits 3 px above the button's centre (BackToTop.astro, its take-off cue).
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 - 3 };
   };
 
   /** Hero rocket centre in viewport coordinates (follows the scroll). */
@@ -146,11 +147,11 @@ export function initRocketFab(flight: HeroFlight): void {
     }
     state = 'descending';
     flight.stop(); // a hero flight in progress stops where it is
+    flight.clearTrail(); // its trail in the hero goes: only the way down draws one now
     // At 15 % visible the rocket is usually above the screen already: it comes in from just
     // above the top edge, as if it came down to follow the reading.
     const from = { x: start.left + start.width / 2, y: Math.max(start.top + start.height / 2, -ROCKET) };
     flyer.style.visibility = 'hidden';
-    waypoint.classList.remove('is-visible');
     const target = fabCenter();
     skyFlight({
       from,

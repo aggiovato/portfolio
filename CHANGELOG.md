@@ -18,6 +18,20 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
   contact), built from the published content.
 - `/sitemap.xml` redirects to the sitemap Astro generates (`/sitemap-index.xml`).
 
+### Changed
+
+- New logo, «Soft Ascent»: an A that is also a rocket, with nozzles, a peach horizon and landing
+  pads that turn into flames in flight. Used in the header, footer, hero rocket, back-to-top button,
+  share cards and newsletter; new favicon (SVG and ICO), Apple and 512 px icons and a web manifest.
+- The hero rocket lands on Jupiter's limb standing on its pads, hovers with its engines on in open
+  sky, and its old trail fades when it descends into the back-to-top button, which now shows a
+  small take-off trail. The watermark rockets are the new mark.
+
+### Fixed
+
+- The hero sky launches from any blank space, also beside short lines of text; only the letters
+  themselves and the controls are kept for reading and clicking.
+
 ---
 
 ## [1.5.0] — 2026-11-15
