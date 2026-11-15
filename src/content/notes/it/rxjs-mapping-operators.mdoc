@@ -92,4 +92,27 @@ può avviare una nuova richiesta. Usalo per ignorare i clic ripetuti mentre si i
 L'operatore codifica la tua politica di concorrenza: sceglilo in base al comportamento che serve
 alla tua interfaccia. Sono operatori di RxJS, usati anche dentro gli effect di NgRx.
 
+{% quiz %}
+{% question text="Ricerca mentre scrivi: i risultati devono corrispondere sempre all'ultima ricerca. Quale operatore va al posto di `???`?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=1 explanation="`switchMap` annulla la sottoscrizione alla richiesta precedente quando arriva una nuova ricerca, così una risposta lenta e vecchia non sovrascrive mai gli ultimi risultati." %}
+```ts
+query$.pipe(
+  debounceTime(300),
+  ???((q) => this.api.search(q)),
+);
+```
+{% /question %}
+
+{% question text="Un modulo crea una risorsa a ogni «Salva». Ogni clic deve creare la sua risorsa, in ordine, e nessuna richiesta può essere annullata o saltata dalla successiva. Quale operatore?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=2 explanation="`concatMap` mette in coda ogni creazione e la avvia quando la precedente si completa: vengono eseguite tutte, in ordine. `switchMap` potrebbe annullarne una in corso; `exhaustMap` la scarterebbe." /%}
+
+{% question text="Un pulsante «Paga»: un doppio clic non deve mai addebitare due volte. Quale operatore?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=4 explanation="`exhaustMap` ignora i nuovi clic mentre il primo pagamento è in corso: vengono scartati, non messi in coda, e l'addebito avviene una sola volta." /%}
+
+{% question text="Con gli eventi dell'esperimento (A impiega 5 s, B 3 s, C 1 s), in che ordine arrivano le risposte?" options=["A, B, C", "C, B, A", "Solo C", "Solo A"] answer=2 explanation="`mergeMap` esegue le tre richieste insieme e inoltra ogni risposta appena finisce: C a 3 s, B a 4 s, A a 5 s. L'ordine di ingresso non è preservato." %}
+```ts
+events$.pipe(mergeMap((id) => request$(id)));
+```
+{% /question %}
+
+{% question text="`switchMap` annulla una richiesta che è già arrivata al server. Cosa annulla?" options=["La modifica fatta dal server", "Niente sul server: si ferma solo la tua sottoscrizione", "Mette la risposta in coda per dopo"] answer=2 explanation="Annullare la sottoscrizione smette di ascoltare; non annulla il lavoro già fatto dal server. Evita `switchMap` per scritture che non si possono perdere." /%}
+{% /quiz %}
+
 Fonti: l'API di RxJS di [switchMap](https://rxjs.dev/api/operators/switchMap), [concatMap](https://rxjs.dev/api/operators/concatMap), [mergeMap](https://rxjs.dev/api/operators/mergeMap) ed [exhaustMap](https://rxjs.dev/api/operators/exhaustMap), e la [guida al client HTTP](https://angular.dev/guide/http) di Angular.

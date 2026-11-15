@@ -92,4 +92,27 @@ una petición nueva. Úsalo para ignorar clics repetidos mientras se envía un f
 El operador codifica tu política de concurrencia: elígelo según el comportamiento que necesita tu
 interfaz. Son operadores de RxJS, que también se usan dentro de los effects de NgRx.
 
+{% quiz %}
+{% question text="Búsqueda mientras escribes: los resultados deben corresponder siempre a la última búsqueda. ¿Qué operador va en lugar de `???`?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=1 explanation="`switchMap` cancela la suscripción a la petición anterior cuando llega una búsqueda nueva, así una respuesta lenta y antigua nunca pisa los últimos resultados." %}
+```ts
+query$.pipe(
+  debounceTime(300),
+  ???((q) => this.api.search(q)),
+);
+```
+{% /question %}
+
+{% question text="Un formulario crea un recurso con cada «Guardar». Cada clic debe crear su recurso, en orden, y ninguna petición puede cancelarse ni saltarse por la siguiente. ¿Qué operador?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=2 explanation="`concatMap` pone en cola cada creación y la empieza cuando termina la anterior: se ejecutan todas, en orden. `switchMap` podría cancelar una en curso; `exhaustMap` la descartaría." /%}
+
+{% question text="Un botón «Pagar»: un doble clic nunca debe cobrar dos veces. ¿Qué operador?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=4 explanation="`exhaustMap` ignora los clics nuevos mientras el primer pago está en curso: se descartan, no se ponen en cola, y solo se cobra una vez." /%}
+
+{% question text="Con los eventos del experimento (A tarda 5 s, B 3 s, C 1 s), ¿en qué orden llegan las respuestas?" options=["A, B, C", "C, B, A", "Solo C", "Solo A"] answer=2 explanation="`mergeMap` ejecuta las tres peticiones a la vez y reenvía cada respuesta según termina: C a los 3 s, B a los 4 s, A a los 5 s. No se conserva el orden de entrada." %}
+```ts
+events$.pipe(mergeMap((id) => request$(id)));
+```
+{% /question %}
+
+{% question text="`switchMap` cancela una petición que ya llegó al servidor. ¿Qué deshace eso?" options=["El cambio que hizo el servidor", "Nada en el servidor: solo se detiene tu suscripción", "Pone la respuesta en cola para más tarde"] answer=2 explanation="Cancelar la suscripción deja de escuchar; no revierte lo que el servidor ya hizo. Evita `switchMap` para escrituras que no se pueden perder." /%}
+{% /quiz %}
+
 Fuentes: la API de RxJS de [switchMap](https://rxjs.dev/api/operators/switchMap), [concatMap](https://rxjs.dev/api/operators/concatMap), [mergeMap](https://rxjs.dev/api/operators/mergeMap) y [exhaustMap](https://rxjs.dev/api/operators/exhaustMap), y la [guía del cliente HTTP](https://angular.dev/guide/http) de Angular.

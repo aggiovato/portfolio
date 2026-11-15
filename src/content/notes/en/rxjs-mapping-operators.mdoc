@@ -90,4 +90,27 @@ request. Use it to ignore repeated clicks while a form is submitting.
 The operator encodes your concurrency policy: choose it from the behaviour your UI needs. These are
 RxJS operators, also used inside NgRx effects.
 
+{% quiz %}
+{% question text="Search as you type: the results must always match the latest query. Which operator replaces `???`?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=1 explanation="`switchMap` unsubscribes from the previous request when a new query arrives, so a slow, stale response never overwrites the latest results." %}
+```ts
+query$.pipe(
+  debounceTime(300),
+  ???((q) => this.api.search(q)),
+);
+```
+{% /question %}
+
+{% question text="A form creates a resource on every «Save». Each click must create its own resource, in order, and no request may be cancelled or skipped by the next one. Which operator?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=2 explanation="`concatMap` queues each creation and starts it when the previous one completes: all of them run, in order. `switchMap` could cancel one in flight; `exhaustMap` would drop it." /%}
+
+{% question text="A «Pay» button: a double click must never charge twice. Which operator?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=4 explanation="`exhaustMap` ignores new clicks while the first payment is in flight: they are dropped, not queued, so only one charge is made." /%}
+
+{% question text="With the experiment's events (A takes 5s, B 3s, C 1s), in what order do the responses arrive?" options=["A, B, C", "C, B, A", "Only C", "Only A"] answer=2 explanation="`mergeMap` runs the three requests at once and forwards each response as it finishes: C at 3s, B at 4s, A at 5s. Input order is not preserved." %}
+```ts
+events$.pipe(mergeMap((id) => request$(id)));
+```
+{% /question %}
+
+{% question text="`switchMap` cancels a request that already reached the server. What does that undo?" options=["The change the server made", "Nothing on the server: only your subscription stops", "It queues the response for later"] answer=2 explanation="Unsubscribing stops listening; it does not roll back work the server already did. Avoid `switchMap` for writes that must not be lost." /%}
+{% /quiz %}
+
 Sources: the RxJS API for [switchMap](https://rxjs.dev/api/operators/switchMap), [concatMap](https://rxjs.dev/api/operators/concatMap), [mergeMap](https://rxjs.dev/api/operators/mergeMap) and [exhaustMap](https://rxjs.dev/api/operators/exhaustMap), and Angular's [HTTP client guide](https://angular.dev/guide/http).
