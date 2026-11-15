@@ -194,8 +194,8 @@ export const en = {
   'contact.intro': 'Tell me what you’re building and where you’re stuck. I usually reply within a few days.',
   'contact.email': 'Email',
   'cta.titleBefore': 'Have',
-  'cta.words': 'a product|an idea|a project|a dream|a business',
-  'cta.titleAfter': 'worth building? Let’s talk.',
+  'cta.words': 'a product|an idea|a project|a business',
+  'cta.titleAfter': 'in mind? Let’s talk.',
   'cta.body':
     'An idea on a napkin, a process that slows your team down, a product that needs another pair of hands: tell me about it. I read every message and answer with honest questions, not a sales pitch.',
   'cta.email': 'Email me',

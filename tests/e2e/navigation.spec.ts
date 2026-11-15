@@ -92,7 +92,7 @@ test.describe('static pages', () => {
 test.describe('contact call to action', () => {
   test('reads as one still sentence and rests on its first word after the cycle', async ({ page }) => {
     await page.goto('/');
-    const heading = page.getByRole('heading', { name: 'Have a product worth building? Let’s talk.' });
+    const heading = page.getByRole('heading', { name: 'Have a product in mind? Let’s talk.' });
     await heading.scrollIntoViewIfNeeded();
     await expect(heading).toBeVisible();
     // The cycle runs once (five words, under five seconds) and comes back to the resting word.

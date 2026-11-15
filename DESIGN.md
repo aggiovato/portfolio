@@ -376,8 +376,9 @@ itself descending and elsewhere appears past the first screen and lifts off when
 
 Sections that close a page carry a large line drawing as a watermark (Watermark.astro): the
 trail's dots and thin strokes, rotated about 10°, half outside the page, at 7% opacity, with one
-lavender piece. The contact call to action has a launch blueprint on the left, the about section a
-business → product → tools structure on the right; they alternate sides. Static, decorative.
+lavender piece. The process section has a rocket lifting off its pad in the centre, the contact call to action
+a launch blueprint on the left, the about section a business → product → tools structure on the
+right. Static, decorative.
 
 ## Do's and Don'ts
 

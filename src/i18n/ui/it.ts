@@ -193,8 +193,8 @@ export const it: UiDictionary = {
   'contact.intro': 'Raccontami cosa stai costruendo e dove sei bloccato. Di solito rispondo in pochi giorni.',
   'contact.email': 'Email',
   'cta.titleBefore': 'Hai',
-  'cta.words': 'un prodotto|un’idea|un progetto|un sogno|un’attività',
-  'cta.titleAfter': 'che valga la pena costruire? Parliamone.',
+  'cta.words': 'un prodotto|un’idea|un progetto|un’attività',
+  'cta.titleAfter': 'in mente? Parliamone.',
   'cta.body':
     'Un’idea scritta su un tovagliolo, un processo che rallenta il tuo team, un prodotto che ha bisogno di altre mani: raccontamelo. Leggo ogni messaggio e rispondo con domande sincere, non con un discorso di vendita.',
   'cta.email': 'Scrivimi',

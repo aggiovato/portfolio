@@ -55,8 +55,9 @@ const process = [
     )}
   </section>
 
-  <section class="section" aria-labelledby="process-title">
-    <div class="container">
+  <section class="section process-section" aria-labelledby="process-title">
+    <Watermark kind="liftoff" side="center" />
+    <div class="container process-container">
       <SectionHeading path="process" id="process-title">
         {t('home.processTitle')}
       </SectionHeading>
@@ -161,10 +162,12 @@ const process = [
     }
   }
 
+  .process-section,
   .about-section {
     position: relative;
     overflow: clip;
   }
+  .process-container,
   .about {
     position: relative;
     z-index: 1;

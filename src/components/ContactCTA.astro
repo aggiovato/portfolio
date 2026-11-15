@@ -4,8 +4,9 @@
  * (`cta.words`, first one = the resting word) in the site's shining lavender, behind it a launch
  * blueprint as a watermark.
  *
- * Motion (WCAG 2.2.2): the words cycle once, quickly, each time the section comes into view, then
- * rest on the first; nothing changes for more than five seconds. Screen readers get the whole
+ * The word sits on its own line, so changing it never reflows the sentence. Motion (WCAG 2.2.2):
+ * the words cycle once each time the section comes into view, with a soft crossfade, and rest on
+ * the first, all in under five seconds. Screen readers get the whole
  * sentence, still. Without JS or with reduced motion the resting word just stays.
  */
 import Watermark from './Watermark.astro';
@@ -44,7 +45,8 @@ const words = t('cta.words').split('|');
 </section>
 
 <script>
-  const STEP = 900; // ms per word: five words ≈ 4.5 s, under WCAG's five seconds
+  // Four words at ~1.1 s each: the cycle ends in under five seconds (WCAG 2.2.2).
+  const STEP = 1100;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   document.querySelectorAll<HTMLElement>('[data-cta-words]').forEach((rotator) => {
@@ -53,14 +55,14 @@ const words = t('cta.words').split('|');
     if (!word || words.length < 2 || reduce.matches) return;
 
     let running = false;
+    // The word has its own line, so only it changes: fade out, swap, fade in.
     const show = (text: string) => {
-      word.classList.remove('is-in');
-      // Restart the entrance animation for the new word.
-      void word.offsetWidth;
-      word.textContent = text;
-      word.classList.add('is-in');
+      word.classList.add('is-out');
+      setTimeout(() => {
+        word.textContent = text;
+        word.classList.remove('is-out');
+      }, 220);
     };
-    // The rest of the list, then back to the resting word.
     const cycle = () => {
       if (running) return;
       running = true;
@@ -103,18 +105,19 @@ const words = t('cta.words').split('|');
     font-size: var(--text-h2);
     max-width: 20ch;
   }
-  /* The rotating word keeps the shine's baseline; a short rise marks each change. */
+  /* The rotating word on its own line: the rest of the sentence never moves. */
   .rotator {
-    display: inline-block;
+    display: block;
+    white-space: nowrap;
   }
-  .rotator :global(.is-in) {
-    animation: word-in 320ms var(--ease-out);
+  .rotator :global(.shine) {
+    transition:
+      opacity 220ms var(--ease-out),
+      filter 220ms var(--ease-out);
   }
-  @keyframes word-in {
-    from {
-      opacity: 0;
-      transform: translateY(0.35em);
-    }
+  .rotator :global(.is-out) {
+    opacity: 0;
+    filter: blur(4px);
   }
   .shine {
     display: inline-block;

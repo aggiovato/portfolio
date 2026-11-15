@@ -193,8 +193,8 @@ export const es: UiDictionary = {
   'contact.intro': 'Cuéntame qué estás construyendo y dónde te has atascado. Suelo responder en pocos días.',
   'contact.email': 'Email',
   'cta.titleBefore': '¿Tienes',
-  'cta.words': 'un producto|una idea|un proyecto|un sueño|un negocio',
-  'cta.titleAfter': 'que merezca construirse? Hablemos.',
+  'cta.words': 'un producto|una idea|un proyecto|un negocio',
+  'cta.titleAfter': 'en mente? Hablemos.',
   'cta.body':
     'Una idea apuntada en una servilleta, un proceso que frena a tu equipo, un producto que necesita otras manos: cuéntamelo. Leo cada mensaje y respondo con preguntas honestas, no con un discurso de ventas.',
   'cta.email': 'Escríbeme',
