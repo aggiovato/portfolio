@@ -80,6 +80,12 @@ export const it: UiDictionary = {
   'note.readingTime': '{minutes} min di lettura',
   'note.all': 'Tutte le note',
   'note.tags': 'Argomenti',
+  'quiz.title': 'Mettiti alla prova',
+  'quiz.intro': 'Scegli una risposta per vedere se è giusta, e perché.',
+  'quiz.correct': 'Corretta',
+  'quiz.incorrect': 'Non proprio',
+  'quiz.score': '{correct} su {total} corrette',
+  'quiz.retry': 'Riprova',
   'newsletter.title': 'Ricevi le nuove note via email',
   'newsletter.text':
     'Un’email quando pubblico una nota, nella lingua che scegli. Puoi disiscriverti da qualsiasi email.',

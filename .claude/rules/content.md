@@ -46,6 +46,10 @@ time; Keystatic will edit the same files later (§13), so keep the format editor
   inlined: give it a viewBox, and set text with `font-family: var(--font-sans | --font-mono)` (or
   outline it) so it matches the site. Prefer a drawing to a picture of a diagram. Covers from the
   marble drawings: `node scripts/note-covers.mjs`.
+- Self-check (notes, optional): one `{% quiz %}` before the sources, with 2–6 questions as
+  `{% question text="…" options=["…", "…"] answer=2 explanation="…" /%}` (`answer` counts from 1;
+  a bad one fails the build; `backticks` are inline code; a code sample goes in the tag's body). Ask about what the note shows, not trivia; every option plausible;
+  the explanation says why, citing the note. Translate text, options and explanation; keep `answer`.
 - A note's `publishedAt` is the day it is released: the newsletter emails notes by that date
   (`publish-note` skill).
 

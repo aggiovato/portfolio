@@ -1,0 +1,103 @@
+---
+/**
+ * The self-check at the end of a note (`{% quiz %}` … `{% /quiz %}` around `{% question … /%}`).
+ * A <form> so «Try again» is a native reset button and everything works without JS. With JS, a
+ * running score («3 of 4 correct») is announced politely. Nothing is stored or sent.
+ */
+import { resolveLocale, useTranslations } from '../i18n';
+
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+---
+
+<section class="quiz" aria-labelledby="quiz-title" data-quiz>
+  <h2 id="quiz-title">{t('quiz.title')}</h2>
+  <p class="intro">{t('quiz.intro')}</p>
+  <form>
+    <slot />
+    <div class="foot">
+      <p class="score" aria-live="polite" data-quiz-score data-template={t('quiz.score')}></p>
+      <button class="btn retry" type="reset">
+        {t('quiz.retry')}
+      </button>
+    </div>
+  </form>
+</section>
+
+<script>
+  import { score } from '../lib/quiz';
+
+  for (const quiz of document.querySelectorAll<HTMLElement>('[data-quiz]')) {
+    const form = quiz.querySelector('form');
+    const out = quiz.querySelector<HTMLElement>('[data-quiz-score]');
+    const questions = [...quiz.querySelectorAll<HTMLFieldSetElement>('[data-question]')];
+    if (!form || !out) continue;
+    const update = () => {
+      const picked = questions.map((q) => {
+        const checked = q.querySelector<HTMLInputElement>('input:checked');
+        return checked ? Number(checked.value) : null;
+      });
+      const { answered, correct } = score(
+        picked,
+        questions.map((q) => Number(q.dataset.answer)),
+      );
+      out.textContent = answered
+        ? (out.dataset.template ?? '')
+            .replace('{correct}', String(correct))
+            .replace('{total}', String(questions.length))
+        : '';
+    };
+    form.addEventListener('change', update);
+    // A reset clears the radios after the event: read them on the next frame.
+    form.addEventListener('reset', () => requestAnimationFrame(update));
+  }
+</script>
+
+<style>
+  .quiz {
+    margin-block: var(--space-16) var(--space-8);
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+  .quiz h2 {
+    margin: 0 0 var(--space-2);
+  }
+  .intro {
+    margin: 0 0 var(--space-4);
+    color: var(--color-text-muted);
+  }
+  form {
+    margin: 0;
+    counter-reset: question;
+  }
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+  /* Secondary action: the same quiet outline as the footer's subscribe button (NewsletterForm). */
+  .retry {
+    border: 0;
+    font: inherit;
+    font-weight: 700;
+    background: transparent;
+    color: var(--color-text);
+    box-shadow: inset 0 0 0 1px var(--color-control-border);
+    cursor: pointer;
+  }
+  .retry:hover {
+    color: var(--color-accent-hover);
+    box-shadow: inset 0 0 0 1px var(--color-accent);
+  }
+  .score {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-text);
+  }
+</style>
