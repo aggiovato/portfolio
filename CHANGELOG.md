@@ -12,6 +12,12 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- `/llms.txt`: the site summarised in Markdown for AI assistants (who, how, case studies, notes,
+  contact), built from the published content.
+- `/sitemap.xml` redirects to the sitemap Astro generates (`/sitemap-index.xml`).
+
 ---
 
 ## [1.5.0] — 2026-11-15
