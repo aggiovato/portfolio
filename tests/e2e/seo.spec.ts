@@ -13,7 +13,10 @@ test.describe('seo', () => {
     await page.goto('/about/');
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /^https:\/\/.+\.jpg$/);
     await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute('content', '1200');
-    await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute('content', /Alejandro Lugo/);
+    await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
+      'content',
+      /Heber Alejandro Lugo/,
+    );
     const types = (await jsonLd(page))['@graph'].map((n) => n['@type']);
     expect(types).toEqual(['WebSite', 'Person']);
   });

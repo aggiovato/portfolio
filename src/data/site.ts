@@ -8,7 +8,7 @@ import type { Locale, UiKey } from '../i18n';
 
 export const site = {
   brand: 'aggiovato',
-  person: 'Alejandro Lugo',
+  person: 'Heber Alejandro Lugo',
   email: 'aggiovato@gmail.com',
   links: {
     github: 'https://github.com/aggiovato' as string,

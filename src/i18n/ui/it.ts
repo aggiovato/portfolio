@@ -8,12 +8,12 @@ export const it: UiDictionary = {
   'site.tagline':
     'Dalla prima conversazione al rilascio: prodotto, interfaccia, backend e gli strumenti che lo tengono in piedi.',
   'site.description':
-    'Alejandro Lugo è uno sviluppatore full-stack che trasforma idee in prodotti che crescono: dalla prima conversazione al rilascio.',
-  'site.defaultTitle': '{person} — {role} · {brand}',
+    'Heber Alejandro Lugo è uno sviluppatore full-stack che trasforma idee in prodotti che crescono: dalla prima conversazione al rilascio.',
+  'site.defaultTitle': '{person} · {brand}',
 
   // Layout and navigation
   'og.defaultAlt':
-    'Alejandro Lugo, sviluppatore full-stack: «Radicato nel codice. Fatto per esplorare.» accanto al pianeta Giove.',
+    'Heber Alejandro Lugo, sviluppatore full-stack: «Radicato nel codice. Fatto per esplorare.» accanto al pianeta Giove.',
   'a11y.newTab': '(si apre in una nuova scheda)',
   'a11y.skipToContent': 'Vai al contenuto',
   'nav.label': 'Principale',

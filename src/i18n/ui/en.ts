@@ -10,12 +10,12 @@ export const en = {
   'site.tagline':
     'From the first conversation to the release: product, interface, backend and the tooling that keeps it running.',
   'site.description':
-    'Alejandro Lugo is a full-stack developer who turns ideas into products that scale: from the first conversation to the release.',
-  'site.defaultTitle': '{person} — {role} · {brand}',
+    'Heber Alejandro Lugo is a full-stack developer who turns ideas into products that scale: from the first conversation to the release.',
+  'site.defaultTitle': '{person} · {brand}',
 
   // Layout and navigation
   'og.defaultAlt':
-    'Alejandro Lugo, full-stack developer: “Grounded in code. Built to explore.” beside the planet Jupiter.',
+    'Heber Alejandro Lugo, full-stack developer: “Grounded in code. Built to explore.” beside the planet Jupiter.',
   'a11y.newTab': '(opens in a new tab)',
   'a11y.skipToContent': 'Skip to content',
   'nav.label': 'Main',

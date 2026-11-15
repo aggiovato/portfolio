@@ -54,7 +54,7 @@ const {
 } = Astro.props;
 const fullTitle = title
   ? `${title} — ${site.brand}`
-  : t('site.defaultTitle', { person: site.person, role: t('site.role'), brand: site.brand });
+  : t('site.defaultTitle', { person: site.person, brand: site.brand });
 // Sections without content stay out of the menu (§7).
 const notesOpen = await hasNotes();
 const navItems = nav.filter((item) => !('requires' in item) || notesOpen);
