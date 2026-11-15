@@ -11,7 +11,7 @@ tags:
   - Angular
 cover:
   src: ../../../assets/notes/rxjs-mapping-operators/cover.webp
-  alt: 'Los cuatro operadores: switchMap cambia al más reciente, concatMap encola y mantiene el orden, mergeMap deja que las operaciones se solapen y exhaustMap ignora los eventos nuevos mientras está ocupado.'
+  alt: 'Respuestas de las mismas tres peticiones con cada operador: switchMap emite C a los 3 s; concatMap A a los 5 s, B a los 8 s y C a los 9 s; mergeMap C a los 3 s, B a los 4 s y A a los 5 s; exhaustMap solo A a los 5 s.'
 ---
 
 ¿Qué debería pasar cuando llega otra petición antes de que termine la actual? Los cuatro
@@ -46,7 +46,7 @@ events$.pipe(operator((id) => request$(id)));
 
 Un evento nuevo cancela la suscripción al flujo interno anterior.
 
-![Línea de tiempo de switchMap: A empieza a los 0 s y se cancela a los 1 s, B empieza a los 1 s y se cancela a los 2 s, C empieza a los 2 s y responde a los 3 s.](../../../assets/notes/rxjs-mapping-operators/switchmap.webp "Las barras son suscripciones activas; Out muestra las respuestas.")
+{% diagram id="rxjs-mapping-operators/switchmap" alt="Línea de tiempo de switchMap: A empieza a los 0 s y se cancela a los 1 s, B empieza a los 1 s y se cancela a los 2 s, C empieza a los 2 s y responde a los 3 s." caption="Las barras son suscripciones activas; Out muestra las respuestas." /%}
 
 A se detiene a los 1 s, B a los 2 s, y solo responde C, a los 3 s. Úsalo para resultados de búsqueda
 que deben seguir a la última consulta. Cancelar la suscripción no deshace los cambios en el
@@ -56,7 +56,7 @@ servidor.
 
 Los valores nuevos esperan en una cola; cada uno empieza cuando termina el anterior.
 
-![Línea de tiempo de concatMap: A se ejecuta desde los 0 s y responde a los 5 s; B espera en la cola y se ejecuta de los 5 s a los 8 s; C espera y se ejecuta de los 8 s a los 9 s.](../../../assets/notes/rxjs-mapping-operators/concatmap.webp "Las líneas punteadas son eventos esperando en la cola.")
+{% diagram id="rxjs-mapping-operators/concatmap" alt="Línea de tiempo de concatMap: A se ejecuta desde los 0 s y responde a los 5 s; B espera en la cola y se ejecuta de los 5 s a los 8 s; C espera y se ejecuta de los 8 s a los 9 s." caption="Las líneas punteadas son eventos esperando en la cola." /%}
 
 A responde a los 5 s, luego B a los 8 s y C a los 9 s. Úsalo para guardados ordenados que deben
 ejecutarse todos. Si un flujo interno nunca se completa, la cola se atasca.
@@ -65,7 +65,7 @@ ejecutarse todos. Si un flujo interno nunca se completa, la cola se atasca.
 
 Se suscribe a medida que llegan los eventos y reenvía las respuestas según llegan.
 
-![Línea de tiempo de mergeMap: A, B y C empiezan al llegar y se solapan; las respuestas salen C a los 3 s, B a los 4 s y A a los 5 s.](../../../assets/notes/rxjs-mapping-operators/mergemap.webp "Las tres peticiones se ejecutan a la vez; las respuestas llegan en el orden en que terminan.")
+{% diagram id="rxjs-mapping-operators/mergemap" alt="Línea de tiempo de mergeMap: A, B y C empiezan al llegar y se solapan; las respuestas salen C a los 3 s, B a los 4 s y A a los 5 s." caption="Las tres peticiones se ejecutan a la vez; las respuestas llegan en el orden en que terminan." /%}
 
 Las respuestas llegan C, B, A: no se conserva el orden de entrada. Úsalo para peticiones
 independientes que pueden solaparse. La concurrencia es ilimitada por defecto; pasa un límite si lo
@@ -75,7 +75,7 @@ necesitas.
 
 Los eventos nuevos se ignoran hasta que se completa el flujo interno activo.
 
-![Línea de tiempo de exhaustMap: A empieza a los 0 s y responde a los 5 s; B y C llegan mientras A está en marcha y se ignoran.](../../../assets/notes/rxjs-mapping-operators/exhaustmap.webp "B y C se descartan, no se encolan.")
+{% diagram id="rxjs-mapping-operators/exhaustmap" alt="Línea de tiempo de exhaustMap: A empieza a los 0 s y responde a los 5 s; B y C llegan mientras A está en marcha y se ignoran." caption="B y C se descartan, no se encolan." /%}
 
 Solo empieza A. B y C se descartan, no se encolan. Cuando A termina, un evento futuro puede iniciar
 una petición nueva. Úsalo para ignorar clics repetidos mientras se envía un formulario.

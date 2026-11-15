@@ -11,7 +11,7 @@ tags:
   - Angular
 cover:
   src: ../../../assets/notes/rxjs-mapping-operators/cover.webp
-  alt: "I quattro operatori: switchMap passa all'ultimo, concatMap mette in coda e mantiene l'ordine, mergeMap lascia sovrapporre le operazioni ed exhaustMap ignora i nuovi eventi mentre è occupato."
+  alt: 'Risposte delle stesse tre richieste con ciascun operatore: switchMap emette C a 3 s; concatMap A a 5 s, B a 8 s e C a 9 s; mergeMap C a 3 s, B a 4 s e A a 5 s; exhaustMap solo A a 5 s.'
 ---
 
 Cosa dovrebbe succedere quando arriva un'altra richiesta prima che finisca quella in corso? I
@@ -47,7 +47,7 @@ events$.pipe(operator((id) => request$(id)));
 
 Un nuovo evento annulla la sottoscrizione al flusso interno precedente.
 
-![Linea del tempo di switchMap: A parte a 0 s e viene annullato a 1 s, B parte a 1 s e viene annullato a 2 s, C parte a 2 s e risponde a 3 s.](../../../assets/notes/rxjs-mapping-operators/switchmap.webp "Le barre sono sottoscrizioni attive; Out mostra le risposte.")
+{% diagram id="rxjs-mapping-operators/switchmap" alt="Linea del tempo di switchMap: A parte a 0 s e viene annullato a 1 s, B parte a 1 s e viene annullato a 2 s, C parte a 2 s e risponde a 3 s." caption="Le barre sono sottoscrizioni attive; Out mostra le risposte." /%}
 
 A si ferma a 1 s, B a 2 s, e risponde solo C, a 3 s. Usalo per i risultati di ricerca che devono
 seguire l'ultima query. Annullare la sottoscrizione non annulla le modifiche lato server.
@@ -56,7 +56,7 @@ seguire l'ultima query. Annullare la sottoscrizione non annulla le modifiche lat
 
 I nuovi valori aspettano in coda; ognuno parte quando il precedente si completa.
 
-![Linea del tempo di concatMap: A va da 0 s e risponde a 5 s; B aspetta in coda e va da 5 s a 8 s; C aspetta e va da 8 s a 9 s.](../../../assets/notes/rxjs-mapping-operators/concatmap.webp "Le linee tratteggiate sono eventi in attesa nella coda.")
+{% diagram id="rxjs-mapping-operators/concatmap" alt="Linea del tempo di concatMap: A va da 0 s e risponde a 5 s; B aspetta in coda e va da 5 s a 8 s; C aspetta e va da 8 s a 9 s." caption="Le linee tratteggiate sono eventi in attesa nella coda." /%}
 
 A risponde a 5 s, poi B a 8 s e C a 9 s. Usalo per salvataggi ordinati che devono essere eseguiti
 tutti. Se un flusso interno non si completa mai, la coda si blocca.
@@ -65,7 +65,7 @@ tutti. Se un flusso interno non si completa mai, la coda si blocca.
 
 Sottoscrive man mano che arrivano gli eventi e inoltra le risposte man mano che arrivano.
 
-![Linea del tempo di mergeMap: A, B e C partono all'arrivo e si sovrappongono; le risposte escono C a 3 s, B a 4 s e A a 5 s.](../../../assets/notes/rxjs-mapping-operators/mergemap.webp "Le tre richieste girano insieme; le risposte arrivano nell'ordine in cui finiscono.")
+{% diagram id="rxjs-mapping-operators/mergemap" alt="Linea del tempo di mergeMap: A, B e C partono all'arrivo e si sovrappongono; le risposte escono C a 3 s, B a 4 s e A a 5 s." caption="Le tre richieste girano insieme; le risposte arrivano nell'ordine in cui finiscono." /%}
 
 Le risposte arrivano C, B, A: l'ordine di ingresso non è preservato. Usalo per richieste
 indipendenti che possono sovrapporsi. La concorrenza è illimitata per impostazione predefinita;
@@ -75,7 +75,7 @@ passa un limite se ti serve.
 
 I nuovi eventi vengono ignorati finché il flusso interno attivo non si completa.
 
-![Linea del tempo di exhaustMap: A parte a 0 s e risponde a 5 s; B e C arrivano mentre A è in corso e vengono ignorati.](../../../assets/notes/rxjs-mapping-operators/exhaustmap.webp "B e C vengono scartati, non messi in coda.")
+{% diagram id="rxjs-mapping-operators/exhaustmap" alt="Linea del tempo di exhaustMap: A parte a 0 s e risponde a 5 s; B e C arrivano mentre A è in corso e vengono ignorati." caption="B e C vengono scartati, non messi in coda." /%}
 
 Parte solo A. B e C vengono scartati, non messi in coda. Dopo che A si completa, un evento futuro
 può avviare una nuova richiesta. Usalo per ignorare i clic ripetuti mentre si invia un modulo.
