@@ -7,7 +7,9 @@ CSS tokens · static output · English (default) + Spanish (`/es/`) + Italian (`
   content decisions come from it; cite sections (§n). Never commit it.
 - **Language:** site copy in English, Spanish and Italian via `src/i18n/`; **all code comments in English**;
   `.claude/` and README in English; the local spec in Spanish.
-- Logo and planet are provisional assets; do not treat them as final.
+- Logo: «Soft Ascent» (src/assets/brand/, drawn in Figma), rendered by `LogoMark` (body in
+  `currentColor`, accent in peach; `micro` ≤ 28 px; pads become flames in flight). Icons and the email
+  logo in `public/` come from the same files. The planet is still provisional.
 - Case study images (`src/assets/projects/<slug>/`), Jupiter (`src/assets/hero/`) and the logo are
   versioned. Design references (`docs/referencias/`) are local only. `npm run assets:placeholders`
   stays as a safety net for a referenced image that is missing.

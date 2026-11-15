@@ -160,3 +160,31 @@ export const trailDots = (history: Vec[], count: number): Vec[] =>
     .filter((_, i) => (history.length - 1 - i) % 2 === 0)
     .slice(-count)
     .reverse();
+
+/** Jupiter in hero pixels: centre and radius of the disc. */
+export type Planet = { c: Vec; R: number };
+
+/**
+ * How the rocket comes to rest at `p`. On Jupiter (within its disc, plus half a rocket of
+ * tolerance) it stands on its pads along the surface normal, pointing away from the centre.
+ * In open sky there is no ground: it hovers in its flight pose, `angle` null keeps its heading.
+ */
+export function landingPose(
+  p: Vec,
+  planet: Planet | null,
+  rocket: number,
+): { onPlanet: boolean; angle: number | null } {
+  if (planet && Math.hypot(p.x - planet.c.x, p.y - planet.c.y) <= planet.R + rocket / 2) {
+    const a = headingDeg(planet.c, p);
+    return { onPlanet: true, angle: ((((a + 180) % 360) + 360) % 360) - 180 }; // in [-180, 180)
+  }
+  return { onPlanet: false, angle: null };
+}
+
+/** The point of Jupiter's limb in the direction of `p`, lifted `lift` px off it (pads on the rim). */
+export function onLimb(p: Vec, planet: Planet, lift: number): Vec {
+  const dx = p.x - planet.c.x;
+  const dy = p.y - planet.c.y;
+  const n = Math.hypot(dx, dy) || 1;
+  return { x: planet.c.x + (dx / n) * (planet.R + lift), y: planet.c.y + (dy / n) * (planet.R + lift) };
+}

@@ -1,5 +1,5 @@
 ---
-import LogoMark from './LogoMark.astro';
+import Lockup from './Lockup.astro';
 import NewsletterForm from './NewsletterForm.astro';
 import { site, type NavItem } from '../data/site';
 import { localizePath, resolveLocale, useTranslations } from '../i18n';
@@ -21,10 +21,8 @@ const year = new Date().getFullYear();
 <footer class="site-footer">
   <div class="container inner">
     <div class="sign">
-      <LogoMark size={32} class="sign-mark" />
-      <p>
-        <strong>{site.brand}</strong>
-      </p>
+      <Lockup height={23} />
+      <p class="visually-hidden">{site.brand}</p>
     </div>
 
     <nav aria-label={t('footer.label')}>
@@ -83,13 +81,8 @@ const year = new Date().getFullYear();
     align-items: center;
   }
 
-  .sign :global(.sign-mark) {
-    color: var(--color-accent);
+  .sign :global(.lockup) {
     flex-shrink: 0;
-  }
-
-  .sign strong {
-    color: var(--color-text);
   }
 
   .subscribe {
@@ -129,6 +122,14 @@ const year = new Date().getFullYear();
     .legal,
     .subscribe {
       grid-column: 1 / -1;
+    }
+  }
+
+  /* Phones: the back-to-top button sits over the last line; keep the copyright clear of it
+     (button 52 px + its 16 px margin) instead of hiding the button where it is most useful. */
+  @media (max-width: 767px) {
+    .legal {
+      padding-inline-end: 4.5rem;
     }
   }
 </style>

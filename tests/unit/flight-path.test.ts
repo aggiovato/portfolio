@@ -7,7 +7,9 @@ import {
   easeInOut,
   easeSine,
   headingDeg,
+  landingPose,
   lerpAngle,
+  onLimb,
   polylineData,
   smoothstep,
   timedPath,
@@ -167,5 +169,27 @@ describe('crossesRects and trailDots', () => {
     const history = Array.from({ length: 7 }, (_, i) => ({ x: i, y: 0 }));
     expect(trailDots(history, 3).map((p) => p.x)).toEqual([6, 4, 2]);
     expect(trailDots([], 3)).toEqual([]);
+  });
+});
+
+describe('landing', () => {
+  const planet = { c: { x: 500, y: 500 }, R: 200 };
+
+  it('stands on Jupiter along the surface normal', () => {
+    expect(landingPose({ x: 500, y: 290 }, planet, 40)).toEqual({ onPlanet: true, angle: 0 });
+    const left = landingPose({ x: 300, y: 500 }, planet, 40);
+    expect(left.onPlanet).toBe(true);
+    expect(left.angle).toBeCloseTo(-90);
+  });
+
+  it('hovers in open sky, keeping its heading', () => {
+    expect(landingPose({ x: 100, y: 100 }, planet, 40)).toEqual({ onPlanet: false, angle: null });
+    expect(landingPose({ x: 100, y: 100 }, null, 40)).toEqual({ onPlanet: false, angle: null });
+  });
+
+  it('puts the arrival point on the limb, lifted off it', () => {
+    const p = onLimb({ x: 450, y: 500 }, planet, 18);
+    expect(p.x).toBeCloseTo(282);
+    expect(p.y).toBeCloseTo(500);
   });
 });

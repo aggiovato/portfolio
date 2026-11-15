@@ -36,7 +36,11 @@ const copy = {
     accent: 'esplorare.',
   },
 };
-const logo = readFileSync(new URL('public/favicon.svg', root), 'utf8').replace(/<!--[\s\S]*?-->/, '');
+// The mark (src/assets/brand/mark.svg) with its body in lavender, as on every dark ground.
+const logo = readFileSync(new URL('src/assets/brand/mark.svg', root), 'utf8').replaceAll(
+  '#211B2E',
+  '#C6A5FF',
+);
 
 const page = (c) => `<!doctype html>
 <html><head><style>
@@ -50,7 +54,7 @@ const page = (c) => `<!doctype html>
   .planet img { width: 100%; height: 100%; border-radius: 50%; filter: saturate(0.9); }
   .text { position: absolute; left: 80px; top: 78px; bottom: 78px; width: 660px; display: flex; flex-direction: column; }
   .brand { display: flex; align-items: center; gap: 16px; font-size: 34px; font-weight: 700; }
-  .brand svg { width: 64px; height: 52px; }
+  .brand svg { width: 56px; height: 56px; }
   h1 { margin-top: auto; font-size: 66px; font-weight: 750; line-height: 1.06; letter-spacing: -0.025em; }
   h1 em { font-style: normal; color: #c6a5ff; }
   .role { margin-top: 8px; font-family: Mono; font-size: 20px; color: #bcb5ca; white-space: nowrap; }

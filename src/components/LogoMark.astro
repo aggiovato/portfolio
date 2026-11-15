@@ -1,33 +1,73 @@
 ---
 /**
- * A-rocket mark — PROVISIONAL.
- * Stroke approximation until the official vector SVG arrives.
- * When it does: replace the <svg> content keeping a coherent viewBox and
- * `fill="currentColor"` so it inherits colour (mono / reverse / lavender).
+ * The aggiovato mark, «Soft Ascent» (src/assets/brand/, drawn in Figma): an A that is also a rocket.
+ * The legs end in nozzles; the peach crossbar is the horizon. Two tones: the body takes
+ * `currentColor` (plum on light, lavender on dark), the accent is peach (--color-jupiter).
+ * - `variant="micro"` (≤ 28 px): no landing pads, heavier strokes, so it stays legible.
+ * - Landed it stands on two pads; in flight the pads become flames. `flying` shows the flames
+ *   always (the sky rocket); inside an element with [data-flying] they show while it flies (the
+ *   hero rocket). Flames are drawn past the 120×120 box (overflow visible) so both states share
+ *   the same geometry and centre.
+ * Points up at 0°, like the previous mark: Hero.astro rotates it to its heading.
  */
+import { MARK } from '../lib/brand/mark';
+
 interface Props {
   size?: number;
+  variant?: 'mark' | 'micro';
+  flying?: boolean;
   class?: string;
   title?: string;
 }
-const { size = 40, class: className, title } = Astro.props;
+const { size = 40, variant = 'mark', flying = false, class: className, title } = Astro.props;
 ---
 
 <svg
-  class={className}
+  class:list={['logo-mark', className, flying && 'is-flying']}
   width={size}
-  height={Math.round(size * 0.8)}
-  viewBox="0 0 120 96"
-  fill="none"
-  stroke="currentColor"
-  stroke-linecap="round"
-  stroke-linejoin="round"
+  height={size}
+  viewBox="0 0 120 120"
+  overflow="visible"
   role={title ? 'img' : undefined}
   aria-label={title}
   aria-hidden={title ? undefined : 'true'}
 >
-  <path d="M40 82 L55 26 Q60 10 65 26 L80 82" stroke-width="13"></path>
-  <path d="M49 60 Q60 57 71 60" stroke-width="8"></path>
-  <path d="M45 44 C30 50 16 57 14 65 C13 72 28 79 41 84" stroke-width="8"></path>
-  <path d="M75 44 C90 50 104 57 106 65 C107 72 92 79 79 84" stroke-width="8"></path>
+  {variant === 'micro' ? (
+    <>
+      <path class="accent" d={MARK.micro.bar} />
+      <path class="body" d={MARK.micro.body} />
+    </>
+  ) : (
+    <>
+      <path class="accent" d={MARK.bar} />
+      <path class="body" d={MARK.body} />
+      <path class="accent pads" d={MARK.pads} />
+      <path class="accent flames" d={MARK.flames} />
+    </>
+  )}
 </svg>
+
+<style>
+  .body {
+    fill: currentColor;
+  }
+  .accent {
+    fill: var(--color-jupiter);
+  }
+  /* Landed by default; in flight the pads become flames. */
+  .flames,
+  .is-flying .pads,
+  :global([data-flying]) .pads {
+    display: none;
+  }
+  .is-flying .flames,
+  :global([data-flying]) .flames {
+    display: inline;
+  }
+  /* Single ink when the system asks for it (forced colours): everything in the text colour. */
+  @media (forced-colors: active) {
+    .accent {
+      fill: currentColor;
+    }
+  }
+</style>

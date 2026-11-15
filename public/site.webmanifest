@@ -1,0 +1,11 @@
+{
+  "name": "aggiovato — Heber Alejandro Lugo",
+  "short_name": "aggiovato",
+  "icons": [
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ],
+  "theme_color": "#15161e",
+  "background_color": "#15161e",
+  "display": "browser"
+}
