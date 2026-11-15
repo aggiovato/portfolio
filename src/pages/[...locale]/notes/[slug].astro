@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Watermark from '../../../components/Watermark.astro';
 import ArticleBody from '../../../components/ArticleBody.astro';
 import ContactCTA from '../../../components/ContactCTA.astro';
 import NewsletterForm from '../../../components/NewsletterForm.astro';
@@ -43,6 +44,7 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 ---
 
 <BaseLayout
+  footerSubscribe={false}
   ogImage={data.cover && { src: data.cover.src, alt: data.cover.alt }}
   article={{ publishedTime: data.publishedAt, modifiedTime: data.updatedAt, tags: data.tags }}
   jsonLd={{
@@ -59,33 +61,36 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
   alternates={alternates}
 >
   <article>
-    <header class="container head">
-      <p class="path-label">
-        portfolio / <a href={localizePath('/notes/', locale)}>notes</a> / <b>{data.slug}.mdoc</b>
-      </p>
-      <h1>{data.title}</h1>
-      <p class="summary">{data.summary}</p>
-      <p class="meta">
-        {data.publishedAt && (
-          <time datetime={isoDate(data.publishedAt)}>
-            {t('note.published', { date: formatDate(data.publishedAt) })}
-          </time>
+    <div class="has-watermark">
+      <Watermark kind="marbles" side="right" anchor="top" />
+      <header class="container head">
+        <p class="path-label">
+          portfolio / <a href={localizePath('/notes/', locale)}>notes</a> / <b>{data.slug}.mdoc</b>
+        </p>
+        <h1>{data.title}</h1>
+        <p class="summary">{data.summary}</p>
+        <p class="meta">
+          {data.publishedAt && (
+            <time datetime={isoDate(data.publishedAt)}>
+              {t('note.published', { date: formatDate(data.publishedAt) })}
+            </time>
+          )}
+          {data.updatedAt && (
+            <time datetime={isoDate(data.updatedAt)}>
+              {t('note.updated', { date: formatDate(data.updatedAt) })}
+            </time>
+          )}
+          <span>{t('note.readingTime', { minutes: String(readingMinutes(note.body ?? '')) })}</span>
+        </p>
+        {data.tags.length > 0 && (
+          <ul class="chip-list" aria-label={t('note.tags')}>
+            {data.tags.map((tag) => (
+              <li class="chip">{tag}</li>
+            ))}
+          </ul>
         )}
-        {data.updatedAt && (
-          <time datetime={isoDate(data.updatedAt)}>
-            {t('note.updated', { date: formatDate(data.updatedAt) })}
-          </time>
-        )}
-        <span>{t('note.readingTime', { minutes: String(readingMinutes(note.body ?? '')) })}</span>
-      </p>
-      {data.tags.length > 0 && (
-        <ul class="chip-list" aria-label={t('note.tags')}>
-          {data.tags.map((tag) => (
-            <li class="chip">{tag}</li>
-          ))}
-        </ul>
-      )}
-    </header>
+      </header>
+    </div>
 
     {data.cover && (
       <figure class="container cover">

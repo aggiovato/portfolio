@@ -8,12 +8,12 @@ export const es: UiDictionary = {
   'site.tagline':
     'De la primera conversación al lanzamiento: producto, interfaz, backend y las herramientas que lo mantienen en marcha.',
   'site.description':
-    'Alejandro Lugo es desarrollador full-stack y convierte ideas en productos que escalan: de la primera conversación al lanzamiento.',
-  'site.defaultTitle': '{person} — {role} · {brand}',
+    'Heber Alejandro Lugo es desarrollador full-stack y convierte ideas en productos que escalan: de la primera conversación al lanzamiento.',
+  'site.defaultTitle': '{person} · {brand}',
 
   // Layout and navigation
   'og.defaultAlt':
-    'Alejandro Lugo, desarrollador full-stack: «Anclado en el código. Hecho para explorar.» junto al planeta Júpiter.',
+    'Heber Alejandro Lugo, desarrollador full-stack: «Anclado en el código. Hecho para explorar.» junto al planeta Júpiter.',
   'a11y.newTab': '(se abre en una pestaña nueva)',
   'a11y.skipToContent': 'Saltar al contenido',
   'nav.label': 'Principal',
@@ -34,27 +34,22 @@ export const es: UiDictionary = {
   'hero.identity': '{role}, centrado en {focus}.',
   'hero.primaryCta': 'Ver mis proyectos',
   'hero.secondaryCta': 'Hablemos',
-  'hero.latest': 'Último proyecto:',
+  'hero.latest': 'Proyecto destacado:',
   'hero.backToTop': 'Volver arriba',
   'hero.arrivalPoint': 'Punto de llegada',
   'home.workTitle': 'Cosas que he lanzado.',
   'home.seeAllProjects': 'Ver todos los proyectos',
   'home.workEmpty': 'Estoy escribiendo los casos de estudio. Mientras tanto, el código está en',
   'home.processTitle': 'Cómo trabajo.',
-  'home.process1Title': 'Entender el problema',
+  'home.process1Title': 'Entender la necesidad',
   'home.process1Body':
-    'Hablar con quien hace el trabajo, mapear el flujo actual y encontrar dónde falla de verdad antes de proponer pantallas.',
-  'home.process1Example':
-    'el frontend se bloqueaba esperando APIs que aún no existían, y json-server se quedaba corto para pantallas reales.',
-  'home.process2Title': 'Diseñar la solución',
+    'Hablar con quien hace el trabajo o tiene la idea, mapear el flujo actual o el que se desea, y encontrar los puntos débiles, los fallos y las oportunidades de crecer antes de diseñar nada.',
+  'home.process2Title': 'Acotar la primera versión',
   'home.process2Body':
-    'Esbozar el flujo principal, acordar pronto los contratos de datos y decidir qué se queda fuera de la primera versión.',
-  'home.process2Example': 'la puntuación y los temporizadores fueron fórmulas en papel antes de ser código.',
-  'home.process3Title': 'Construir e iterar',
+    'Convertir ese mapa en una prueba de concepto y un MVP que resuelvan la necesidad inmediata, sin perder de vista el crecimiento que salió del paso 01: ahí empieza la escalabilidad.',
+  'home.process3Title': 'Construir, medir, crecer',
   'home.process3Body':
-    'Entregar una parte usable, observar cómo se usa y refinar. Interfaces y APIs evolucionan juntas.',
-  'home.process3Example':
-    'los falsos positivos de la primera versión llevaron a limitar cada diagnóstico a su sección.',
+    'Entregar una parte usable, ver cómo se usa de verdad y hacer evolucionar el producto en pasos pequeños, interfaz y backend a la vez, sobre una base que no haya que rehacer para crecer.',
   'home.aboutTitle': 'Primero el producto. Herramientas que crecen con él.',
   'home.aboutBody':
     'Soy {person}, desarrollador full-stack. Empiezo por el negocio y el producto: cómo se organiza el trabajo y qué quiere construir la persona que está detrás. Las herramientas deberían ser la expresión natural de ese orden, así que primero alineamos las ideas y después construyo sobre una base que pueda crecer. La escalabilidad no es un añadido final: forma parte del primer diseño.',
@@ -111,6 +106,8 @@ export const es: UiDictionary = {
 
   // Case study
   'project.liveDemo': 'Demo en vivo',
+  'project.playground': 'Explorar el playground',
+  'project.install': 'Ver en el Marketplace',
   'project.sourceCode': 'Código fuente',
   'project.documentation': 'Documentación',
   'project.tryItLive': 'Pruébalo en vivo →',
@@ -135,7 +132,7 @@ export const es: UiDictionary = {
   'glance.label': 'De un vistazo',
   'glance.problem': 'Problema',
   'glance.contribution': 'Mi parte',
-  'glance.outcome': 'Resultado',
+  'glance.outcome': 'Qué entregué',
   'project.meta.type': 'Tipo',
   'project.meta.period': 'Periodo',
   'project.meta.status': 'Estado',
@@ -182,12 +179,13 @@ export const es: UiDictionary = {
   'about.headingWord': 'producto',
   'about.description': 'Sobre {person}: {role} centrado en {focus}.',
   'about.lead':
-    'Soy {person}, desarrollador full-stack. Antes de cualquier pantalla o endpoint, quiero entender el negocio: cómo se organiza el trabajo, quién hace qué y qué intenta construir la persona que está detrás.',
+    'Soy {person}, desarrollador full-stack con foco en frontend y producto. Antes de diseñar una pantalla o construir una API, quiero entender a las personas que la van a usar: cómo trabajan, qué se lo complica y qué necesitan conseguir.',
   'about.approach':
-    'Las buenas herramientas son la expresión natural de ese orden. Por eso lo primero es alinear las ideas, las del emprendedor y las del equipo, en una estructura clara; el software nace de ahí y se diseña desde el principio para escalar con el negocio, en lugar de rehacerse cada vez que crece.',
-  'about.nameBefore': 'El nombre',
-  'about.nameAfter':
-    'significa «aterrizado en Júpiter»: un recordatorio de seguir explorando, pero con los pies en el suelo. En la práctica, curiosidad por las herramientas nuevas y una preferencia testaruda por lo que está probado, documentado y es fácil de cambiar.',
+    'Mi trabajo combina desarrollo, análisis funcional y responsabilidad de producto. Convierto necesidades de negocio en flujos, interfaces y decisiones técnicas claras, y decido qué entra en la primera versión y qué puede esperar. Busco construir software que resuelva el problema de hoy y siga siendo fácil de cambiar a medida que el producto evoluciona.',
+  'about.background':
+    'Mi formación es de ingeniero en telecomunicaciones y electrónica. Empecé programando cerca del hardware antes de pasar al desarrollo multiplataforma y web. Esa experiencia marcó mi forma de abordar el software: entender cómo encajan las piezas, seguir un problema a través de las capas y equilibrar las decisiones técnicas con las limitaciones reales.',
+  'about.today':
+    'Hoy trabajo sobre todo con Angular y React en el frontend, y con Spring Boot y Node.js en el backend. Lo que más me interesa es conectar todo el proceso: desde entender un problema hasta poner una herramienta útil en manos de alguien.',
   'about.workWith': 'Con qué trabajo',
 
   // Contact
@@ -195,7 +193,8 @@ export const es: UiDictionary = {
   'contact.heading': '{word}.',
   'contact.headingWord': 'Hablemos',
   'contact.description': 'Cómo contactar con {person}.',
-  'contact.intro': 'Cuéntame qué estás construyendo y dónde te has atascado. Suelo responder en pocos días.',
+  'contact.intro':
+    'Si estás construyendo un producto, mejorando una herramienta interna, buscas colaboración técnica o a alguien para tu equipo: cuéntame el contexto y qué necesitas resolver. Suelo responder en pocos días.',
   'contact.email': 'Email',
   'cta.titleBefore': '¿Tienes',
   'cta.words': 'un producto|una idea|un proyecto|un negocio',

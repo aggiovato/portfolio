@@ -369,3 +369,13 @@ samp {
     background-position: 0% 0;
   }
 }
+
+/* A page section with a Watermark behind it: clips the drawing and keeps the content above. */
+.has-watermark {
+  position: relative;
+  overflow: clip;
+}
+.has-watermark > .container {
+  position: relative;
+  z-index: 1;
+}

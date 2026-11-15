@@ -7,7 +7,7 @@ import ProjectCarousel from '../../components/ProjectCarousel.astro';
 import ContactCTA from '../../components/ContactCTA.astro';
 import Watermark from '../../components/Watermark.astro';
 import HorizonArc from '../../components/HorizonArc.astro';
-import { getFeaturedProjects, getPublicProjects, projectPath } from '../../lib/content/projects';
+import { getFeaturedProjects, projectPath } from '../../lib/content/projects';
 import { site } from '../../data/site';
 import { localeParams, localizePath, resolveLocale, useTranslations } from '../../i18n';
 
@@ -16,33 +16,14 @@ export const getStaticPaths = (() => localeParams()) satisfies GetStaticPaths;
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 const featured = await getFeaturedProjects(locale, 8);
-// The newest case study (listings are sorted by date), shown under the hero's tagline.
-const [newest] = await getPublicProjects(locale);
-const latest = newest && { title: newest.data.title, href: projectPath(newest) };
+// The first featured case study (by featuredOrder), shown under the hero's tagline.
+const [top] = featured;
+const latest = top && { title: top.data.title, href: projectPath(top) };
 
-// Each step shows where it happened, in a real case study (by slug). A step whose project is not
-// published in this listing simply shows no example.
-const projects = await getPublicProjects(locale);
-const evidence = (slug: string, example: string) => {
-  const project = projects.find((p) => p.data.slug === slug);
-  return project && { title: project.data.title, href: projectPath(project), example };
-};
 const process = [
-  {
-    title: t('home.process1Title'),
-    body: t('home.process1Body'),
-    evidence: evidence('yrest', t('home.process1Example')),
-  },
-  {
-    title: t('home.process2Title'),
-    body: t('home.process2Body'),
-    evidence: evidence('uquiz', t('home.process2Example')),
-  },
-  {
-    title: t('home.process3Title'),
-    body: t('home.process3Body'),
-    evidence: evidence('yrest-vscode', t('home.process3Example')),
-  },
+  { title: t('home.process1Title'), body: t('home.process1Body') },
+  { title: t('home.process2Title'), body: t('home.process2Body') },
+  { title: t('home.process3Title'), body: t('home.process3Body') },
 ];
 ---
 
@@ -90,14 +71,6 @@ const process = [
             </span>
             <h3>{step.title}</h3>
             <p>{step.body}</p>
-            {step.evidence && (
-              <p class="evidence">
-                <a class="link-underline" href={step.evidence.href}>
-                  {step.evidence.title}
-                </a>
-                : {step.evidence.example}
-              </p>
-            )}
           </li>
         ))}
       </ol>
@@ -197,19 +170,6 @@ const process = [
 
   .process p {
     color: var(--color-text-muted);
-  }
-
-  /* The proof under each step: where it happened, as a link to that case study. */
-  .process .evidence {
-    margin-top: var(--space-4);
-    padding-top: var(--space-4);
-    border-top: 1px dashed var(--color-border);
-    font-size: 0.9375rem;
-    color: var(--color-text-subtle);
-  }
-  .process .evidence a {
-    min-height: 0;
-    font-weight: 650;
   }
 
   @media (min-width: 900px) {

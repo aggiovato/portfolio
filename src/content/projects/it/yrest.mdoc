@@ -19,7 +19,7 @@ role:
   - Documentazione
 periodLabel: Giugno 2026 – oggi
 glance:
-  problem: "Il frontend si blocca su API che non esistono ancora, e json-server resta troppo limitato per schermate reali."
+  problem: "Il frontend si blocca su API che non esistono ancora; mi servivano relazioni, scenari e rotte personalizzate in un mock facile da modificare."
   contribution: "L'ho progettato e costruito da solo: ambito del prodotto, CLI, server, formato db.yml, test, documentazione e release."
   outcome:
     - "Pubblicato su npm come @yrest/cli, con release dai tag di versione e npm provenance."
@@ -65,16 +65,14 @@ gallery:
     alt: "La pagina Relations della documentazione di yRest, che spiega many2one, one2one e many2many con un esempio di _rel."
     caption: "Documentazione — relazioni: tre tipi e un DSL compatto."
 links:
-  demo: https://yrest-docs.netlify.app/playground/
+  playground: https://yrest-docs.netlify.app/playground/
   code: https://github.com/aggiovato/yRest
   docs: https://yrest-docs.netlify.app
 ---
 
 ## Problema
 
-Il lavoro di frontend si blocca spesso su un'API che ancora non esiste. La soluzione abituale, `json-server`, si avvia in fretta ma resta superficiale: i dati vivono in JSON, le relazioni sono limitate e, appena una schermata ha bisogno di un endpoint personalizzato, di una risposta lenta o di un caso di errore, finisci comunque per scrivere un piccolo backend.
-
-Volevo che il mock fosse facile da modificare come un file di configurazione e che coprisse comunque i casi in cui si imbatte un'interfaccia reale.
+Il lavoro di frontend si blocca spesso su un'API che ancora non esiste. Per i miei casi serviva più di un CRUD su un JSON: relazioni, risposte condizionali, endpoint lenti o che falliscono e rotte personalizzate, in un formato facile da modificare come un file di configurazione. yRest è nato per riunire queste esigenze attorno a un unico file YAML.
 
 ## L'idea
 
@@ -96,7 +94,7 @@ posts:
 npx @yrest/cli serve db.yml
 ```
 
-Ogni collezione di primo livello diventa una risorsa CRUD completa (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) su `http://localhost:3070`. La porta predefinita è un piccolo scherzo: Y + A + M + L in ASCII fa 307.
+Ogni collezione di primo livello diventa una risorsa CRUD completa (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) su `http://localhost:3070`.
 
 ## Soluzione
 
@@ -140,7 +138,7 @@ Il progetto è cresciuto per fasi, e ognuna ha chiuso una lacuna che ho incontra
 La suite gira con Vitest su Node 20 e 22 in CI: test unitari, end-to-end e test di sicurezza dedicati a XSS, ReDoS e funzioni handler. Le release si pubblicano da un tag di versione con npm provenance.
 
 {% callout type="constraint" title="Limiti" %}
-yRest è uno strumento di sviluppo e di test, non un backend. I dati vivono in un file YAML; non ci sono ancora autenticazione né validazione delle richieste, i canali WebSocket sono ancora nella roadmap e il fallback al proxy è rimandato.
+yRest è uno strumento di sviluppo e di test, non un backend. I dati vivono in un file YAML. Le risposte di login si possono simulare con rotte, scenari e handler, ma non è un'autenticazione di produzione; la validazione delle richieste rispetto a uno schema, i canali WebSocket e il fallback al proxy sono ancora nella roadmap.
 {% /callout %}
 
 ## Prossimi passi

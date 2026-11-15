@@ -62,9 +62,14 @@ const projects = defineCollection({
           .default([]),
         links: z
           .object({
+            /** A working demo of the product itself. */
             demo: z.url().optional(),
+            /** An interactive playground (not the product running): labelled as such. */
+            playground: z.url().optional(),
             code: z.url().optional(),
             docs: z.url().optional(),
+            /** Where to install it (a marketplace, a store, a package page). */
+            install: z.url().optional(),
           })
           .default({}),
         seo: z.object({ title: z.string().optional(), description: z.string().optional() }).optional(),
@@ -115,4 +120,37 @@ const notes = defineCollection({
       }),
 });
 
-export const collections = { projects, notes };
+/**
+ * «What I work with» on the About page: one file per locale (`src/content/skills/<locale>.yaml`,
+ * id = locale). Areas → technologies → branches, each branch saying when it is used. Translations
+ * keep the same ids and branch counts (src/lib/content/skill-utils.ts).
+ */
+const id = z.string().regex(/^[a-z0-9-]+$/);
+const skills = defineCollection({
+  loader: glob({ pattern: '*.yaml', base: './src/content/skills' }),
+  schema: z.object({
+    intro: z.string().min(1),
+    groups: z
+      .array(
+        z.object({
+          id,
+          title: z.string().min(1),
+          nodes: z
+            .array(
+              z.object({
+                id,
+                name: z.string().min(1),
+                summary: z.string().min(1).max(80),
+                branches: z
+                  .array(z.object({ name: z.string().min(1), when: z.string().min(1).max(220) }))
+                  .min(1),
+              }),
+            )
+            .min(1),
+        }),
+      )
+      .min(1),
+  }),
+});
+
+export const collections = { projects, notes, skills };

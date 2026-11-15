@@ -62,7 +62,7 @@ gallery:
     caption: "Modo Estudio: repaso pregunta a pregunta con explicaciones."
   - src: ../../../assets/projects/uquiz/game_session.jpg
     alt: "Introducción del modo Juego para el pack Tech Mix, con 40 preguntas, dificultad media y un tiempo estimado de unos 19 minutos y 59 segundos."
-    caption: "Modo Juego: el tiempo se estima para cada pack."
+    caption: "Modo Juego: la duración estimada del pack, a partir del tiempo de sus preguntas."
   - src: ../../../assets/projects/uquiz/game_summary.jpg
     alt: "Resumen de partida con +136 puntos en el rango Adept, 305 de MMR para el siguiente rango, 10 aciertos y 100 % de precisión."
     caption: "Resumen de partida: puntuación, rango y MMR hasta el siguiente nivel."
@@ -82,7 +82,7 @@ Quería entrenar conocimientos técnicos (Angular, RxJS, Java…) con mis propia
 - **Contenido:** carpetas, packs y preguntas de opción múltiple con 2–6 opciones, dificultad y una explicación opcional. Los packs se pueden compartir como archivos JSON `.uquiz`.
 - **Modo Estudio:** repaso secuencial con respuesta inmediata y niveles de dominio por pregunta (Nueva → Aprendiendo → Familiar → Dominada).
 - **Modo Juego:** cada pregunta tiene su propia cuenta atrás y después un tiempo extra en el que las respuestas siguen contando, pero cuestan más.
-- **Ranking:** un MMR personal suavizado con una media móvil ponderada exponencialmente, con nueve niveles de Initiate a Paragon e histéresis para que el rango no parpadee en los límites.
+- **Ranking:** un rango personal que suaviza las variaciones entre partidas y no oscila cuando la puntuación está cerca de un límite. Por dentro: un MMR con media móvil ponderada exponencialmente, nueve niveles de Initiate a Paragon e histéresis en los límites.
 
 ## Decisiones técnicas
 
@@ -104,8 +104,8 @@ Quería entrenar conocimientos técnicos (Angular, RxJS, Java…) con mis propia
 
 ## Calidad
 
-Los tests unitarios cubren la lógica de negocio pura: la puntuación del juego (todas las ramas), el cálculo del presupuesto de tiempo y las utilidades del juego.
+Los tests unitarios cubren la lógica de negocio pura: la puntuación del juego (todas las ramas), el cálculo del presupuesto de tiempo y las utilidades del juego. La primera versión está completa. Existe un APK, pero no está publicado en Google Play; el código es público.
 
 ## Qué aprendí
 
-Las reglas de un juego hay que escribirlas como fórmulas antes de programarlas; así ajustar la puntuación y los temporizadores fue mucho más fácil.
+En este proyecto, escribir primero las reglas de puntuación y tiempo como fórmulas me ayudó a detectar casos límite y ajustar el comportamiento antes de implementarlo.

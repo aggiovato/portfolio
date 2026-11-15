@@ -1,0 +1,151 @@
+# Con qué trabajo (Sobre mí). Same group and node ids and branch count as en.yaml.
+intro: Abre una tecnología para ver sus ramas y cuándo recurro a cada una.
+groups:
+  - id: frontend
+    title: Frontend
+    nodes:
+      - id: angular
+        name: Angular
+        summary: Mi framework principal para aplicaciones de negocio.
+        branches:
+          - name: Enrutamiento
+            when: Rutas con carga diferida por funcionalidad y guards de acceso, para que cada área de la app cargue y crezca por su cuenta.
+          - name: Estado con signals y NgRx
+            when: Signals para el estado local y derivado; un store solo cuando varias funcionalidades comparten y modifican los mismos datos.
+          - name: Componentes
+            when: Componentes standalone, separados en contenedores que hablan con los servicios y presentacionales que solo reciben inputs.
+          - name: RxJS
+            when: Para todo lo que ocurre en el tiempo, como llamadas HTTP, búsqueda mientras escribes o cancelación; el operador sigue el comportamiento que necesita la pantalla.
+      - id: react
+        name: React
+        summary: Interfaces de producto y herramientas interactivas.
+        branches:
+          - name: Hooks
+            when: Un hook propio en cuanto la misma lógica aparece en dos componentes, como la carga de datos, formularios o suscripciones.
+          - name: Estado del servidor con TanStack Query
+            when: Los datos que vienen de una API viven en una caché de consultas, no en un store global, con caché, reintentos y recargas incluidos.
+          - name: Estado global con Redux o context
+            when: Context para valores que cambian poco, como el tema o la sesión; Redux solo cuando muchas partes de la app editan el mismo estado.
+          - name: Componentes
+            when: Componentes pequeños que se componen con props y children; una librería de componentes compartida cuando un patrón se repite.
+      - id: typescript
+        name: TypeScript
+        summary: El contrato entre todas las capas.
+        branches:
+          - name: Tipado estricto
+            when: Modo estricto siempre; los tipos modelan el dominio para que los estados inválidos no se puedan escribir.
+          - name: Modelos compartidos
+            when: Los mismos tipos para peticiones y respuestas de la API a ambos lados cuando frontend y backend conviven.
+      - id: styling
+        name: HTML, CSS, Sass y Tailwind
+        summary: Interfaces accesibles y coherentes.
+        branches:
+          - name: HTML semántico
+            when: Elementos nativos antes que ARIA; los enlaces navegan, los botones actúan y la página funciona antes de cualquier JavaScript.
+          - name: Design tokens
+            when: Colores, espacios y tipografía como tokens desde el primer día, para que de ellos pueda crecer un design system.
+          - name: Sass o Tailwind
+            when: Sass con tokens para un producto con su propio design system; Tailwind cuando importa la velocidad y el equipo comparte sus convenciones.
+  - id: backend
+    title: Backend
+    nodes:
+      - id: spring
+        name: Java y Spring Boot
+        summary: Backends con reglas de negocio complejas.
+        branches:
+          - name: Arquitectura por capas
+            when: Controladores, servicios y repositorios alrededor del dominio, para probar las reglas sin el framework.
+          - name: APIs REST
+            when: Endpoints por recurso con validación y errores coherentes, para que todos los clientes los lean igual.
+          - name: JPA y transacciones
+            when: JPA para la persistencia habitual; consultas escritas a mano cuando un informe o una operación masiva lo necesitan.
+          - name: Seguridad con JWT
+            when: Autenticación sin estado con JWT cuando varios clientes consumen la misma API.
+      - id: node
+        name: Node.js
+        summary: APIs ligeras, herramientas y CLIs.
+        branches:
+          - name: Express
+            when: APIs pequeñas, o un backend para un frontend que adapta los datos a lo que necesitan sus pantallas.
+          - name: GraphQL y Apollo
+            when: Cuando las pantallas necesitan distintas formas de los mismos datos y con REST harían falta muchos endpoints o se pediría de más.
+          - name: CLIs y herramientas para desarrolladores
+            when: Herramientas como yRest, una CLI con servidor local y su propio formato de archivo, publicada en npm.
+  - id: data
+    title: Datos
+    nodes:
+      - id: sql
+        name: PostgreSQL y MySQL
+        summary: La opción por defecto para datos de negocio.
+        branches:
+          - name: Modelado relacional
+            when: Entidades, relaciones y restricciones en la propia base de datos cuando los datos tienen una estructura clara y deben ser coherentes.
+          - name: Índices y consultas
+            when: Los índices siguen a las consultas reales; los añado cuando una consulta resulta lenta, no antes.
+      - id: nosql
+        name: MongoDB y Redis
+        summary: Cuando la forma o la velocidad de los datos lo piden.
+        branches:
+          - name: MongoDB
+            when: Documentos cuya forma varía, o que siempre se leen y escriben enteros.
+          - name: Redis
+            when: Caché y datos de vida corta, como sesiones o límites de peticiones, delante de una fuente más lenta.
+  - id: architecture
+    title: Arquitectura
+    nodes:
+      - id: design
+        name: Diseño y arquitectura
+        summary: Decisiones que mantienen el producto fácil de cambiar.
+        branches:
+          - name: Programación orientada a objetos y SOLID
+            when: Objetos con una sola responsabilidad y dependencias inyectadas, sobre todo en backends Java con un dominio rico.
+          - name: Patrones de diseño
+            when: Un patrón cuando da nombre a un problema que ya tengo, como una strategy para reglas intercambiables o un adapter en el borde de una API externa.
+          - name: Clean Architecture
+            when: El dominio separado de los frameworks cuando la lógica es lo valioso, como en UQuiz.
+          - name: Escalabilidad
+            when: Primero una estructura que pueda crecer, con módulos por funcionalidad y contratos claros; el trabajo de rendimiento e infraestructura, cuando el uso real muestra dónde hace falta.
+  - id: delivery
+    title: Entrega
+    nodes:
+      - id: git
+        name: Git y control de versiones
+        summary: Un historial que explica el producto.
+        branches:
+          - name: Ramas y pull requests
+            when: Una rama por cambio y una pull request con checks antes de llegar a main, para que main siempre se pueda publicar.
+          - name: Conventional commits
+            when: Mensajes cortos con tipo (feat, fix, chore) para derivar de ellos el changelog y la siguiente versión.
+          - name: Versionado semántico
+            when: Una etiqueta de versión y una entrada en el changelog por cada release; un fix es un patch, una funcionalidad un minor, un cambio incompatible un major.
+      - id: testing
+        name: Testing
+        summary: En proporción al riesgo.
+        branches:
+          - name: Tests unitarios con Vitest y JUnit
+            when: Para la lógica pura, como reglas, cálculos y transformaciones; rápidos y sin el framework.
+          - name: End-to-end con Playwright
+            when: Para lo que hace de verdad un usuario, como navegar, formularios y flujos críticos, más comprobaciones automáticas de accesibilidad.
+          - name: Pruebas de API con Postman
+            when: Para explorar y documentar el contrato de una API mientras se construye.
+      - id: ci
+        name: CI/CD y Docker
+        summary: Automatizar lo que se repite.
+        branches:
+          - name: Pipelines de CI
+            when: Lint, tipos, tests y build en cada pull request; despliegues solo desde una etiqueta de versión o la rama main.
+          - name: Docker
+            when: El mismo entorno en desarrollo y en producción, y servicios como bases de datos arrancados con un comando.
+  - id: product
+    title: Producto
+    nodes:
+      - id: analysis
+        name: Análisis y producto
+        summary: Antes de cualquier código.
+        branches:
+          - name: Requisitos
+            when: Necesidades de negocio escritas como flujos, casos límite y criterios de aceptación que desarrolladores y negocio leen igual.
+          - name: Priorización
+            when: Qué entra en la primera versión y qué espera, según su valor y su riesgo.
+          - name: Diseño en Figma
+            when: Flujos y pantallas prototipados antes de construir cuando la interacción es nueva o hay que validarla.

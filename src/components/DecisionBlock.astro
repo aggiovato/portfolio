@@ -17,8 +17,8 @@ interface Props {
 }
 const { title, problem, decision, alternatives, tradeoff, evidence, outlook } = Astro.props;
 const t = useTranslations(resolveLocale(Astro.currentLocale));
-// Narrative order (spec §10), with a weight per row: the decision is the headline, problem and
-// trade-off read normally, the supporting rows step back.
+// Narrative order (spec §10), with a weight per row: the decision stands out, problem and
+// trade-off read normally, the supporting rows step back (colour and weight, same size).
 type Weight = 'lead' | 'main' | 'aside';
 const rows = (
   [
@@ -81,35 +81,37 @@ const titleId = title
   .row + .row {
     border-top: 1px solid var(--color-border);
   }
-  /* The decision itself: the line a skimming reader takes away. */
+  /*
+   * One text size for every row: weight and colour carry the hierarchy. The decision is the line a
+   * skimming reader takes away (raised surface, 600, its label in lavender: «the word to
+   * remember», DESIGN.md The One Signal Rule); supporting rows step back in muted text.
+   */
   .row--lead {
     background: var(--color-surface-raised);
   }
+  .row--lead dt {
+    color: var(--color-accent);
+  }
   .row--lead dd {
-    font-size: var(--text-lead);
     font-weight: 600;
-    line-height: 1.45;
     color: var(--color-text);
   }
   .row--main dd {
     color: var(--color-text);
   }
-  /* Supporting rows stay visible (alternatives are part of the judgement) but step back. */
-  .row--aside {
-    padding-block: var(--space-3);
-  }
   .row--aside dd {
-    font-size: 0.9375rem;
     color: var(--color-text-muted);
   }
   dt {
     font-family: var(--font-mono);
     font-size: var(--text-meta);
-    /* A label, not an action: lavender is reserved for what can be acted on. */
     color: var(--color-text-subtle);
   }
+  /* A compact reference card inside the article: smaller than the prose around it. */
   dd {
     margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
   }
   @media (min-width: 640px) {
     .row {

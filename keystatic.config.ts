@@ -222,8 +222,10 @@ const projects = (locale: Locale) =>
       gallery: fields.array(media('Image'), { label: 'Gallery' }),
       links: fields.object({
         demo: link('Demo URL'),
+        playground: link('Playground URL'),
         code: link('Code URL'),
         docs: link('Docs URL'),
+        install: link('Install URL (marketplace, store)'),
       }),
     },
   });

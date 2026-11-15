@@ -8,13 +8,13 @@ import type { Locale, UiKey } from '../i18n';
 
 export const site = {
   brand: 'aggiovato',
-  person: 'Alejandro Lugo',
+  person: 'Heber Alejandro Lugo',
   email: 'aggiovato@gmail.com',
   links: {
     github: 'https://github.com/aggiovato' as string,
-    linkedin: 'https://www.linkedin.com/in/aggiovato' as string,
+    linkedin: 'https://www.linkedin.com/in/heberlugo' as string,
   },
-  coreStack: ['Angular', 'React', 'TypeScript', 'Spring Boot', 'PostgreSQL'],
+  coreStack: ['Angular', 'React', 'TypeScript', 'Spring Boot', 'Node.js', 'PostgreSQL'],
 } as const;
 
 /**

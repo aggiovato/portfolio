@@ -8,12 +8,12 @@ export const it: UiDictionary = {
   'site.tagline':
     'Dalla prima conversazione al rilascio: prodotto, interfaccia, backend e gli strumenti che lo tengono in piedi.',
   'site.description':
-    'Alejandro Lugo è uno sviluppatore full-stack che trasforma idee in prodotti che crescono: dalla prima conversazione al rilascio.',
-  'site.defaultTitle': '{person} — {role} · {brand}',
+    'Heber Alejandro Lugo è uno sviluppatore full-stack che trasforma idee in prodotti che crescono: dalla prima conversazione al rilascio.',
+  'site.defaultTitle': '{person} · {brand}',
 
   // Layout and navigation
   'og.defaultAlt':
-    'Alejandro Lugo, sviluppatore full-stack: «Radicato nel codice. Fatto per esplorare.» accanto al pianeta Giove.',
+    'Heber Alejandro Lugo, sviluppatore full-stack: «Radicato nel codice. Fatto per esplorare.» accanto al pianeta Giove.',
   'a11y.newTab': '(si apre in una nuova scheda)',
   'a11y.skipToContent': 'Vai al contenuto',
   'nav.label': 'Principale',
@@ -31,31 +31,26 @@ export const it: UiDictionary = {
   'hero.titleLine1': 'Radicato nel codice.',
   'hero.titleLine2': 'Fatto per',
   'hero.titleHighlight': 'esplorare.',
-  'hero.identity': '{role}, con focus su {focus}.',
+  'hero.identity': '{role}: mi occupo di {focus}.',
   'hero.primaryCta': 'Esplora i miei progetti',
   'hero.secondaryCta': 'Parliamone',
-  'hero.latest': 'Ultimo progetto:',
+  'hero.latest': 'Progetto in evidenza:',
   'hero.backToTop': 'Torna su',
   'hero.arrivalPoint': 'Punto di arrivo',
   'home.workTitle': 'Cose che ho realizzato.',
   'home.seeAllProjects': 'Vedi tutti i progetti',
   'home.workEmpty': 'I casi di studio sono in lavorazione. Nel frattempo, il codice è su',
   'home.processTitle': 'Come lavoro.',
-  'home.process1Title': 'Capire il problema',
+  'home.process1Title': 'Capire il bisogno',
   'home.process1Body':
-    'Parlo con chi svolge il lavoro, ricostruisco il flusso attuale e trovo dove si rompe davvero prima di proporre schermate.',
-  'home.process1Example':
-    'il frontend si bloccava in attesa di API che non esistevano ancora, e json-server non bastava per schermate reali.',
-  'home.process2Title': 'Progettare la soluzione',
+    'Parlare con chi fa il lavoro o ha l’idea, mappare il flusso attuale o quello desiderato e trovare i punti deboli, i guasti e le occasioni di crescita prima di progettare qualsiasi cosa.',
+  'home.process2Title': 'Delimitare la prima versione',
   'home.process2Body':
-    'Abbozzo il flusso principale, concordo presto i contratti dei dati e decido cosa lasciare fuori dalla prima versione.',
-  'home.process2Example': 'punteggio e timer sono stati formule su carta prima di diventare codice.',
-  'home.process3Title': 'Costruire e iterare',
+    'Trasformare quella mappa in un proof of concept e in un MVP che risolvano il bisogno immediato, senza perdere di vista la crescita emersa al passo 01: è lì che inizia la scalabilità.',
+  'home.process3Title': 'Costruire, misurare, crescere',
   'home.process3Body':
-    'Rilascio una parte utilizzabile, osservo come viene usata e la rifinisco. Interfacce e API evolvono insieme.',
-  'home.process3Example':
-    'i falsi positivi della prima versione hanno portato a limitare ogni diagnostica alla sua sezione.',
-  'home.aboutTitle': 'Prima il prodotto. Strumenti che crescono con lui.',
+    'Consegnare una parte usabile, osservare come viene usata davvero e far evolvere il prodotto a piccoli passi, interfaccia e backend insieme, su una base che non vada rifatta per crescere.',
+  'home.aboutTitle': 'Prima il prodotto. Strumenti che crescono insieme.',
   'home.aboutBody':
     'Sono {person}, sviluppatore full-stack. Parto dal business e dal prodotto: come è organizzato il lavoro e cosa vuole costruire la persona che c’è dietro. Gli strumenti dovrebbero essere l’espressione naturale di quell’ordine, quindi prima allineiamo le idee e poi costruisco su una base che possa crescere. La scalabilità non è un ripensamento: fa parte del primo progetto.',
   'home.coreStack': 'Stack principale',
@@ -93,7 +88,7 @@ export const it: UiDictionary = {
   'newsletter.language': 'Lingua',
   'newsletter.submit': 'Iscriviti',
   'newsletter.consent':
-    'Prima riceverai un’email di conferma. Il tuo indirizzo è custodito da Brevo, il servizio che invia le note, e usato solo per loro.',
+    'Prima riceverai un’email di conferma. Il tuo indirizzo è custodito da Brevo, il servizio che invia le note, e utilizzato esclusivamente per inviarti le nuove note.',
   'newsletter.pendingTitle': 'Controlla la posta',
   'newsletter.pendingBody':
     'Ti ho inviato un’email per confermare l’iscrizione. Aprila e clicca sul link; fino ad allora non riceverai altro.',
@@ -111,6 +106,8 @@ export const it: UiDictionary = {
 
   // Case study
   'project.liveDemo': 'Demo dal vivo',
+  'project.playground': 'Esplora il playground',
+  'project.install': 'Vedi sul Marketplace',
   'project.sourceCode': 'Codice sorgente',
   'project.documentation': 'Documentazione',
   'project.tryItLive': 'Provalo dal vivo →',
@@ -135,7 +132,7 @@ export const it: UiDictionary = {
   'glance.label': 'In breve',
   'glance.problem': 'Problema',
   'glance.contribution': 'Il mio ruolo',
-  'glance.outcome': 'Risultato',
+  'glance.outcome': 'Cosa ho consegnato',
   'project.meta.type': 'Tipo',
   'project.meta.period': 'Periodo',
   'project.meta.status': 'Stato',
@@ -180,14 +177,15 @@ export const it: UiDictionary = {
   'about.title': 'Chi sono',
   'about.heading': 'Prima il {word}.',
   'about.headingWord': 'prodotto',
-  'about.description': 'Chi è {person}: {role} con focus su {focus}.',
+  'about.description': 'Chi è {person}: {role}, si occupa di {focus}.',
   'about.lead':
-    'Sono {person}, sviluppatore full-stack. Prima di qualsiasi schermata o endpoint, voglio capire il business: come è organizzato il lavoro, chi fa cosa e cosa sta cercando di costruire la persona che c’è dietro.',
+    'Sono {person}, sviluppatore full-stack con un focus su frontend e prodotto. Prima di progettare una schermata o costruire un’API, voglio capire le persone che la useranno: come lavorano, cosa le ostacola e cosa devono ottenere.',
   'about.approach':
-    'I buoni strumenti sono l’espressione naturale di quell’ordine. Per questo il primo lavoro è allineare le idee, quelle dell’imprenditore e del team, in una struttura chiara; il software nasce da lì ed è pensato fin dall’inizio per crescere con il business, invece di essere rifatto ogni volta che cresce.',
-  'about.nameBefore': 'Il nome',
-  'about.nameAfter':
-    'significa «atterrato su Giove»: un promemoria per continuare a esplorare, ma su un terreno solido. In pratica significa curiosità per i nuovi strumenti e una ostinata preferenza per ciò che è testato, documentato e facile da cambiare.',
+    'Il mio lavoro unisce sviluppo, analisi funzionale e responsabilità di prodotto. Trasformo le esigenze di business in flussi, interfacce e decisioni tecniche chiare, decidendo cosa entra nella prima versione e cosa può aspettare. Cerco di costruire software che risolva il problema di oggi e resti facile da cambiare man mano che il prodotto evolve.',
+  'about.background':
+    'La mia formazione è in ingegneria delle telecomunicazioni e dell’elettronica. Ho iniziato a programmare vicino all’hardware prima di passare allo sviluppo multipiattaforma e web. Quell’esperienza ha plasmato il mio modo di affrontare il software: capire come si incastrano le parti, seguire un problema attraverso i livelli e bilanciare le scelte tecniche con i vincoli reali.',
+  'about.today':
+    'Oggi lavoro soprattutto con Angular e React sul frontend, insieme a Spring Boot e Node.js sul backend. Ciò che mi interessa di più è collegare l’intero processo: dal capire un problema al mettere uno strumento utile nelle mani di qualcuno.',
   'about.workWith': 'Con cosa lavoro',
 
   // Contact
@@ -195,7 +193,8 @@ export const it: UiDictionary = {
   'contact.heading': '{word}.',
   'contact.headingWord': 'Parliamone',
   'contact.description': 'Come contattare {person}.',
-  'contact.intro': 'Raccontami cosa stai costruendo e dove sei bloccato. Di solito rispondo in pochi giorni.',
+  'contact.intro':
+    'Stai costruendo un prodotto, migliorando uno strumento interno, cerchi una collaborazione tecnica o qualcuno per il tuo team: raccontami il contesto e cosa ti serve risolvere. Di solito rispondo in pochi giorni.',
   'contact.email': 'Email',
   'cta.titleBefore': 'Hai',
   'cta.words': 'un prodotto|un’idea|un progetto|un’attività',

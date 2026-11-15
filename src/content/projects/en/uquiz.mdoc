@@ -62,7 +62,7 @@ gallery:
     caption: "Study mode — review question by question with explanations."
   - src: ../../../assets/projects/uquiz/game_session.jpg
     alt: "Game mode intro for the Tech Mix pack, with 40 questions, medium difficulty and an estimated time of about 19 minutes 59 seconds."
-    caption: "Game mode — the time budget is estimated per pack."
+    caption: "Game mode — the pack's estimated duration, from its questions' time budgets."
   - src: ../../../assets/projects/uquiz/game_summary.jpg
     alt: "Game summary with +136 points at the Adept rank, 305 MMR to the next rank, 10 correct answers and 100% accuracy."
     caption: "Game summary — score, rank and MMR to the next tier."
@@ -82,7 +82,7 @@ I wanted to train technical knowledge (Angular, RxJS, Java…) with my own quest
 - **Content:** folders, packs and multiple-choice questions with 2–6 options, difficulty and an optional explanation. Packs can be shared as `.uquiz` JSON files.
 - **Study mode:** sequential review with immediate feedback and per-question mastery levels (New → Learning → Familiar → Mastered).
 - **Game mode:** each question gets its own countdown, then an overtime window where answers still count but cost more.
-- **Ranking:** a personal MMR smoothed with an exponentially weighted moving average, with nine tiers from Initiate to Paragon and hysteresis so the rank doesn't flicker at the borders.
+- **Ranking:** a personal rank that smooths out the swings between games and does not flicker when the score sits near a border. Under the hood: an MMR with an exponentially weighted moving average, nine tiers from Initiate to Paragon, and hysteresis at the borders.
 
 ## Technical decisions
 
@@ -104,8 +104,8 @@ I wanted to train technical knowledge (Angular, RxJS, Java…) with my own quest
 
 ## Quality
 
-Unit tests cover the pure business logic: game scoring (every branch), the time budget calculation and game utilities.
+Unit tests cover the pure business logic: game scoring (every branch), the time budget calculation and game utilities. The first version is complete. An APK exists but is not published on Google Play; the code is public.
 
 ## What I learned
 
-Game rules need to be written down as formulas before they are coded; it made tuning the scoring and timers much easier.
+In this project, writing the scoring and timing rules as formulas before coding them helped me find edge cases and tune the behaviour before implementing it.

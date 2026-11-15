@@ -32,6 +32,8 @@ interface Props {
   jsonLd?: Record<string, unknown>;
   /** The shared night sky behind the top of the page; the home and case studies draw their own. */
   sky?: boolean;
+  /** False when the page closes with its own subscription form, so the footer does not repeat it. */
+  footerSubscribe?: boolean;
   noindex?: boolean;
   /**
    * URL of this page in each locale where it exists (hreflang + language switcher).
@@ -49,12 +51,13 @@ const {
   article,
   jsonLd,
   sky = true,
+  footerSubscribe = true,
   noindex = false,
   alternates = alternatesFor(Astro.url.pathname),
 } = Astro.props;
 const fullTitle = title
   ? `${title} — ${site.brand}`
-  : t('site.defaultTitle', { person: site.person, role: t('site.role'), brand: site.brand });
+  : t('site.defaultTitle', { person: site.person, brand: site.brand });
 // Sections without content stay out of the menu (§7).
 const notesOpen = await hasNotes();
 const navItems = nav.filter((item) => !('requires' in item) || notesOpen);
@@ -180,7 +183,7 @@ const xDefault = alternates[defaultLocale];
       {sky && <PageSky />}
       <slot />
     </main>
-    <SiteFooter nav={navItems} />
+    <SiteFooter nav={navItems} subscribe={footerSubscribe} />
     <BackToTop />
   </body>
 </html>

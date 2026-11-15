@@ -6,7 +6,7 @@ test.describe('home', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       /Grounded in code\.\s*Built to explore\./,
     );
-    await expect(page.getByText('Alejandro Lugo').first()).toBeInViewport();
+    await expect(page.getByText('Heber Alejandro Lugo').first()).toBeInViewport();
     await expect(page.getByRole('link', { name: 'Explore my work' })).toBeInViewport();
     await expect(page.getByRole('link', { name: 'Let’s talk' })).toBeVisible();
   });

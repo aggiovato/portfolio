@@ -60,7 +60,7 @@ const page = (c) => `<!doctype html>
   <div class="text">
     <div class="brand">${logo}<span>aggiovato</span></div>
     <h1>${c.line1}<br>${c.line2} <em>${c.accent}</em></h1>
-    <p class="who">Alejandro Lugo</p>
+    <p class="who">Heber Alejandro Lugo</p>
     <p class="role">${c.role}</p>
   </div>
 </body></html>`;

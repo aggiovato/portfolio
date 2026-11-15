@@ -31,9 +31,9 @@ const mono = "'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace";
 
 export const copy = {
   en: {
-    notesPreheader: 'A new note from Alejandro Lugo.',
+    notesPreheader: 'A new note from Heber Alejandro Lugo.',
     read: 'Read the note',
-    why: 'You get this email because you subscribed to Alejandro Lugo’s notes.',
+    why: 'You get this email because you subscribed to Heber Alejandro Lugo’s notes.',
     browser: 'View in the browser',
     unsubscribe: 'Unsubscribe',
     confirmPreheader: 'One click to confirm your subscription.',
@@ -43,9 +43,9 @@ export const copy = {
     confirmButton: 'Confirm subscription',
   },
   es: {
-    notesPreheader: 'Una nota nueva de Alejandro Lugo.',
+    notesPreheader: 'Una nota nueva de Heber Alejandro Lugo.',
     read: 'Leer la nota',
-    why: 'Recibes este correo porque te suscribiste a las notas de Alejandro Lugo.',
+    why: 'Recibes este correo porque te suscribiste a las notas de Heber Alejandro Lugo.',
     browser: 'Ver en el navegador',
     unsubscribe: 'Darme de baja',
     confirmPreheader: 'Un clic para confirmar tu suscripción.',
@@ -55,9 +55,9 @@ export const copy = {
     confirmButton: 'Confirmar suscripción',
   },
   it: {
-    notesPreheader: 'Una nuova nota di Alejandro Lugo.',
+    notesPreheader: 'Una nuova nota di Heber Alejandro Lugo.',
     read: 'Leggi la nota',
-    why: 'Ricevi questa email perché ti sei iscritto alle note di Alejandro Lugo.',
+    why: 'Ricevi questa email perché ti sei iscritto alle note di Heber Alejandro Lugo.',
     browser: 'Apri nel browser',
     unsubscribe: 'Disiscriviti',
     confirmPreheader: 'Un clic per confermare l’iscrizione.',

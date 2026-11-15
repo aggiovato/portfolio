@@ -10,12 +10,12 @@ export const en = {
   'site.tagline':
     'From the first conversation to the release: product, interface, backend and the tooling that keeps it running.',
   'site.description':
-    'Alejandro Lugo is a full-stack developer who turns ideas into products that scale: from the first conversation to the release.',
-  'site.defaultTitle': '{person} — {role} · {brand}',
+    'Heber Alejandro Lugo is a full-stack developer who turns ideas into products that scale: from the first conversation to the release.',
+  'site.defaultTitle': '{person} · {brand}',
 
   // Layout and navigation
   'og.defaultAlt':
-    'Alejandro Lugo, full-stack developer: “Grounded in code. Built to explore.” beside the planet Jupiter.',
+    'Heber Alejandro Lugo, full-stack developer: “Grounded in code. Built to explore.” beside the planet Jupiter.',
   'a11y.newTab': '(opens in a new tab)',
   'a11y.skipToContent': 'Skip to content',
   'nav.label': 'Main',
@@ -36,26 +36,22 @@ export const en = {
   'hero.identity': '{role}, focused on {focus}.',
   'hero.primaryCta': 'Explore my work',
   'hero.secondaryCta': 'Let’s talk',
-  'hero.latest': 'Latest project:',
+  'hero.latest': 'Featured project:',
   'hero.backToTop': 'Back to top',
   'hero.arrivalPoint': 'Arrival point',
   'home.workTitle': 'Things I’ve shipped.',
   'home.seeAllProjects': 'See all projects',
   'home.workEmpty': 'Case studies are being written. Meanwhile, the code lives on',
   'home.processTitle': 'How I work.',
-  'home.process1Title': 'Understand the problem',
+  'home.process1Title': 'Understand the need',
   'home.process1Body':
-    'Talk to the people doing the work, map the current flow and find where it actually breaks before proposing screens.',
-  'home.process1Example':
-    'frontend work blocked on APIs that did not exist yet, and json-server fell short for real screens.',
-  'home.process2Title': 'Design the solution',
+    'Talk to whoever does the work or has the idea, map the current flow or the one they want, and find the weak points, the failures and the room to grow before designing anything.',
+  'home.process2Title': 'Scope the first version',
   'home.process2Body':
-    'Sketch the main flow, agree on data contracts early and decide what to leave out of the first version.',
-  'home.process2Example': 'the scoring and the timers were formulas on paper before they were code.',
-  'home.process3Title': 'Build and iterate',
+    'Turn that map into a proof of concept and an MVP that solve the immediate need, without losing sight of the growth found in step 01: that is where scalability starts.',
+  'home.process3Title': 'Build, measure, grow',
   'home.process3Body':
-    'Ship a usable slice, watch how it is used and refine. Interfaces and APIs evolve together.',
-  'home.process3Example': 'false positives in the first release led to diagnostics scoped to their section.',
+    'Ship a usable slice, watch how it is really used and let the product evolve in small steps, interface and backend together, on a base that does not need to be rewritten to grow.',
   'home.aboutTitle': 'Product first. Tools that grow with it.',
   'home.aboutBody':
     'I’m {person}, a full-stack developer. I start with the business and the product: how the work is organised and what the person behind it wants to build. The tools should be the natural expression of that order, so first we line up the ideas, then I build on a base that can grow. Scalability isn’t an afterthought; it’s part of the first design.',
@@ -111,6 +107,8 @@ export const en = {
 
   // Case study
   'project.liveDemo': 'Live demo',
+  'project.playground': 'Explore the playground',
+  'project.install': 'View on the Marketplace',
   'project.sourceCode': 'Source code',
   'project.documentation': 'Documentation',
   'project.tryItLive': 'Try it live →',
@@ -135,7 +133,7 @@ export const en = {
   'glance.label': 'At a glance',
   'glance.problem': 'Problem',
   'glance.contribution': 'My part',
-  'glance.outcome': 'Outcome',
+  'glance.outcome': 'What I delivered',
   'project.meta.type': 'Type',
   'project.meta.period': 'Period',
   'project.meta.status': 'Status',
@@ -182,12 +180,13 @@ export const en = {
   'about.headingWord': 'first',
   'about.description': 'About {person}: {role} focused on {focus}.',
   'about.lead':
-    'I’m {person}, a full-stack developer. Before any screen or endpoint, I want to understand the business: how the work is organised, who does what, and what the person behind it is trying to build.',
+    'I’m {person}, a full-stack developer with a focus on frontend and product. Before designing a screen or building an API, I want to understand the people who will use it: how they work, what gets in their way, and what they need to achieve.',
   'about.approach':
-    'Good tools are the natural expression of that order. So the first job is to line up the ideas, the founder’s and the team’s, into a clear structure; the software grows out of it, and it is designed from the start to scale with the business instead of being rebuilt every time it grows.',
-  'about.nameBefore': 'The name',
-  'about.nameAfter':
-    'means “landed on Jupiter”: a reminder to keep exploring, but to do it on solid ground. In practice that means curiosity about new tools and a stubborn preference for things that are tested, documented and easy to change.',
+    'My work combines development, functional analysis and product ownership. I turn business needs into clear workflows, interfaces and technical decisions, working through what belongs in the first version and what can wait. I aim to build software that solves today’s problem and remains easy to change as the product evolves.',
+  'about.background':
+    'My background is in telecommunications and electronics engineering. I started programming close to the hardware before moving into cross-platform and web development. That experience shaped how I approach software: understanding how the parts fit together, tracing problems across layers, and balancing technical choices with practical constraints.',
+  'about.today':
+    'Today, I work primarily with Angular and React on the frontend, alongside Spring Boot and Node.js on the backend. What interests me most is connecting the whole process, from understanding a problem to putting a useful tool in someone’s hands.',
   'about.workWith': 'What I work with',
 
   // Contact
@@ -195,7 +194,8 @@ export const en = {
   'contact.heading': 'Let’s {word}.',
   'contact.headingWord': 'talk',
   'contact.description': 'How to reach {person}.',
-  'contact.intro': 'Tell me what you’re building and where you’re stuck. I usually reply within a few days.',
+  'contact.intro':
+    'Building a product, improving an internal tool, looking for technical collaboration or for someone to join your team: tell me the context and what you need to solve. I usually reply within a few days.',
   'contact.email': 'Email',
   'cta.titleBefore': 'Have',
   'cta.words': 'a product|an idea|a project|a business',
