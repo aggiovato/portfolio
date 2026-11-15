@@ -119,12 +119,14 @@ ${footer}
 /** RSS email: each new note of the feed as a card with its image, title, summary and button. */
 export function notesEmail(locale) {
   const t = copy[locale];
-  const content = `{% for item in params.items %}
-    <tr><td style="padding:0 0 24px;">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:${c.surface};border:1px solid ${c.border};border-radius:20px;">
-        {% if item.ENCLOSURE %}<tr><td style="padding:0;">
-          <a href="{{ item.LINK }}"><img src="{{ item.ENCLOSURE }}" width="598" alt="" style="display:block;width:100%;max-width:598px;height:auto;border:0;border-radius:19px 19px 0 0;"></a>
-        </td></tr>{% endif %}
+  // Brevo's tags sit inside a cell: text between table rows is moved out of the table by any HTML
+  // parser (and by Brevo's editor), which would leave the loop wrapping nothing.
+  const content = `    <tr><td style="padding:0;">
+{% for item in params.items %}
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 24px;background:${c.surface};border:1px solid ${c.border};border-radius:20px;">
+        <tr><td style="padding:0;">
+          {% if item.ENCLOSURE %}<a href="{{ item.LINK }}"><img src="{{ item.ENCLOSURE }}" width="598" alt="" style="display:block;width:100%;max-width:598px;height:auto;border:0;border-radius:19px 19px 0 0;"></a>{% endif %}
+        </td></tr>
         <tr><td style="padding:28px 28px 32px;">
           <h1 style="margin:0 0 12px;font-family:${sans};font-size:26px;line-height:32px;font-weight:750;letter-spacing:-0.4px;color:${c.text};">
             <a href="{{ item.LINK }}" style="color:${c.text};text-decoration:none;">{{ item.TITLE }}</a>
@@ -133,8 +135,8 @@ export function notesEmail(locale) {
 ${button('{{ item.LINK }}', t.read)}
         </td></tr>
       </table>
-    </td></tr>
-{% endfor %}`;
+{% endfor %}
+    </td></tr>`;
   const footer = `      <p style="margin:0 0 8px;">${t.why}</p>
       <p style="margin:0;"><a href="{{ mirror }}" style="color:${c.muted};">${t.browser}</a>&nbsp;&nbsp;&nbsp;<a href="{{ unsubscribe }}" style="color:${c.muted};">${t.unsubscribe}</a>&nbsp;&nbsp;&nbsp;<a href="${SITE}${notesPath(locale)}" style="color:${c.muted};">aggiovato.netlify.app</a></p>`;
   return layout({ locale, preheader: t.notesPreheader, title: t.notesPreheader, content, footer });

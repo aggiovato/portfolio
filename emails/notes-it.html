@@ -22,12 +22,12 @@
         <td align="right" style="vertical-align:middle;font-family:'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;font-size:13px;color:#9691a8;">~/<span style="color:#c6a5ff;">notes</span></td>
       </tr></table>
     </td></tr>
+    <tr><td style="padding:0;">
 {% for item in params.items %}
-    <tr><td style="padding:0 0 24px;">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#1b1d28;border:1px solid #363344;border-radius:20px;">
-        {% if item.ENCLOSURE %}<tr><td style="padding:0;">
-          <a href="{{ item.LINK }}"><img src="{{ item.ENCLOSURE }}" width="598" alt="" style="display:block;width:100%;max-width:598px;height:auto;border:0;border-radius:19px 19px 0 0;"></a>
-        </td></tr>{% endif %}
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 24px;background:#1b1d28;border:1px solid #363344;border-radius:20px;">
+        <tr><td style="padding:0;">
+          {% if item.ENCLOSURE %}<a href="{{ item.LINK }}"><img src="{{ item.ENCLOSURE }}" width="598" alt="" style="display:block;width:100%;max-width:598px;height:auto;border:0;border-radius:19px 19px 0 0;"></a>{% endif %}
+        </td></tr>
         <tr><td style="padding:28px 28px 32px;">
           <h1 style="margin:0 0 12px;font-family:Manrope, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:26px;line-height:32px;font-weight:750;letter-spacing:-0.4px;color:#f5f1fa;">
             <a href="{{ item.LINK }}" style="color:#f5f1fa;text-decoration:none;">{{ item.TITLE }}</a>
@@ -41,8 +41,8 @@
 </tr></table>
         </td></tr>
       </table>
-    </td></tr>
 {% endfor %}
+    </td></tr>
     <tr><td style="padding:28px 4px 0;border-top:1px solid #363344;font-family:Manrope, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#9691a8;">
       <p style="margin:0 0 8px;">Ricevi questa email perché ti sei iscritto alle note di Alejandro Lugo.</p>
       <p style="margin:0;"><a href="{{ mirror }}" style="color:#bcb5ca;">Apri nel browser</a>&nbsp;&nbsp;&nbsp;<a href="{{ unsubscribe }}" style="color:#bcb5ca;">Disiscriviti</a>&nbsp;&nbsp;&nbsp;<a href="https://aggiovato.netlify.app/it/notes/" style="color:#bcb5ca;">aggiovato.netlify.app</a></p>
