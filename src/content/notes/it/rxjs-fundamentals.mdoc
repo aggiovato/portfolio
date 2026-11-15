@@ -32,7 +32,7 @@ condividere un produttore già in funzione. Le emissioni possono essere sincrone
 | | Promise | Observable |
 | --- | --- | --- |
 | Valori | Uno, o un rifiuto | Da zero a molti |
-| Parte | Subito, alla creazione | Alla sottoscrizione (fredda) o già in funzione (calda) |
+| Parte | L'executor viene eseguito subito, in `new Promise()` | Alla sottoscrizione (fredda) o già in funzione (calda) |
 | Tempi | Callback sempre asincrone | Sincrono o asincrono |
 | Annullare | Nessun metodo proprio | `unsubscribe()` ferma la tua sottoscrizione |
 
@@ -57,10 +57,7 @@ const doubled$ = source$.pipe(map((n) => n * 2));
 doubled$.subscribe(console.log);
 ```
 
-{% highlight %}`pipe()`{% /highlight %} costruisce un nuovo Observable a partire da `source$` e dai suoi operatori; non si esegue
-ancora nulla. {% highlight %}`subscribe()`{% /highlight %} collega un consumatore e avvia il lavoro. Con l'`HttpClient` di Angular,
-ogni sottoscrizione invia una richiesta. La pipe `async` di Angular può gestire la sottoscrizione
-al posto tuo.
+{% highlight %}`pipe()`{% /highlight %} compone gli operatori in un nuovo Observable senza sottoscriversi alla catena; una sorgente calda può già produrre valori per conto suo. {% highlight %}`subscribe()`{% /highlight %} registra il consumatore e, su una sorgente fredda, ne avvia l'esecuzione per quella sottoscrizione. Con l'`HttpClient` di Angular, ogni sottoscrizione invia una richiesta. La pipe `async` di Angular può gestire la sottoscrizione al posto tuo.
 
 ## {% highlight %}map{% /highlight %} cambia il valore, {% highlight %}filter{% /highlight %} decide cosa passa
 
@@ -99,4 +96,4 @@ source$
 
 {% highlight %}map{% /highlight %} trasforma, {% highlight %}filter{% /highlight %} seleziona, {% highlight %}tap{% /highlight %} osserva.
 
-Fonti: la documentazione di RxJS su Observable e operatori, e la guida di `HttpClient` di Angular.
+Fonti: [Observable](https://rxjs.dev/guide/observable) e [operatori](https://rxjs.dev/guide/operators) nella documentazione di RxJS, e la [guida al client HTTP](https://angular.dev/guide/http) di Angular.

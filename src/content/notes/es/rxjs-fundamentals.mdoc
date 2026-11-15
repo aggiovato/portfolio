@@ -32,7 +32,7 @@ que ya está en marcha. Las emisiones pueden ser síncronas o asíncronas.
 | | Promise | Observable |
 | --- | --- | --- |
 | Valores | Uno, o un rechazo | De cero a muchos |
-| Empieza | De inmediato, al crearse | Al suscribirse (fría) o ya en marcha (caliente) |
+| Empieza | El executor se ejecuta al momento, en `new Promise()` | Al suscribirse (fría) o ya en marcha (caliente) |
 | Momento | Callbacks siempre asíncronos | Síncrono o asíncrono |
 | Cancelar | Sin método propio | `unsubscribe()` detiene tu suscripción |
 
@@ -57,10 +57,7 @@ const doubled$ = source$.pipe(map((n) => n * 2));
 doubled$.subscribe(console.log);
 ```
 
-{% highlight %}`pipe()`{% /highlight %} construye un Observable nuevo a partir de `source$` y sus operadores; todavía no se ejecuta
-nada. {% highlight %}`subscribe()`{% /highlight %} conecta un consumidor y pone el trabajo en marcha. Con el `HttpClient` de
-Angular, cada suscripción envía una petición. El pipe `async` de Angular puede gestionar la
-suscripción por ti.
+{% highlight %}`pipe()`{% /highlight %} compone los operadores en un Observable nuevo sin suscribirse a la cadena; una fuente caliente puede estar produciendo valores por su cuenta. {% highlight %}`subscribe()`{% /highlight %} registra al consumidor y, en una fuente fría, inicia su ejecución para esa suscripción. Con el `HttpClient` de Angular, cada suscripción envía una petición. El pipe `async` de Angular puede gestionar la suscripción por ti.
 
 ## {% highlight %}map{% /highlight %} cambia el valor, {% highlight %}filter{% /highlight %} decide qué pasa
 
@@ -99,5 +96,4 @@ source$
 
 {% highlight %}map{% /highlight %} transforma, {% highlight %}filter{% /highlight %} selecciona, {% highlight %}tap{% /highlight %} observa.
 
-Fuentes: la documentación de RxJS sobre Observables y operadores, y la guía de `HttpClient` de
-Angular.
+Fuentes: [Observable](https://rxjs.dev/guide/observable) y [operadores](https://rxjs.dev/guide/operators) en la documentación de RxJS, y la [guía del cliente HTTP](https://angular.dev/guide/http) de Angular.

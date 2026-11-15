@@ -32,7 +32,7 @@ Emissions can be synchronous or asynchronous.
 | | Promise | Observable |
 | --- | --- | --- |
 | Values | One, or a rejection | Zero to many |
-| Starts | Immediately, on creation | On subscribe (cold) or already running (hot) |
+| Starts | The executor runs at once, in `new Promise()` | On subscribe (cold) or already running (hot) |
 | Timing | Callbacks always asynchronous | Synchronous or asynchronous |
 | Cancel | No built-in method | `unsubscribe()` stops your subscription |
 
@@ -57,9 +57,7 @@ const doubled$ = source$.pipe(map((n) => n * 2));
 doubled$.subscribe(console.log);
 ```
 
-{% highlight %}`pipe()`{% /highlight %} builds a new Observable from `source$` and its operators; nothing runs yet. {% highlight %}`subscribe()`{% /highlight %}
-connects a consumer and starts the work. With Angular's `HttpClient`, each subscription sends a
-request. Angular's `async` pipe can manage the subscription for you.
+{% highlight %}`pipe()`{% /highlight %} composes the operators into a new Observable without subscribing to the chain; a hot source may already be producing values on its own. {% highlight %}`subscribe()`{% /highlight %} registers the consumer and, on a cold source, starts its execution for that subscription. With Angular's `HttpClient`, each subscription sends a request. Angular's `async` pipe can manage the subscription for you.
 
 ## {% highlight %}map{% /highlight %} changes the value, {% highlight %}filter{% /highlight %} decides what passes
 
@@ -98,4 +96,4 @@ source$
 
 {% highlight %}map{% /highlight %} transforms, {% highlight %}filter{% /highlight %} selects, {% highlight %}tap{% /highlight %} observes.
 
-Sources: the RxJS documentation on Observables and operators, and Angular's `HttpClient` guide.
+Sources: [Observable](https://rxjs.dev/guide/observable) and [operators](https://rxjs.dev/guide/operators) in the RxJS docs, and the [HTTP client guide](https://angular.dev/guide/http) in Angular's docs.

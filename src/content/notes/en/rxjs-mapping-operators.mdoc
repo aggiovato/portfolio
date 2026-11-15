@@ -2,8 +2,8 @@
 slug: rxjs-mapping-operators
 title: switchMap, concatMap, mergeMap or exhaustMap?
 summary: >-
-  One new event, four possible choices. The same experiment run through the four RxJS mapping
-  operators shows that each one encodes a concurrency policy, not a transformation.
+  One new event, four possible choices. The same experiment through the four RxJS mapping
+  operators: each projects values into inner streams and adds its own concurrency policy.
 publicationStatus: published
 publishedAt: 2026-11-14
 tags:
@@ -90,4 +90,4 @@ request. Use it to ignore repeated clicks while a form is submitting.
 The operator encodes your concurrency policy: choose it from the behaviour your UI needs. These are
 RxJS operators, also used inside NgRx effects.
 
-Sources: the RxJS operator API and Angular's `HttpClient` guide.
+Sources: the RxJS API for [switchMap](https://rxjs.dev/api/operators/switchMap), [concatMap](https://rxjs.dev/api/operators/concatMap), [mergeMap](https://rxjs.dev/api/operators/mergeMap) and [exhaustMap](https://rxjs.dev/api/operators/exhaustMap), and Angular's [HTTP client guide](https://angular.dev/guide/http).

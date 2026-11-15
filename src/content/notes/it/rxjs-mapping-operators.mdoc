@@ -3,7 +3,7 @@ slug: rxjs-mapping-operators
 title: switchMap, concatMap, mergeMap o exhaustMap?
 summary: >-
   Un nuovo evento, quattro risposte possibili. Lo stesso esperimento con i quattro operatori di
-  mapping di RxJS mostra che ognuno codifica una politica di concorrenza, non una trasformazione.
+  mapping di RxJS: ognuno proietta i valori in flussi interni e aggiunge la propria politica di concorrenza.
 publicationStatus: published
 publishedAt: 2026-11-14
 tags:
@@ -92,4 +92,4 @@ può avviare una nuova richiesta. Usalo per ignorare i clic ripetuti mentre si i
 L'operatore codifica la tua politica di concorrenza: sceglilo in base al comportamento che serve
 alla tua interfaccia. Sono operatori di RxJS, usati anche dentro gli effect di NgRx.
 
-Fonti: l'API degli operatori di RxJS e la guida di `HttpClient` di Angular.
+Fonti: l'API di RxJS di [switchMap](https://rxjs.dev/api/operators/switchMap), [concatMap](https://rxjs.dev/api/operators/concatMap), [mergeMap](https://rxjs.dev/api/operators/mergeMap) ed [exhaustMap](https://rxjs.dev/api/operators/exhaustMap), e la [guida al client HTTP](https://angular.dev/guide/http) di Angular.
