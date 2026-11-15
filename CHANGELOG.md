@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [1.4.1] — 2026-11-15
+
 ### Changed
 
 - Releases can only be cut from an up-to-date `main`; the release task stops otherwise.
