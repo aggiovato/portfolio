@@ -194,7 +194,8 @@ export const en = {
   'contact.heading': 'Let’s {word}.',
   'contact.headingWord': 'talk',
   'contact.description': 'How to reach {person}.',
-  'contact.intro': 'Tell me what you’re building and where you’re stuck. I usually reply within a few days.',
+  'contact.intro':
+    'Building a product, improving an internal tool, looking for technical collaboration or for someone to join your team: tell me the context and what you need to solve. I usually reply within a few days.',
   'contact.email': 'Email',
   'cta.titleBefore': 'Have',
   'cta.words': 'a product|an idea|a project|a business',

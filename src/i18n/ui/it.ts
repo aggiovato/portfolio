@@ -193,7 +193,8 @@ export const it: UiDictionary = {
   'contact.heading': '{word}.',
   'contact.headingWord': 'Parliamone',
   'contact.description': 'Come contattare {person}.',
-  'contact.intro': 'Raccontami cosa stai costruendo e dove sei bloccato. Di solito rispondo in pochi giorni.',
+  'contact.intro':
+    'Stai costruendo un prodotto, migliorando uno strumento interno, cerchi una collaborazione tecnica o qualcuno per il tuo team: raccontami il contesto e cosa ti serve risolvere. Di solito rispondo in pochi giorni.',
   'contact.email': 'Email',
   'cta.titleBefore': 'Hai',
   'cta.words': 'un prodotto|un’idea|un progetto|un’attività',

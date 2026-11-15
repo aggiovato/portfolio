@@ -3,6 +3,8 @@ import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import HighlightedTitle from '../../components/HighlightedTitle.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
+import SocialIcon from '../../components/SocialIcon.astro';
+import Watermark from '../../components/Watermark.astro';
 import { site } from '../../data/site';
 import { localeParams, resolveLocale, useTranslations } from '../../i18n';
 
@@ -10,19 +12,17 @@ export const getStaticPaths = (() => localeParams()) satisfies GetStaticPaths;
 
 const t = useTranslations(resolveLocale(Astro.currentLocale));
 
+const shortUrl = (url: string) => url.replace(/^https:\/\/(www\.)?/, '');
 const channels = [
-  { label: t('contact.email'), value: site.email, href: `mailto:${site.email}` },
-  { label: 'GitHub', value: site.links.github.replace('https://', ''), href: site.links.github },
-  site.links.linkedin && {
-    label: 'LinkedIn',
-    value: site.links.linkedin.replace('https://', ''),
-    href: site.links.linkedin,
-  },
-].filter(Boolean) as { label: string; value: string; href: string }[];
+  { kind: 'email', label: t('contact.email'), value: site.email, href: `mailto:${site.email}` },
+  { kind: 'github', label: 'GitHub', value: shortUrl(site.links.github), href: site.links.github },
+  { kind: 'linkedin', label: 'LinkedIn', value: shortUrl(site.links.linkedin), href: site.links.linkedin },
+] as const;
 ---
 
 <BaseLayout title={t('contact.title')} description={t('contact.description', { person: site.person })}>
-  <section class="section">
+  <section class="section has-watermark">
+    <Watermark kind="signal" side="right" anchor="top" />
     <div class="container">
       <SectionHeading path="contact" id="page-title" level="h1">
         <HighlightedTitle text={t('contact.heading')} word={t('contact.headingWord')} />
@@ -32,7 +32,12 @@ const channels = [
       <dl class="channels">
         {channels.map((c) => (
           <div>
-            <dt>{c.label}</dt>
+            <dt>
+              <span class="icon">
+                <SocialIcon kind={c.kind} />
+              </span>
+              {c.label}
+            </dt>
             <dd>
               <a href={c.href} rel={c.href.startsWith('http') ? 'me noopener' : undefined}>
                 {c.value}
@@ -49,24 +54,42 @@ const channels = [
   .intro {
     margin-top: calc(var(--space-8) * -1);
     margin-bottom: var(--space-12);
-    max-width: 48ch;
+    max-width: 52ch;
     font-size: var(--text-lead);
     color: var(--color-text-muted);
   }
   .channels {
     display: grid;
-    max-width: 40rem;
+    max-width: 36rem;
   }
   .channels > div {
     display: grid;
     gap: var(--space-1);
-    padding-block: var(--space-4);
+    padding-block: var(--space-3);
     border-top: 1px solid var(--color-border);
   }
+  .channels > div:last-child {
+    border-bottom: 1px solid var(--color-border);
+  }
   dt {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     font-family: var(--font-mono);
     font-size: var(--text-meta);
     color: var(--color-text-subtle);
+  }
+  /* The icon sits in a small lavender-ringed disc: the channel is recognised before it is read. */
+  .icon {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--color-card-border);
+    border-radius: 50%;
+    color: var(--color-accent);
+    background: var(--color-card);
+    flex: none;
   }
   dd {
     margin: 0;
@@ -75,9 +98,8 @@ const channels = [
     display: inline-flex;
     min-height: 44px;
     align-items: center;
-    font-size: var(--text-h3);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-size: 1.125rem;
+    font-weight: 600;
     text-decoration: none;
     overflow-wrap: anywhere;
   }
@@ -86,7 +108,7 @@ const channels = [
   }
   @media (min-width: 640px) {
     .channels > div {
-      grid-template-columns: 8rem 1fr;
+      grid-template-columns: 11rem 1fr;
       align-items: center;
     }
   }
