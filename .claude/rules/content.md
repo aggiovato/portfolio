@@ -44,8 +44,9 @@ time; Keystatic will edit the same files later (§13), so keep the format editor
   `id="<note>/<figure>"` for a marble diagram or a timeline of subscriptions (src/lib/diagrams/specs.ts, drawn by marble.ts in the
   page's language) or `src="<note>/<file>"` for any SVG or image in src/assets/notes/. An SVG is
   inlined: give it a viewBox, and set text with `font-family: var(--font-sans | --font-mono)` (or
-  outline it) so it matches the site. Prefer a drawing to a picture of a diagram. Covers from the
-  marble drawings: `node scripts/note-covers.mjs`.
+  outline it) so it matches the site. Prefer a drawing to a picture of a diagram. An SVG with prose
+  needs one file per language (`places.en.svg`, `places.es.svg`…); a cover carries no prose (one
+  image for every language). Covers from a marble drawing or a cover SVG: `node scripts/note-covers.mjs`.
 - Self-check (notes, optional): one `{% quiz %}` before the sources, with 2–6 questions as
   `{% question text="…" options=["…", "…"] answer=2 explanation="…" /%}` (`answer` counts from 1;
   a bad one fails the build; `backticks` are inline code; a code sample goes in the tag's body). Ask about what the note shows, not trivia; every option plausible;

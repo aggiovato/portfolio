@@ -24,8 +24,9 @@ Standards: `.claude/rules/content.md` (notes contract, figures) and `.claude/rul
    Diagrams go on the notebook background with `{% diagram … alt="…" caption="…" /%}`:
    `src="<slug>/<file>.svg"` for a drawing made anywhere (Figma, Excalidraw, a diagram tool;
    it needs a viewBox, text in the site's fonts or outlined), or `id="<slug>/<figure>"` for a
-   marble diagram described in `src/lib/diagrams/specs.ts` (labels translated). A marble cover:
-   `node scripts/note-covers.mjs`.
+   marble diagram described in `src/lib/diagrams/specs.ts` (labels translated). An SVG with prose:
+   one file per language. Covers (no prose, one for every language) from a marble diagram or a
+   cover SVG: `node scripts/note-covers.mjs`.
    Only when a drawing is not possible, crop from the PDF: `pdftoppm -r 240`, the panel interior
    (no paper margin or second frame), WebP ≤ 1600px. Every image needs an `alt` in the note's
    language.
