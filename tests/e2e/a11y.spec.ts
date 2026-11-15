@@ -16,6 +16,7 @@ const PAGES = [
   '/it/',
   '/notes/',
   '/notes/rxjs-mapping-operators/',
+  '/es/notes/where-state-lives/',
   '/es/notes/',
   '/newsletter/pending/',
   '/404/',
