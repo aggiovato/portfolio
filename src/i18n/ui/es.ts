@@ -69,8 +69,11 @@ export const es: UiDictionary = {
 
   // Work
   'notes.title': 'Notas',
+  'notes.heading': 'Notas, {word} como las entiendo.',
+  'notes.headingWord': 'dibujadas',
   'notes.description': 'Notas técnicas breves: cómo funciona algo, un valor cada vez.',
-  'notes.intro': 'Notas técnicas breves sobre lo que uso a diario, dibujadas como yo lo entiendo.',
+  'notes.intro':
+    'Notas técnicas breves sobre lo que uso a diario, con diagramas que se siguen valor a valor.',
   'notes.feed': 'Feed RSS',
   'note.published': 'Publicada el {date}',
   'note.updated': 'Actualizada el {date}',
@@ -94,6 +97,8 @@ export const es: UiDictionary = {
     'Cada nota nueva llegará a tu correo. Todos los correos tienen un enlace para darte de baja.',
   'newsletter.backToNotes': 'Volver a las notas',
   'work.title': 'Proyectos',
+  'work.heading': 'Cosas que he {word}.',
+  'work.headingWord': 'lanzado',
   'work.description': 'Casos de estudio: el problema, mi parte, las decisiones y lo que aprendí.',
   'work.intro':
     'Cada proyecto explica el problema, mi papel, las decisiones que lo sostienen y qué haría de otra manera.',
@@ -168,19 +173,22 @@ export const es: UiDictionary = {
 
   // About
   'about.title': 'Sobre mí',
+  'about.heading': 'Primero el {word}.',
+  'about.headingWord': 'producto',
   'about.description': 'Sobre {person}: {role} centrado en {focus}.',
   'about.lead':
-    'Soy {person}. Construyo productos web de principio a fin, con la mayor parte de mi atención en la interfaz y en las decisiones de producto que hay detrás.',
+    'Soy {person}, desarrollador full-stack. Antes de cualquier pantalla o endpoint, quiero entender el negocio: cómo se organiza el trabajo, quién hace qué y qué intenta construir la persona que está detrás.',
+  'about.approach':
+    'Las buenas herramientas son la expresión natural de ese orden. Por eso lo primero es alinear las ideas, las del emprendedor y las del equipo, en una estructura clara; el software nace de ahí y se diseña desde el principio para escalar con el negocio, en lugar de rehacerse cada vez que crece.',
   'about.nameBefore': 'El nombre',
   'about.nameAfter':
     'significa «aterrizado en Júpiter»: un recordatorio de seguir explorando, pero con los pies en el suelo. En la práctica, curiosidad por las herramientas nuevas y una preferencia testaruda por lo que está probado, documentado y es fácil de cambiar.',
   'about.workWith': 'Con qué trabajo',
-  'about.experience': 'Experiencia',
-  'about.experienceSoon': 'La trayectoria profesional llegará pronto.',
 
   // Contact
   'contact.title': 'Contacto',
-  'contact.heading': 'Hablemos.',
+  'contact.heading': '{word}.',
+  'contact.headingWord': 'Hablemos',
   'contact.description': 'Cómo contactar con {person}.',
   'contact.intro': 'Cuéntame qué estás construyendo y dónde te has atascado. Suelo responder en pocos días.',
   'contact.email': 'Email',

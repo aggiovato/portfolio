@@ -1,0 +1,18 @@
+---
+/**
+ * A page title with one shining word (the hero's «explore.»): the translated `text` holds a
+ * `{word}` placeholder where the highlighted `word` goes, so each language places it naturally.
+ * Rendered inside the page's h1 (SectionHeading's slot).
+ */
+interface Props {
+  text: string;
+  word: string;
+}
+
+const { text, word } = Astro.props;
+const [before = '', after = ''] = text.split('{word}');
+---
+
+{before}
+<em class="shine">{word}</em>
+{after}

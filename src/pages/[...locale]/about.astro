@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import HighlightedTitle from '../../components/HighlightedTitle.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import ContactCTA from '../../components/ContactCTA.astro';
 import { site } from '../../data/site';
@@ -22,12 +23,12 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   <section class="section">
     <div class="container">
       <SectionHeading path="about" id="page-title" level="h1">
-        {t('about.title')}
+        <HighlightedTitle text={t('about.heading')} word={t('about.headingWord')} />
       </SectionHeading>
 
       <div class="prose">
-        <!-- TODO: real profile, experience and way of working (§7). -->
         <p class="lead">{t('about.lead', { person: site.person })}</p>
+        <p>{t('about.approach')}</p>
         <p>
           {t('about.nameBefore')} <strong>{site.brand}</strong> {t('about.nameAfter')}
         </p>
@@ -38,9 +39,6 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
             <li class="chip">{tech}</li>
           ))}
         </ul>
-
-        <h2>{t('about.experience')}</h2>
-        <p>{t('about.experienceSoon')}</p>
       </div>
     </div>
   </section>

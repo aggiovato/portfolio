@@ -69,8 +69,11 @@ export const it: UiDictionary = {
 
   // Work
   'notes.title': 'Note',
+  'notes.heading': 'Note, {word} come le capisco.',
+  'notes.headingWord': 'disegnate',
   'notes.description': 'Brevi note tecniche: come funziona qualcosa, un valore alla volta.',
-  'notes.intro': 'Brevi note tecniche su ciò che uso ogni giorno, disegnate come le capisco.',
+  'notes.intro':
+    'Brevi note tecniche su ciò che uso ogni giorno, con diagrammi da seguire un valore alla volta.',
   'notes.feed': 'Feed RSS',
   'note.published': 'Pubblicata il {date}',
   'note.updated': 'Aggiornata il {date}',
@@ -94,6 +97,8 @@ export const it: UiDictionary = {
     'Ogni nuova nota arriverà nella tua casella. Ogni email ha un link per disiscriverti.',
   'newsletter.backToNotes': 'Torna alle note',
   'work.title': 'Progetti',
+  'work.heading': 'Cose che ho {word}.',
+  'work.headingWord': 'realizzato',
   'work.description': 'Casi di studio: il problema, il mio ruolo, le decisioni e cosa ho imparato.',
   'work.intro':
     'Ogni progetto spiega il problema, il mio ruolo, le decisioni prese e cosa farei diversamente.',
@@ -168,19 +173,22 @@ export const it: UiDictionary = {
 
   // About
   'about.title': 'Chi sono',
+  'about.heading': 'Prima il {word}.',
+  'about.headingWord': 'prodotto',
   'about.description': 'Chi è {person}: {role} con focus su {focus}.',
   'about.lead':
-    'Sono {person}. Costruisco prodotti web dall’inizio alla fine, con la maggior parte dell’attenzione sull’interfaccia e sulle decisioni di prodotto che ci stanno dietro.',
+    'Sono {person}, sviluppatore full-stack. Prima di qualsiasi schermata o endpoint, voglio capire il business: come è organizzato il lavoro, chi fa cosa e cosa sta cercando di costruire la persona che c’è dietro.',
+  'about.approach':
+    'I buoni strumenti sono l’espressione naturale di quell’ordine. Per questo il primo lavoro è allineare le idee, quelle dell’imprenditore e del team, in una struttura chiara; il software nasce da lì ed è pensato fin dall’inizio per crescere con il business, invece di essere rifatto ogni volta che cresce.',
   'about.nameBefore': 'Il nome',
   'about.nameAfter':
     'significa «atterrato su Giove»: un promemoria per continuare a esplorare, ma su un terreno solido. In pratica significa curiosità per i nuovi strumenti e una ostinata preferenza per ciò che è testato, documentato e facile da cambiare.',
   'about.workWith': 'Con cosa lavoro',
-  'about.experience': 'Esperienza',
-  'about.experienceSoon': 'Il percorso professionale arriverà presto.',
 
   // Contact
   'contact.title': 'Contatti',
-  'contact.heading': 'Parliamone.',
+  'contact.heading': '{word}.',
+  'contact.headingWord': 'Parliamone',
   'contact.description': 'Come contattare {person}.',
   'contact.intro': 'Raccontami cosa stai costruendo e dove sei bloccato. Di solito rispondo in pochi giorni.',
   'contact.email': 'Email',

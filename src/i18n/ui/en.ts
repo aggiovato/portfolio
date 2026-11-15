@@ -71,8 +71,11 @@ export const en = {
 
   // Work
   'notes.title': 'Notes',
+  'notes.heading': 'Notes, {word} as I understand them.',
+  'notes.headingWord': 'drawn',
   'notes.description': 'Short technical notes: how something works, read one value at a time.',
-  'notes.intro': 'Short technical notes on what I use every day, drawn as I understand it.',
+  'notes.intro':
+    'Short technical notes on what I use every day, with diagrams you can follow one value at a time.',
   'notes.feed': 'RSS feed',
   'note.published': 'Published {date}',
   'note.updated': 'Updated {date}',
@@ -95,6 +98,8 @@ export const en = {
   'newsletter.confirmedBody': 'Each new note will reach your inbox. Every email has a link to unsubscribe.',
   'newsletter.backToNotes': 'Back to the notes',
   'work.title': 'Work',
+  'work.heading': 'Things I’ve {word}.',
+  'work.headingWord': 'shipped',
   'work.description': 'Case studies: the problem, my part, the decisions and what I learned.',
   'work.intro':
     'Each project explains the problem, my part in it, the decisions behind it and what I’d do differently.',
@@ -169,19 +174,22 @@ export const en = {
 
   // About
   'about.title': 'About',
+  'about.heading': 'Product {word}.',
+  'about.headingWord': 'first',
   'about.description': 'About {person}: {role} focused on {focus}.',
   'about.lead':
-    'I’m {person}. I build web products end to end, with most of my attention on the interface and on the product decisions behind it.',
+    'I’m {person}, a full-stack developer. Before any screen or endpoint, I want to understand the business: how the work is organised, who does what, and what the person behind it is trying to build.',
+  'about.approach':
+    'Good tools are the natural expression of that order. So the first job is to line up the ideas, the founder’s and the team’s, into a clear structure; the software grows out of it, and it is designed from the start to scale with the business instead of being rebuilt every time it grows.',
   'about.nameBefore': 'The name',
   'about.nameAfter':
     'means “landed on Jupiter”: a reminder to keep exploring, but to do it on solid ground. In practice that means curiosity about new tools and a stubborn preference for things that are tested, documented and easy to change.',
   'about.workWith': 'What I work with',
-  'about.experience': 'Experience',
-  'about.experienceSoon': 'Experience timeline coming soon.',
 
   // Contact
   'contact.title': 'Contact',
-  'contact.heading': 'Let’s talk.',
+  'contact.heading': 'Let’s {word}.',
+  'contact.headingWord': 'talk',
   'contact.description': 'How to reach {person}.',
   'contact.intro': 'Tell me what you’re building and where you’re stuck. I usually reply within a few days.',
   'contact.email': 'Email',

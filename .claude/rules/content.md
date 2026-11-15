@@ -33,6 +33,8 @@ time; Keystatic will edit the same files later (§13), so keep the format editor
   translations with the same file name and slug, read only through `src/lib/content/notes.ts`
   (`getPublicNotes`, `getNotesInLocale`, `notePath`, `getNoteAlternates`, `hasNotes`). Published
   notes need `publishedAt`. `verify:drafts` also fails if `/notes/` ships without a published note.
+- Highlight a key term with `{% highlight %}term{% /highlight %}` (inline, also in headings):
+  lavender with a soft glow, at most one idea per section.
 - Images in Markdoc (notes and case studies): `![alt](path "Caption")` renders an optimised figure
   with the title as its caption (`Figure.astro`). Images live in `src/assets/<collection>/<slug>/`.
 - A note's `publishedAt` is the day it is released: the newsletter emails notes by that date

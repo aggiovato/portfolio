@@ -45,7 +45,7 @@ test.describe('work', () => {
 test.describe('notes', () => {
   test('the menu links to notes and a note opens its own URL with an index', async ({ page, isMobile }) => {
     await page.goto('/notes/');
-    await expect(page.locator('h1')).toHaveText('Notes');
+    await expect(page.locator('h1')).toHaveText('Notes, drawn as I understand them.');
     if (!isMobile) {
       await expect(
         page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Notes' }),
