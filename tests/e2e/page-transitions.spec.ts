@@ -17,17 +17,25 @@ test.describe('page transitions', () => {
 
   test('card → case study animates, shares names and works with back', async ({ page }) => {
     await page.addInitScript(recordReveal);
-    await page.goto('/');
-    const card = page.locator('.pcard').first();
-    const slug = await card.locator('.stretched').getAttribute('href');
-    await card.locator('.stretched').click();
-    await expect(page).toHaveURL(new RegExp(`${slug}$`));
+    let slug = '';
+    // Under heavy CPU load (the full suite in parallel) Chrome skips a cross-document transition
+    // when the new page is not ready in time: measured ~3–17 % with 12–14 workers, 0 of 60 with
+    // one. The site is not at fault (the old page does start it), so the navigation is retried:
+    // a site that stopped transitioning still fails every attempt.
+    await expect(async () => {
+      await page.goto('/');
+      const link = page.locator('.pcard').first().locator('.stretched');
+      slug = (await link.getAttribute('href')) ?? '';
+      await link.click();
+      await expect(page).toHaveURL(new RegExp(`${slug}$`));
+      // `pagereveal` can fire after the URL commits: wait for it instead of reading it once.
+      await expect
+        .poll(() => page.evaluate(() => (window as unknown as { __vt: boolean | null }).__vt))
+        .not.toBeNull();
+      expect(await page.evaluate(() => (window as unknown as { __vt: boolean }).__vt)).toBe(true);
+    }).toPass({ intervals: [0], timeout: 30_000 });
 
-    // `pagereveal` can fire after the URL commits: wait for it instead of reading it once.
-    await expect
-      .poll(() => page.evaluate(() => (window as unknown as { __vt: boolean | null }).__vt))
-      .toBe(true);
-    const name = slug!.split('/').filter(Boolean).pop();
+    const name = slug.split('/').filter(Boolean).pop();
     await expect(page.locator('h1')).toHaveCSS('view-transition-name', `title-${name}`);
     await expect(page.locator('figure.cover img')).toHaveCSS('view-transition-name', `cover-${name}`);
 
