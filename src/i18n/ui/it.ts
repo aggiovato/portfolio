@@ -31,7 +31,7 @@ export const it: UiDictionary = {
   'hero.titleLine1': 'Radicato nel codice.',
   'hero.titleLine2': 'Fatto per',
   'hero.titleHighlight': 'esplorare.',
-  'hero.identity': '{role}, con focus su {focus}.',
+  'hero.identity': '{role}: mi occupo di {focus}.',
   'hero.primaryCta': 'Esplora i miei progetti',
   'hero.secondaryCta': 'Parliamone',
   'hero.latest': 'Progetto in evidenza:',
@@ -88,7 +88,7 @@ export const it: UiDictionary = {
   'newsletter.language': 'Lingua',
   'newsletter.submit': 'Iscriviti',
   'newsletter.consent':
-    'Prima riceverai un’email di conferma. Il tuo indirizzo è custodito da Brevo, il servizio che invia le note, e usato solo per loro.',
+    'Prima riceverai un’email di conferma. Il tuo indirizzo è custodito da Brevo, il servizio che invia le note, e utilizzato esclusivamente per inviarti le nuove note.',
   'newsletter.pendingTitle': 'Controlla la posta',
   'newsletter.pendingBody':
     'Ti ho inviato un’email per confermare l’iscrizione. Aprila e clicca sul link; fino ad allora non riceverai altro.',
@@ -177,7 +177,7 @@ export const it: UiDictionary = {
   'about.title': 'Chi sono',
   'about.heading': 'Prima il {word}.',
   'about.headingWord': 'prodotto',
-  'about.description': 'Chi è {person}: {role} con focus su {focus}.',
+  'about.description': 'Chi è {person}: {role}, si occupa di {focus}.',
   'about.lead':
     'Sono {person}, sviluppatore full-stack. Prima di qualsiasi schermata o endpoint, voglio capire il business: come è organizzato il lavoro, chi fa cosa e cosa sta cercando di costruire la persona che c’è dietro.',
   'about.approach':
