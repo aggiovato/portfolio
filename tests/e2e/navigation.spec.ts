@@ -99,3 +99,18 @@ test.describe('contact call to action', () => {
     await expect(page.locator('[data-cta-word]')).toHaveText('a product', { timeout: 8000 });
   });
 });
+
+test.describe('back to top', () => {
+  test('every page offers the rocket FAB once the reader scrolls, and it returns to the top', async ({
+    page,
+  }) => {
+    await page.goto('/about/');
+    const fab = page.getByRole('button', { name: 'Back to top' });
+    await expect(fab).toBeHidden();
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect(fab).toBeVisible();
+    await fab.click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page.locator('#main')).toBeFocused();
+  });
+});

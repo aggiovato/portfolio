@@ -97,7 +97,7 @@ const t = useTranslations(locale);
 
 <!--
   Outside the hero on purpose: the hero isolates its stacking context (isolation) and the projects
-  section (z-index: 1) would sit above it. Fixed decorative layer for the rocket in transit + real FAB.
+  section (z-index: 1) would sit above it. Fixed decorative layer for the rocket in transit; the FAB itself is BackToTop.astro (every page).
 -->
 <div class="sky" aria-hidden="true">
   <svg class="sky-trail"></svg>
@@ -105,11 +105,6 @@ const t = useTranslations(locale);
     <LogoMark size={52} />
   </div>
 </div>
-<button class="fab" type="button" aria-label={t('hero.backToTop')} hidden>
-  <span class="fab-icon">
-    <LogoMark size={26} />
-  </span>
-</button>
 
 <script>
   /**
@@ -1179,73 +1174,5 @@ const t = useTranslations(locale);
 
   .sky-rocket[hidden] {
     display: none;
-  }
-
-  /* Dark surface with the lavender rocket: lavender stays reserved for actions without competing
-     with the hero CTAs. 56 px touch target; respects safe areas. */
-  .fab {
-    position: fixed;
-    right: max(1.5rem, calc(env(safe-area-inset-right) + 1rem));
-    bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
-    z-index: 60;
-    display: grid;
-    place-items: center;
-    width: 56px;
-    height: 56px;
-    padding: 0;
-    border: 1px solid var(--color-card-border);
-    border-radius: 50%;
-    background: var(--color-card);
-    color: var(--color-accent);
-    cursor: pointer;
-    box-shadow:
-      0 10px 28px rgb(0 0 0 / 0.4),
-      0 0 22px rgb(121 80 232 / 0.22);
-    transition:
-      border-color var(--duration-fast) var(--ease-out),
-      box-shadow var(--duration-fast) var(--ease-out);
-  }
-
-  .fab[hidden] {
-    display: none;
-  }
-
-  .fab-icon {
-    display: grid;
-    transition: transform var(--duration-fast) var(--ease-out);
-  }
-
-  .fab:hover {
-    border-color: var(--color-accent);
-    box-shadow:
-      0 10px 28px rgb(0 0 0 / 0.4),
-      0 0 28px rgb(121 80 232 / 0.38);
-  }
-
-  .fab:hover .fab-icon {
-    transform: translateY(-2px);
-  }
-
-  .fab:focus-visible {
-    outline: 2px solid var(--color-focus);
-    outline-offset: 4px;
-  }
-
-  .fab.is-entering {
-    animation: fab-in 0.35s var(--ease-out) both;
-  }
-
-  @keyframes fab-in {
-    from {
-      opacity: 0;
-      transform: translateY(8px) scale(0.85);
-    }
-  }
-
-  @media (max-width: 767px) {
-    .fab {
-      width: 52px;
-      height: 52px;
-    }
   }
 </style>
