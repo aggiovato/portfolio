@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [1.6.0] — 2026-11-15
+
 ### Added
 
 - `/llms.txt`: the site summarised in Markdown for AI assistants (who, how, case studies, notes,
