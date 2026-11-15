@@ -544,8 +544,9 @@ const t = useTranslations(locale);
       if (!desktop.matches) return;
       const target = event.target as Element;
       if (target.closest('a, button, input, textarea, select, summary')) return;
-      // The text column is for reading: a click there (to focus, to select) never launches.
-      if (target.closest('.content, .log')) return;
+      // Text is for reading: a click on it (to focus, to select) never launches. Empty space in the
+      // text column is still sky.
+      if (target.closest('h1, p, pre, .actions, .log')) return;
       if (window.getSelection()?.toString()) return; // do not interfere with text selection
       launch(clampAboveHorizon(heroPoint(event.clientX, event.clientY)));
     });
@@ -1114,8 +1115,14 @@ const t = useTranslations(locale);
       white-space: nowrap;
     }
 
+    /* Fixed width (the longest line it can hold, in ch of its own mono font): the values are
+       rewritten on every flight, and a block that resized would reflow the CTA row and shift the
+       hero under the rocket's trail. */
     .mission {
       display: block;
+      flex: none;
+      width: 36ch;
+      overflow: hidden;
       margin: var(--space-6) 0 0;
       padding-left: var(--space-4);
       border-left: 1px dashed var(--color-control-border);

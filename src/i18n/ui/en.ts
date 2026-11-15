@@ -36,26 +36,22 @@ export const en = {
   'hero.identity': '{role}, focused on {focus}.',
   'hero.primaryCta': 'Explore my work',
   'hero.secondaryCta': 'Let’s talk',
-  'hero.latest': 'Latest project:',
+  'hero.latest': 'Featured project:',
   'hero.backToTop': 'Back to top',
   'hero.arrivalPoint': 'Arrival point',
   'home.workTitle': 'Things I’ve shipped.',
   'home.seeAllProjects': 'See all projects',
   'home.workEmpty': 'Case studies are being written. Meanwhile, the code lives on',
   'home.processTitle': 'How I work.',
-  'home.process1Title': 'Understand the problem',
+  'home.process1Title': 'Understand the need',
   'home.process1Body':
-    'Talk to the people doing the work, map the current flow and find where it actually breaks before proposing screens.',
-  'home.process1Example':
-    'frontend work blocked on APIs that did not exist yet, and json-server fell short for real screens.',
-  'home.process2Title': 'Design the solution',
+    'Talk to whoever does the work or has the idea, map the current flow or the one they want, and find the weak points, the failures and the room to grow before designing anything.',
+  'home.process2Title': 'Scope the first version',
   'home.process2Body':
-    'Sketch the main flow, agree on data contracts early and decide what to leave out of the first version.',
-  'home.process2Example': 'the scoring and the timers were formulas on paper before they were code.',
-  'home.process3Title': 'Build and iterate',
+    'Turn that map into a proof of concept and an MVP that solve the immediate need, without losing sight of the growth found in step 01: that is where scalability starts.',
+  'home.process3Title': 'Build, measure, grow',
   'home.process3Body':
-    'Ship a usable slice, watch how it is used and refine. Interfaces and APIs evolve together.',
-  'home.process3Example': 'false positives in the first release led to diagnostics scoped to their section.',
+    'Ship a usable slice, watch how it is really used and let the product evolve in small steps, interface and backend together, on a base that does not need to be rewritten to grow.',
   'home.aboutTitle': 'Product first. Tools that grow with it.',
   'home.aboutBody':
     'I’m {person}, a full-stack developer. I start with the business and the product: how the work is organised and what the person behind it wants to build. The tools should be the natural expression of that order, so first we line up the ideas, then I build on a base that can grow. Scalability isn’t an afterthought; it’s part of the first design.',

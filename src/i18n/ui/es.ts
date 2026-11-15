@@ -34,27 +34,22 @@ export const es: UiDictionary = {
   'hero.identity': '{role}, centrado en {focus}.',
   'hero.primaryCta': 'Ver mis proyectos',
   'hero.secondaryCta': 'Hablemos',
-  'hero.latest': 'Último proyecto:',
+  'hero.latest': 'Proyecto destacado:',
   'hero.backToTop': 'Volver arriba',
   'hero.arrivalPoint': 'Punto de llegada',
   'home.workTitle': 'Cosas que he lanzado.',
   'home.seeAllProjects': 'Ver todos los proyectos',
   'home.workEmpty': 'Estoy escribiendo los casos de estudio. Mientras tanto, el código está en',
   'home.processTitle': 'Cómo trabajo.',
-  'home.process1Title': 'Entender el problema',
+  'home.process1Title': 'Entender la necesidad',
   'home.process1Body':
-    'Hablar con quien hace el trabajo, mapear el flujo actual y encontrar dónde falla de verdad antes de proponer pantallas.',
-  'home.process1Example':
-    'el frontend se bloqueaba esperando APIs que aún no existían, y json-server se quedaba corto para pantallas reales.',
-  'home.process2Title': 'Diseñar la solución',
+    'Hablar con quien hace el trabajo o tiene la idea, mapear el flujo actual o el que se desea, y encontrar los puntos débiles, los fallos y las oportunidades de crecer antes de diseñar nada.',
+  'home.process2Title': 'Acotar la primera versión',
   'home.process2Body':
-    'Esbozar el flujo principal, acordar pronto los contratos de datos y decidir qué se queda fuera de la primera versión.',
-  'home.process2Example': 'la puntuación y los temporizadores fueron fórmulas en papel antes de ser código.',
-  'home.process3Title': 'Construir e iterar',
+    'Convertir ese mapa en una prueba de concepto y un MVP que resuelvan la necesidad inmediata, sin perder de vista el crecimiento que salió del paso 01: ahí empieza la escalabilidad.',
+  'home.process3Title': 'Construir, medir, crecer',
   'home.process3Body':
-    'Entregar una parte usable, observar cómo se usa y refinar. Interfaces y APIs evolucionan juntas.',
-  'home.process3Example':
-    'los falsos positivos de la primera versión llevaron a limitar cada diagnóstico a su sección.',
+    'Entregar una parte usable, ver cómo se usa de verdad y hacer evolucionar el producto en pasos pequeños, interfaz y backend a la vez, sobre una base que no haya que rehacer para crecer.',
   'home.aboutTitle': 'Primero el producto. Herramientas que crecen con él.',
   'home.aboutBody':
     'Soy {person}, desarrollador full-stack. Empiezo por el negocio y el producto: cómo se organiza el trabajo y qué quiere construir la persona que está detrás. Las herramientas deberían ser la expresión natural de ese orden, así que primero alineamos las ideas y después construyo sobre una base que pueda crecer. La escalabilidad no es un añadido final: forma parte del primer diseño.',
