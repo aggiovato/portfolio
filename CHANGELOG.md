@@ -21,6 +21,11 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
   sky, and its old trail fades when it descends into the back-to-top button, which now shows a
   small take-off trail. The watermark rockets are the new mark.
 
+### Fixed
+
+- The hero sky launches from any blank space, also beside short lines of text; only the letters
+  themselves and the controls are kept for reading and clicking.
+
 ---
 
 ## [1.5.0] — 2026-11-15

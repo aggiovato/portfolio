@@ -60,6 +60,29 @@ test.describe('hero rocket flight', () => {
     await expect(hero.locator('.flyer')).not.toHaveAttribute('data-flying', '');
   });
 
+  test('blank space beside the text is sky; the text itself is for reading', async ({ page }) => {
+    const hero = page.locator('[data-launchpad]');
+    await expect(hero.locator('.waypoint-note')).toHaveText('// arrival point');
+    const target = page.locator('[data-field="target"]');
+    const before = await target.textContent();
+
+    // On the headline's letters: nothing launches.
+    const h1 = await hero.locator('h1 span').first().boundingBox();
+    if (!h1) throw new Error('headline not rendered');
+    await page.mouse.click(h1.x + h1.width * 0.3, h1.y + h1.height / 2);
+    await expect(target).toHaveText(before ?? '');
+
+    // To the right of the short «portfolio / introduction.ts» line, inside its paragraph box: launches.
+    const label = await hero.locator('.path-label').evaluate((el) => {
+      const r = document.createRange();
+      r.selectNodeContents(el);
+      const t = r.getBoundingClientRect();
+      return { right: t.right, y: t.top + t.height / 2 };
+    });
+    await page.mouse.click(label.right + 120, label.y);
+    await expect(target).not.toHaveText(before ?? '');
+  });
+
   test('clicking a link navigates instead of launching', async ({ page }) => {
     await page.getByRole('link', { name: 'Let’s talk' }).click();
     await expect(page).toHaveURL(/\/contact\/$/);

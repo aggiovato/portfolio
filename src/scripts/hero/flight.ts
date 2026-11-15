@@ -379,13 +379,29 @@ export function initHeroFlight(): HeroFlight | null {
     return aboveHorizon(p, { width: hero.clientWidth, height: hero.clientHeight }, horizon, ROCKET / 2 + 10);
   };
 
+  /**
+   * Whether a point is on visible text: one rect per line of each text element (not its box, which
+   * spans the whole column), grown by 4 px. The blank space beside short lines stays sky.
+   */
+  const overText = (x: number, y: number) =>
+    crossesRects(
+      [{ x, y }],
+      [...hero.querySelectorAll<HTMLElement>('h1, p, pre, .log')]
+        .filter((n) => n.offsetParent !== null && getComputedStyle(n).visibility !== 'hidden')
+        .flatMap((n) => {
+          const range = document.createRange();
+          range.selectNodeContents(n);
+          return [...range.getClientRects()].map((r) => ({ l: r.left, t: r.top, r: r.right, b: r.bottom }));
+        }),
+      4,
+    );
+
   hero.addEventListener('click', (event) => {
     if (!desktop.matches) return;
     const target = event.target as Element;
     if (target.closest('a, button, input, textarea, select, summary')) return;
-    // Text is for reading: a click on it (to focus, to select) never launches. Empty space in the
-    // text column is still sky.
-    if (target.closest('h1, p, pre, .actions, .log')) return;
+    // Text is for reading: a click on it (to focus, to select) never launches.
+    if (overText(event.clientX, event.clientY)) return;
     if (window.getSelection()?.toString()) return; // do not interfere with text selection
     launch(clampAboveHorizon(heroPoint(event.clientX, event.clientY)));
   });
