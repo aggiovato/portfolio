@@ -12,6 +12,11 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- Note «combineLatest, withLatestFrom, zip or forkJoin?», the third of the RxJS series, in
+  English, Spanish and Italian.
+
 ---
 
 ## [1.6.0] — 2026-11-15

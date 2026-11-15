@@ -1,0 +1,113 @@
+---
+slug: rxjs-combining-streams
+title: combineLatest, withLatestFrom, zip or forkJoin?
+summary: >-
+  Two streams, four ways to combine. The same experiment through combineLatest, withLatestFrom,
+  zip and forkJoin: only the rule for when values from different sources become one result changes.
+publicationStatus: published
+publishedAt: 2026-11-15
+tags:
+  - RxJS
+  - Angular
+cover:
+  src: ../../../assets/notes/rxjs-combining-streams/cover.webp
+  alt: 'The four ways to combine: combineLatest when any input changes, withLatestFrom when one source leads, zip to pair by position, forkJoin to wait for the final values.'
+---
+
+When should values from different sources become one result? Four operators answer that question
+in four different ways:
+
+- {% highlight %}combineLatest{% /highlight %}: any input changes.
+- {% highlight %}withLatestFrom{% /highlight %}: one source leads.
+- {% highlight %}zip{% /highlight %}: pair by position.
+- {% highlight %}forkJoin{% /highlight %}: wait for the final values.
+
+Same inputs, same timeline. Only the combination rule changes.
+
+## The experiment
+
+Two inputs, one shared clock. All examples subscribe at 0s. Each input emits two values and then
+completes. There are no errors.
+
+| Input | Emits | Completes |
+| --- | --- | --- |
+| A | A1 at 1s, A2 at 4s | 6s |
+| B | B1 at 2s, B2 at 5s | 7s |
+
+![Timeline of the two inputs: A emits A1 at 1s and A2 at 4s and completes at 6s; B emits B1 at 2s and B2 at 5s and completes at 7s.](../../../assets/notes/rxjs-combining-streams/experiment.webp "Time runs left to right; a vertical bar marks completion.")
+
+In the outputs, `[A2,B1]` means one emitted pair. The lines show events over time, not separate
+threads, and every diagram uses the same scale.
+
+## {% highlight %}combineLatest{% /highlight %}: any input can trigger
+
+Wait for both inputs to emit once. Then emit their latest values whenever either one changes.
+
+```ts
+combineLatest([a$, b$]);
+```
+
+![Timeline for combineLatest: the output emits [A1,B1] at 2s, [A2,B1] at 4s and [A2,B2] at 5s, and completes at 7s.](../../../assets/notes/rxjs-combining-streams/combinelatest.webp "Values are pairs: each dot on Out is one emission.")
+
+First result at 2s; further results at 4s and 5s. No initial value from one input? No combined
+value yet. Here, the output completes at 7s, after both inputs. Use it for a view model built from
+several changing inputs.
+
+## {% highlight %}withLatestFrom{% /highlight %}: one source leads
+
+Only A can trigger. B updates the stored value; it never triggers an output on its own. A is the
+source here.
+
+```ts
+a$.pipe(withLatestFrom(b$));
+```
+
+![Timeline for withLatestFrom: A1 at 1s produces nothing because B has not emitted yet; A2 at 4s emits [A2,B1]; B2 at 5s produces no output; the output completes with A at 6s.](../../../assets/notes/rxjs-combining-streams/withlatestfrom.webp "Only A's emissions can produce an output.")
+
+A1 is skipped: B has not emitted yet. It is not queued. At 4s, A2 uses B1. B2 at 5s produces no
+output. Here, the output completes with A at 6s. Use it for a submit event that reads the latest
+form state.
+
+## {% highlight %}zip{% /highlight %}: first with first
+
+Wait until every input has a value for the next pair. Consume each value once, in input order.
+
+```ts
+zip(a$, b$);
+```
+
+![Timeline for zip: the output emits [A1,B1] at 2s and [A2,B2] at 5s; A2 waits from 4s to 5s for B2.](../../../assets/notes/rxjs-combining-streams/zip.webp "Each value is used in exactly one pair.")
+
+A2 waits from 4s to 5s for B2. It does not reuse B1. At 6s, A is complete and its queue is empty:
+done. A much faster input can build up a large queue. Use it for two sequences that must be paired
+by index.
+
+## {% highlight %}forkJoin{% /highlight %}: one final snapshot
+
+Wait for every input to emit and complete. Then emit their last values once and complete.
+
+```ts
+forkJoin([a$, b$]);
+```
+
+![Timeline for forkJoin: a single output, [A2,B2], at 7s when B completes, and then the output completes.](../../../assets/notes/rxjs-combining-streams/forkjoin.webp "One emission, only after every input has completed.")
+
+A finishing at 6s is not enough: B finishes at 7s. An input that never completes can keep you
+waiting. In RxJS 7, an empty input completes the join with no value. Use it for several finite HTTP
+requests needed together.
+
+## Choose the trigger
+
+Ask when to emit, then choose the tool. The same values can lead to very different outputs.
+
+| When should it emit? | Operator | Outputs |
+| --- | --- | --- |
+| Any input changes | `combineLatest` | 2s, 4s, 5s |
+| Only the source emits | `withLatestFrom` | 4s |
+| The next pair is ready | `zip` | 2s, 5s |
+| All inputs complete | `forkJoin` | 7s |
+
+These tools combine streams; they do not create threads. An unhandled error in any input fails the
+combined output.
+
+Sources: the RxJS 7 API for [combineLatest](https://rxjs.dev/api/index/function/combineLatest), [withLatestFrom](https://rxjs.dev/api/operators/withLatestFrom), [zip](https://rxjs.dev/api/index/function/zip) and [forkJoin](https://rxjs.dev/api/index/function/forkJoin).

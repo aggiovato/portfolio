@@ -32,11 +32,13 @@ captions too. AI translations stay `draft` until the author reviews them, unless
 ## 3. Publish (the date decides the newsletter)
 
 1. In every language: `publicationStatus: published` and `publishedAt: <the day of the release>`.
-2. Brevo's RSS integrations (one per language, daily at 23:30 Europe/Madrid) email the notes whose
-   date falls since the previous run. The feed dates are the day at 00:00 UTC, so:
-   - `publishedAt` must be the day `task release:minor` runs, and
-   - the release must be live before 22:30 that day (Brevo asks for one hour of margin).
-     A note dated another day, or released after 22:30, is never emailed.
+2. Brevo's RSS integrations (one per language) run on Monday, Wednesday and Friday at 00:30
+   Europe/Madrid and email the notes dated since the previous run (window: previous run day 00:00
+   to this run day 00:00). Feed dates are the day at 00:00 UTC (01:00 Madrid), so:
+   - `publishedAt` is the day `task release:minor` runs; the note goes out in the next run,
+   - the release must be live by 23:30 the night before that run (Brevo asks for one hour), and
+   - a note dated on a run day itself (Mon, Wed, Fri) falls after that night's window and waits
+     for the following run. A date in a window that has already been sent is never emailed.
 3. Verify: `npm run check`, `npm test`, `npm run test:e2e`, then open `/notes/`, `/es/notes/`,
    `/it/notes/` in `npm run dev`.
 4. PR → merge → `task release:minor` → `git push --follow-tags` (see CLAUDE.md, CI).
