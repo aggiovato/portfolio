@@ -17,6 +17,8 @@ export interface FeedItem {
   /** Absolute URL. */
   url: string;
   publishedAt: Date;
+  /** Absolute URL of the note's image (a JPEG): the feed's enclosure, used by the newsletter email. */
+  image?: string;
   /** BCP 47 language of the item, set when it differs from the feed's (an untranslated note). */
   language?: string;
 }
@@ -48,7 +50,7 @@ export function buildFeed(feed: Feed): string {
       <link>${escapeXml(item.url)}</link>
       <guid isPermaLink="true">${escapeXml(item.url)}</guid>
       <description>${escapeXml(item.summary)}</description>
-      <pubDate>${item.publishedAt.toUTCString()}</pubDate>${item.language ? `\n      <dc:language>${item.language}</dc:language>` : ''}
+      <pubDate>${item.publishedAt.toUTCString()}</pubDate>${item.image ? `\n      <enclosure url="${escapeXml(item.image)}" type="image/jpeg" length="0"/>` : ''}${item.language ? `\n      <dc:language>${item.language}</dc:language>` : ''}
     </item>`,
     )
     .join('\n');

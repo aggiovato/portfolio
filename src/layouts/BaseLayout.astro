@@ -1,7 +1,6 @@
 ---
 import '../styles/global.css';
 import type { ImageMetadata } from 'astro';
-import { getImage } from 'astro:assets';
 import ogDefaultEn from '../assets/og/default-en.png';
 import ogDefaultEs from '../assets/og/default-es.png';
 import ogDefaultIt from '../assets/og/default-it.png';
@@ -9,6 +8,7 @@ import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { nav, site } from '../data/site';
 import { hasNotes } from '../lib/content/notes';
+import { shareImage } from '../lib/share-image';
 import {
   alternatesFor,
   defaultLocale,
@@ -55,20 +55,10 @@ const notesOpen = await hasNotes();
 const navItems = nav.filter((item) => !('requires' in item) || notesOpen);
 const canonical = new URL(Astro.url.pathname, Astro.site);
 
-// Share image: always a 1200×630 JPEG, the size and format every network shows reliably
-// (LinkedIn ignores some WebP). Covers are fitted whole on the site's graphite, never cropped.
+// Share image: the page's cover, or the locale's default card (see src/lib/share-image.ts).
 const defaultOg: Record<Locale, ImageMetadata> = { en: ogDefaultEn, es: ogDefaultEs, it: ogDefaultIt };
 const og = ogImage ?? { src: defaultOg[locale], alt: t('og.defaultAlt') };
-const ogRendered = await getImage({
-  src: og.src,
-  width: 1200,
-  height: 630,
-  fit: 'contain',
-  background: '#15161e',
-  format: 'jpg',
-  quality: 82,
-});
-const ogUrl = new URL(ogRendered.src, Astro.site).href;
+const ogUrl = new URL(await shareImage(og.src), Astro.site).href;
 
 // Structured data (schema.org): who the site is about, plus whatever the page describes.
 const siteUrl = new URL('/', Astro.site).href;
