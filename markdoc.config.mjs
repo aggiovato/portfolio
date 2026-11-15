@@ -26,6 +26,18 @@ export default defineMarkdocConfig({
         title: { type: String },
       },
     },
+    // A figure on the notebook background (Diagram.astro): a marble diagram by `id`
+    // (src/lib/diagrams/specs.ts) or any SVG/image under src/assets/notes/ by `src`.
+    diagram: {
+      render: component('./src/components/Diagram.astro'),
+      selfClosing: true,
+      attributes: {
+        id: { type: String },
+        src: { type: String },
+        alt: { type: String, required: true },
+        caption: { type: String },
+      },
+    },
     decision: {
       render: component('./src/components/DecisionBlock.astro'),
       selfClosing: true,

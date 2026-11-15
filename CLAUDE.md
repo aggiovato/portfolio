@@ -34,6 +34,7 @@ CSS tokens · static output · English (default) + Spanish (`/es/`) + Italian (`
 | Everything, CI order      | —                                        | `task preflight`                  |
 | Default share images      | `node scripts/og-default.mjs`            | —                                 |
 | Newsletter email HTML     | `node scripts/emails.mjs`                | —                                 |
+| Note covers (diagrams)    | `node scripts/note-covers.mjs`           | —                                 |
 
 CI: `.github/workflows/ci.yml` (quality → build → e2e → deploy). PRs get a Netlify preview; a push
 to `main` is tested only; a version tag `vX.Y.Z` (from `task release:patch|minor|major` on an up-to-date `main`, after

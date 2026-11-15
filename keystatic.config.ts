@@ -100,6 +100,21 @@ const editorialTags = {
       title: fields.text({ label: 'Title' }),
     },
   }),
+  diagram: block({
+    label: 'Diagram',
+    schema: {
+      id: fields.text({
+        label: 'Marble diagram id',
+        description: 'One of src/lib/diagrams/specs.ts, e.g. "rxjs-fundamentals/map". Or use File.',
+      }),
+      src: fields.text({
+        label: 'File',
+        description: 'An SVG or image in src/assets/notes/, e.g. "my-note/flow.svg". Or use the id.',
+      }),
+      alt: fields.text({ label: 'Alternative text', multiline: true }),
+      caption: fields.text({ label: 'Caption' }),
+    },
+  }),
   decision: block({
     label: 'Decision',
     schema: {
