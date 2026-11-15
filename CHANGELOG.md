@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- **Newsletter:** a subscription form at the end of every note and in the footer. Each language has its own list in Brevo, with an email to confirm, and every new note is emailed to its language's subscribers.
+
 ---
 
 ## [1.1.0] — 2026-11-14

@@ -17,6 +17,7 @@ const PAGES = [
   '/notes/',
   '/notes/rxjs-mapping-operators/',
   '/es/notes/',
+  '/newsletter/pending/',
   '/404/',
 ];
 

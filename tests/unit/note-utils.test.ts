@@ -39,6 +39,14 @@ describe('buildFeed', () => {
     expect(xml).toContain('<guid isPermaLink="true">https://example.com/notes/rxjs/</guid>');
   });
 
+  it('adds the image as a JPEG enclosure when there is one', () => {
+    expect(buildFeed(feed)).not.toContain('<enclosure');
+    const withImage = { ...feed, items: [{ ...feed.items[0], image: 'https://example.com/a.jpg?w=1&h=2' }] };
+    expect(buildFeed(withImage)).toContain(
+      '<enclosure url="https://example.com/a.jpg?w=1&amp;h=2" type="image/jpeg" length="0"/>',
+    );
+  });
+
   it('marks the language of an untranslated item only', () => {
     expect(buildFeed(feed)).not.toContain('dc:language>');
     const es = { ...feed, language: 'es', items: [{ ...feed.items[0], language: 'en' }] };

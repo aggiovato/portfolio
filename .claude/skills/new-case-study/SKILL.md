@@ -27,8 +27,8 @@ Standards: `.claude/rules/content.md` (contract, drafts, Markdoc) and `.claude/r
    `links`. Start with `publicationStatus: draft`.
 3. Images: put them in `src/assets/projects/<name>/` and reference them as
    `../../../assets/projects/<name>/<file>` with a descriptive `alt` (what the screenshot shows,
-   not "screenshot of"). `cover` is required to publish. `src/assets/projects/` is gitignored while
-   images are provisional: they stay local and CI uses placeholders (`npm run assets:placeholders`).
+   not "screenshot of"). `cover` is required to publish. Images are versioned; never point Keystatic at
+   an image outside Git (it deletes what it cannot see).
 4. Body (§10): `## Problem`, `## My contribution`, `## Solution`, `## Technical decisions`
    (`{% decision … /%}` blocks with real alternatives and trade-offs), `## Quality`,
    `## What I learned` / `## What's next`. Use `{% callout %}` for constraints and limits.

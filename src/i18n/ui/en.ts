@@ -79,6 +79,21 @@ export const en = {
   'note.readingTime': '{minutes} min read',
   'note.all': 'All notes',
   'note.tags': 'Topics',
+  'newsletter.title': 'Get new notes by email',
+  'newsletter.text':
+    'One email when a note is published, in the language you choose. Unsubscribe from any email.',
+  'newsletter.footer': 'New notes by email',
+  'newsletter.email': 'Email address',
+  'newsletter.language': 'Language',
+  'newsletter.submit': 'Subscribe',
+  'newsletter.consent':
+    'You’ll get an email to confirm first. Your address is kept by Brevo, the service that sends the notes, and used only for them.',
+  'newsletter.pendingTitle': 'Check your inbox',
+  'newsletter.pendingBody':
+    'I’ve sent you an email to confirm the subscription. Open it and click the link; nothing else arrives until you do.',
+  'newsletter.confirmedTitle': 'You’re subscribed',
+  'newsletter.confirmedBody': 'Each new note will reach your inbox. Every email has a link to unsubscribe.',
+  'newsletter.backToNotes': 'Back to the notes',
   'work.title': 'Work',
   'work.description': 'Case studies: the problem, my part, the decisions and what I learned.',
   'work.intro':

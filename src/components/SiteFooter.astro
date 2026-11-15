@@ -1,5 +1,6 @@
 ---
 import LogoMark from './LogoMark.astro';
+import NewsletterForm from './NewsletterForm.astro';
 import { site, type NavItem } from '../data/site';
 import { localizePath, resolveLocale, useTranslations } from '../i18n';
 
@@ -51,6 +52,10 @@ const year = new Date().getFullYear();
       </ul>
     </nav>
 
+    <div class="subscribe">
+      <NewsletterForm id="footer-newsletter" variant="compact" />
+    </div>
+
     <p class="legal">
       © {year} {site.person}
     </p>
@@ -86,6 +91,12 @@ const year = new Date().getFullYear();
     color: var(--color-text);
   }
 
+  .subscribe {
+    max-width: 40rem;
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+  }
+
   .muted,
   .legal {
     color: var(--color-text-subtle);
@@ -115,7 +126,8 @@ const year = new Date().getFullYear();
       grid-template-columns: 1fr auto;
       align-items: start;
     }
-    .legal {
+    .legal,
+    .subscribe {
       grid-column: 1 / -1;
     }
   }
