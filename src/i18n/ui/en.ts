@@ -27,8 +27,6 @@ export const en = {
   'nav.language': 'Language',
   'nav.switchTo': 'Read this page in {language}',
   'footer.label': 'Footer',
-  'footer.meaning': 'means landed on Jupiter.',
-  'footer.builtBy': 'Built by {person} with Astro.',
 
   // Home
   'hero.titleLine1': 'Grounded in code.',

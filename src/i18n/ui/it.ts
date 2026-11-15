@@ -25,8 +25,6 @@ export const it: UiDictionary = {
   'nav.language': 'Lingua',
   'nav.switchTo': 'Leggi questa pagina in {language}',
   'footer.label': 'Piè di pagina',
-  'footer.meaning': 'significa «atterrato su Giove».',
-  'footer.builtBy': 'Realizzato da {person} con Astro.',
 
   // Home
   'hero.titleLine1': 'Radicato nel codice.',
