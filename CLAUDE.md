@@ -34,8 +34,8 @@ CSS tokens · static output · English (default) + Spanish (`/es/`) + Italian (`
 | Newsletter email HTML     | `node scripts/emails.mjs`                | —                                 |
 
 CI: `.github/workflows/ci.yml` (quality → build → e2e → deploy). PRs get a Netlify preview; a push
-to `main` is tested only; a version tag `vX.Y.Z` (from `task release:patch|minor|major`, after writing
-«Unreleased» in `CHANGELOG.md`) is checked against `package.json` and the changelog, deployed to
+to `main` is tested only; a version tag `vX.Y.Z` (from `task release:patch|minor|major` on an up-to-date `main`, after
+writing «Unreleased» in `CHANGELOG.md`) is checked against `package.json` and the changelog, deployed to
 production, and gets a GitHub Release when it is minor or major. Netlify never builds itself; secrets
 `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`. Headers live in `public/_headers`.
 

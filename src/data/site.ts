@@ -1,8 +1,8 @@
 /**
  * Locale-independent site data (siteSettings, spec §12). Translatable copy (role, tagline,
  * description) lives in `src/i18n/ui/`.
- * It stays in TypeScript for the MVP; it moves to a collection when Keystatic comes in.
- * TODO: confirm the real email, GitHub and LinkedIn before publishing.
+ * Kept in TypeScript rather than a Keystatic singleton: it rarely changes and `as const` keeps it
+ * type-checked where it is used.
  */
 import type { Locale, UiKey } from '../i18n';
 
