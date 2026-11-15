@@ -187,6 +187,8 @@ const footerLinks = (locale) => {
  */
 export function notesEmail(locale) {
   const t = copy[locale];
+  // Brevo hands DESCRIPTION over with its <description> element and escapes it, so the tags
+  // showed as text in the email: `striptags` keeps only the summary, still escaped.
   // Brevo's tags sit inside a cell: text between table rows is moved out of the table by any HTML
   // parser (and by Brevo's editor), which would leave the loop wrapping nothing.
   const content = `<tr><td class="pad" style="padding:30px 40px 24px;">
@@ -197,13 +199,13 @@ export function notesEmail(locale) {
 <table role="presentation" width="100%"><tr><td style="padding:0 0 22px;">{% if item.ENCLOSURE %}<a href="{{ item.LINK }}"><img src="{{ item.ENCLOSURE }}" width="520" alt="{{ item.TITLE }}" style="display:block;width:100%;max-width:520px;height:auto;border-radius:8px;"></a>{% endif %}</td></tr>
 <tr><td style="padding:0 0 30px;">
 <h2 class="article-title" style="margin:0 0 14px;font-family:${serif};font-size:32px;line-height:39px;letter-spacing:-.6px;color:${c.ink};"><a href="{{ item.LINK }}" style="color:${c.ink};text-decoration:none;">{{ item.TITLE }}</a></h2>
-<p style="font-family:${sans};font-size:16px;line-height:27px;color:${c.body};">{{ item.DESCRIPTION }}</p>
+<p style="font-family:${sans};font-size:16px;line-height:27px;color:${c.body};">{{ item.DESCRIPTION|striptags }}</p>
 ${button('{{ item.LINK }}', t.read)}
 </td></tr></table>
 {% else %}{% if forloop.Counter == 2 %}<table role="presentation" width="100%"><tr><td style="border-top:1px solid ${c.rule};padding-top:24px;"><p style="font-family:${mono};font-size:10px;line-height:18px;letter-spacing:1.5px;color:${c.label};">${t.also}</p></td></tr></table>{% endif %}
 <table role="presentation" width="100%"><tr><td style="padding:18px 0 8px;">
 <h2 style="margin:0 0 9px;font-family:${sans};font-size:21px;line-height:29px;letter-spacing:-.3px;"><a href="{{ item.LINK }}" style="color:#352847;text-decoration:underline;">{{ item.TITLE }}&nbsp;&rarr;</a></h2>
-<p style="font-family:${sans};font-size:14px;line-height:24px;color:${c.soft};">{{ item.DESCRIPTION }}</p>
+<p style="font-family:${sans};font-size:14px;line-height:24px;color:${c.soft};">{{ item.DESCRIPTION|striptags }}</p>
 </td></tr></table>
 {% endif %}{% endfor %}
 </td></tr>
