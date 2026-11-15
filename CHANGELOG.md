@@ -12,6 +12,11 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Changed
+
+- Newsletter emails redesigned as «Orbital Journal»: a night masthead with Jupiter over a light
+  paper body, the first note featured and any others listed below, in the three languages.
+
 ---
 
 ## [1.4.1] — 2026-11-15
