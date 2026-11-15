@@ -12,6 +12,12 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- «Check yourself» at the end of the three RxJS notes: a few questions on real cases, some with a
+  short code sample, that show the answer and why as soon as you pick one. Works without
+  JavaScript; nothing is stored or sent. New `{% quiz %}` and `{% question %}` tags.
+
 ### Changed
 
 - The diagrams of the three RxJS notes (fundamentals, mapping operators, combining streams) are
