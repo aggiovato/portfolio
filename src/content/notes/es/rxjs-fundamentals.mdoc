@@ -40,7 +40,7 @@ que ya está en marcha. Las emisiones pueden ser síncronas o asíncronas.
 
 El tiempo avanza de izquierda a derecha. Cada punto es un valor; cada línea, un flujo.
 
-![Un diagrama de flujo: los valores A y B sobre una línea que va de antes a después, y una barra vertical que marca la finalización.](../../../assets/notes/rxjs-fundamentals/reading-a-diagram.webp "Dos valores y luego la finalización.")
+{% diagram id="rxjs-fundamentals/reading" alt="Un diagrama de flujo: los valores A y B sobre una línea que va de antes a después, y una barra vertical que marca la finalización." caption="Dos valores y luego la finalización." /%}
 
 - `next(A)`: se emite un valor.
 - `|` complete: el flujo termina con normalidad.
@@ -61,15 +61,15 @@ doubled$.subscribe(console.log);
 
 ## {% highlight %}map{% /highlight %} cambia el valor, {% highlight %}filter{% /highlight %} decide qué pasa
 
-![Diagrama de canicas: map(n => n * 10) convierte 1, 2 y 3 en 10, 20 y 30.](../../../assets/notes/rxjs-fundamentals/map.webp "map cambia cada valor.")
+{% diagram id="rxjs-fundamentals/map" alt="Diagrama de canicas: map(n => n * 10) convierte 1, 2 y 3 en 10, 20 y 30." caption="map cambia cada valor." /%}
 
-![Diagrama de canicas: filter(n => n >= 20) recibe 10, 20 y 30 y solo deja pasar 20 y 30.](../../../assets/notes/rxjs-fundamentals/filter.webp "filter descarta los valores que no pasan la prueba.")
+{% diagram id="rxjs-fundamentals/filter" alt="Diagrama de canicas: filter(n => n >= 20) recibe 10, 20 y 30 y solo deja pasar 20 y 30." caption="filter descarta los valores que no pasan la prueba." /%}
 
 `filter` descarta emisiones; no emite `true` ni `false`.
 
 ## {% highlight %}tap{% /highlight %} observa sin transformar
 
-![Diagrama de canicas: 20 y 30 entran en tap, la consola registra 20 y después 30, y los mismos 20 y 30 salen sin cambios.](../../../assets/notes/rxjs-fundamentals/tap.webp "tap registra cada valor; el flujo sigue igual.")
+{% diagram id="rxjs-fundamentals/tap" alt="Diagrama de canicas: 20 y 30 entran en tap, la consola registra 20 y después 30, y los mismos 20 y 30 salen sin cambios." caption="tap registra cada valor; el flujo sigue igual." /%}
 
 Devolver un valor desde `tap` no cambia el valor emitido. Úsalo para observar; evita mutar objetos
 dentro de él.

@@ -40,7 +40,7 @@ Emissions can be synchronous or asynchronous.
 
 Time moves from left to right. Each dot is a value; each line is a stream.
 
-![A stream diagram: the values A and B on a line that runs from earlier to later, then a vertical bar for completion.](../../../assets/notes/rxjs-fundamentals/reading-a-diagram.webp "Two values, then completion.")
+{% diagram id="rxjs-fundamentals/reading" alt="A stream diagram: the values A and B on a line that runs from earlier to later, then a vertical bar for completion." caption="Two values, then completion." /%}
 
 - `next(A)`: a value is emitted.
 - `|` complete: the stream ends normally.
@@ -61,15 +61,15 @@ doubled$.subscribe(console.log);
 
 ## {% highlight %}map{% /highlight %} changes the value, {% highlight %}filter{% /highlight %} decides what passes
 
-![Marble diagram: map(n => n * 10) turns 1, 2 and 3 into 10, 20 and 30.](../../../assets/notes/rxjs-fundamentals/map.webp "map changes every value.")
+{% diagram id="rxjs-fundamentals/map" alt="Marble diagram: map(n => n * 10) turns 1, 2 and 3 into 10, 20 and 30." caption="map changes every value." /%}
 
-![Marble diagram: filter(n => n >= 20) receives 10, 20 and 30 and lets only 20 and 30 through.](../../../assets/notes/rxjs-fundamentals/filter.webp "filter drops the values that fail the test.")
+{% diagram id="rxjs-fundamentals/filter" alt="Marble diagram: filter(n => n >= 20) receives 10, 20 and 30 and lets only 20 and 30 through." caption="filter drops the values that fail the test." /%}
 
 `filter` drops emissions; it does not emit `true` or `false`.
 
 ## {% highlight %}tap{% /highlight %} observes without transforming
 
-![Marble diagram: 20 and 30 enter tap, the console logs 20 and then 30, and the same 20 and 30 come out unchanged.](../../../assets/notes/rxjs-fundamentals/tap.webp "tap logs each value; the stream carries on unchanged.")
+{% diagram id="rxjs-fundamentals/tap" alt="Marble diagram: 20 and 30 enter tap, the console logs 20 and then 30, and the same 20 and 30 come out unchanged." caption="tap logs each value; the stream carries on unchanged." /%}
 
 Returning a value from `tap` does not change the emitted value. Use it to observe; avoid mutating
 objects inside it.
