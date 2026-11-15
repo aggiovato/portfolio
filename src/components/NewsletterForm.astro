@@ -105,7 +105,9 @@ const targets = Object.fromEntries(available.map((l) => [l, newsletter[l]]));
     display: grid;
     gap: var(--space-3);
   }
+  /* Same width as the reading column it closes (ArticleBody's grid track is var(--measure)). */
   .newsletter--full {
+    box-sizing: border-box;
     max-width: var(--measure);
     padding: var(--space-8);
     border: 1px solid var(--color-border);

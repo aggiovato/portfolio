@@ -84,9 +84,10 @@
   --hero-log-w: 3.75rem;
   --hero-indent: calc(var(--hero-log-w) + var(--space-6));
   --header-h: 64px;
-  /* Reading measure. `ch` is the width of «0», wider than an average Manrope letter: 56ch ≈ 74
-     characters per line, inside the comfortable 65–75 (68ch measured ~90). */
-  --measure: 56ch;
+  /* Reading measure. `ch` is the width of «0», wider than an average Manrope letter: 62ch ≈ 80
+     characters per line. Long-form text (ArticleBody) is set a size larger, so the column is about
+     44rem on desktop: wide enough not to feel like a strip in the middle of the page. */
+  --measure: 62ch;
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);

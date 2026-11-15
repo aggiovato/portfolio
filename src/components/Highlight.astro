@@ -1,0 +1,31 @@
+---
+/**
+ * Markdoc `{% highlight %}…{% /highlight %}`: a key word or phrase of a note or case study in the
+ * hero's highlight lavender with a soft glow, the same signal as «explore.» on the home. Rendered
+ * as <mark> (text highlighted for reference). Use it sparingly: one idea per section at most.
+ */
+---
+
+<mark class="highlight">
+  <slot />
+</mark>
+
+<style>
+  .highlight {
+    background: none;
+    color: var(--color-accent);
+    font-weight: 650;
+    text-shadow: 0 0 18px rgb(198 165 255 / 0.45);
+  }
+  /* Inline code inside a highlight takes the same colour instead of the code chip's white. */
+  /* Doubled class: beats the prose's inline-code colour (.prose :not(pre) > code). */
+  .highlight.highlight :global(code) {
+    color: inherit;
+  }
+  @media (forced-colors: active) {
+    .highlight {
+      color: Highlight;
+      text-shadow: none;
+    }
+  }
+</style>

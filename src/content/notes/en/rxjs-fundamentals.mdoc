@@ -49,7 +49,7 @@ Time moves from left to right. Each dot is a value; each line is a stream.
 No more values arrive after complete or error. These lines are not execution threads: they only
 show when values happen.
 
-## pipe() composes, subscribe() connects
+## {% highlight %}pipe(){% /highlight %} composes, {% highlight %}subscribe(){% /highlight %} connects
 
 ```ts
 const doubled$ = source$.pipe(map((n) => n * 2));
@@ -57,7 +57,7 @@ const doubled$ = source$.pipe(map((n) => n * 2));
 doubled$.subscribe(console.log);
 ```
 
-`pipe()` builds a new Observable from `source$` and its operators; nothing runs yet. `subscribe()`
+{% highlight %}`pipe()`{% /highlight %} builds a new Observable from `source$` and its operators; nothing runs yet. {% highlight %}`subscribe()`{% /highlight %}
 connects a consumer and starts the work. With Angular's `HttpClient`, each subscription sends a
 request. Angular's `async` pipe can manage the subscription for you.
 
