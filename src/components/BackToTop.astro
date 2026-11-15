@@ -1,8 +1,9 @@
 ---
 /**
  * «Back to top» FAB with the logo's rocket, on every page (BaseLayout).
- * - Home: the hero's rocket descends into this button and flies back to the hero; Hero.astro drives
- *   it (it finds the button by `.fab`), so this script stays out when there is a [data-launchpad].
+ * - A page with [data-fab-driver] shows and hides it itself (the home: the hero's rocket descends
+ *   into this button and flies back), so the scroll logic below stays out. Its API for drivers:
+ *   src/scripts/fab.ts; the `.fab` classes are styling only.
  * - Other pages: the FAB appears once the reader is past the first screen; on click the rocket lifts
  *   off (a short rise and fade) while the page scrolls to the top, and focus returns to #main.
  * Reduced motion: no lift-off, an instant jump.
@@ -20,11 +21,13 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
 </button>
 
 <script>
+  import { backToTop, fabIsDriven, findFab, hideFab, showFab } from '../scripts/fab';
+
   // The FAB steps aside only while it actually overlaps something it would cover (the call to
   // action's buttons, the subscription form: elements marked [data-fab-avoid]), so it never hides
   // an action and is still there at the bottom of every page.
   {
-    const button = document.querySelector<HTMLButtonElement>('[data-fab]');
+    const button = findFab();
     const avoid = [...document.querySelectorAll<HTMLElement>('[data-fab-avoid]')];
     if (button && avoid.length) {
       const overlaps = (a: DOMRect, b: DOMRect) =>
@@ -47,27 +50,17 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     }
   }
 
-  const fab = document.querySelector<HTMLButtonElement>('[data-fab]');
+  const fab = findFab();
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  if (fab && !document.querySelector('[data-launchpad]')) {
+  if (fab && !fabIsDriven()) {
     let shown = false;
     const update = () => {
       const past = window.scrollY > window.innerHeight * 0.6;
       if (past === shown) return;
       shown = past;
-      if (past) {
-        fab.hidden = false;
-        fab.classList.remove('is-launching', 'is-entering');
-        if (!reduced.matches) {
-          void fab.offsetWidth;
-          fab.classList.add('is-entering');
-        }
-      } else {
-        // Do not drop keyboard focus on <body> when the button goes away.
-        if (document.activeElement === fab) document.getElementById('main')?.focus({ preventScroll: true });
-        fab.hidden = true;
-      }
+      if (past) showFab(fab, !reduced.matches);
+      else hideFab(fab);
     };
     let frame = 0;
     addEventListener('scroll', () => (frame ||= requestAnimationFrame(() => ((frame = 0), update()))), {
@@ -75,11 +68,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     });
     update();
 
-    fab.addEventListener('click', () => {
-      if (!reduced.matches) fab.classList.add('is-launching');
-      window.scrollTo({ top: 0, behavior: reduced.matches ? 'auto' : 'smooth' });
-      document.getElementById('main')?.focus({ preventScroll: true });
-    });
+    fab.addEventListener('click', () => backToTop(fab, { liftOff: true }));
   }
 </script>
 
