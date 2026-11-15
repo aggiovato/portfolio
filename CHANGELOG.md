@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [1.4.0] — 2026-11-15
+
 ### Added
 
 - A watermark drawing on Work, Notes, About and Contact, like the home sections.
