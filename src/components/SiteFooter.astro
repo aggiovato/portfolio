@@ -7,9 +7,11 @@ import { localizePath, resolveLocale, useTranslations } from '../i18n';
 interface Props {
   /** Menu entries, already filtered to the sections that have content (BaseLayout). */
   nav: readonly NavItem[];
+  /** False on pages that already end with their own subscription form (notes). */
+  subscribe?: boolean;
 }
 
-const { nav } = Astro.props;
+const { nav, subscribe = true } = Astro.props;
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 
@@ -50,9 +52,11 @@ const year = new Date().getFullYear();
       </ul>
     </nav>
 
-    <div class="subscribe">
-      <NewsletterForm id="footer-newsletter" variant="compact" />
-    </div>
+    {subscribe && (
+      <div class="subscribe">
+        <NewsletterForm id="footer-newsletter" variant="compact" />
+      </div>
+    )}
 
     <p class="legal">
       © {year} {site.person}

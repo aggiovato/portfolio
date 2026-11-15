@@ -44,6 +44,7 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 ---
 
 <BaseLayout
+  footerSubscribe={false}
   ogImage={data.cover && { src: data.cover.src, alt: data.cover.alt }}
   article={{ publishedTime: data.publishedAt, modifiedTime: data.updatedAt, tags: data.tags }}
   jsonLd={{
