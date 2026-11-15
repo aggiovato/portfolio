@@ -1,0 +1,35 @@
+---
+/** Watermark drawing (Watermark.astro draws the grid, places and styles it): A launch blueprint: trajectory, angle, rocket and the calculations beside it. Contact CTA. */
+---
+
+{/* Launch pad and the dotted trajectory leaving it. */}
+<path class="line" d="M60 470h130" />
+<path class="trail" d="M118 462C150 330 230 220 360 150S470 70 500 52" />
+{/* Launch angle from the pad. */}
+<path class="line" d="M118 462L300 330" />
+<path class="line" d="M190 462a72 72 0 0 0-14-44" />
+{/* The rocket, at the start of the arc. */}
+<g class="accent" transform="translate(206 300) rotate(36)">
+  <path d="M0 -38C10 -26 12 -6 10 14H-10C-12 -6 -10 -26 0 -38Z" />
+  <path d="M-10 6L-20 22H-10M10 6L20 22H10M-5 14L0 26L5 14" />
+  <circle cx="0" cy="-12" r="4" />
+</g>
+{/* Orbit reached, top right. */}
+<ellipse class="trail" cx="430" cy="110" rx="70" ry="26" transform="rotate(-18 430 110)" />
+<circle class="line" cx="430" cy="110" r="16" />
+<g class="calc">
+  <text x="210" y="456">
+    θ = 42°
+  </text>
+  <text x="300" y="404">
+    Δv = 9.4 km/s
+  </text>
+  <text x="318" y="430">
+    t₀ − 10 s
+  </text>
+  <text x="352" y="214">
+    h = 420 km
+  </text>
+</g>
+{/* Crosshair on the pad. */}
+<path class="line" d="M118 446v32M102 462h32" />

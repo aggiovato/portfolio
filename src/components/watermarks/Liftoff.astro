@@ -1,0 +1,36 @@
+---
+/** Watermark drawing (Watermark.astro draws the grid, places and styles it): The rocket leaving its pad, with the tower and the countdown. How I work. */
+---
+
+{/* The pad and the launch tower with its arms. */}
+<path class="line" d="M150 440h220M175 440l20-26h130l20 26" />
+<path class="line" d="M340 414V170M372 414V170M340 200h32M340 250h32M340 300h32M340 350h32" />
+<path class="line" d="M340 230h-48M340 320h-48" />
+{/* The rocket, just off the pad, in lavender. */}
+<g class="accent" transform="translate(260 270)">
+  <path d="M0 -112C26 -82 32 -30 28 30H-28C-32 -30 -26 -82 0 -112Z" />
+  <path d="M-28 4L-52 52H-28M28 4L52 52H28M-12 30L0 58L12 30" />
+  <circle cx="0" cy="-48" r="11" />
+</g>
+{/* Exhaust: the trail's dots spreading below the engine. */}
+<path class="trail" d="M260 336v70M248 340l-22 64M272 340l22 64M238 344l-48 56M282 344l48 56" />
+{/* The ascent it will follow. */}
+<path class="trail" d="M260 150V40" />
+<path class="line" d="M252 52l8-14 8 14" />
+<g class="calc">
+  <text x="90" y="200">
+    T−3
+  </text>
+  <text x="90" y="236">
+    T−2
+  </text>
+  <text x="90" y="272">
+    T−1
+  </text>
+  <text x="90" y="318">
+    ignition
+  </text>
+  <text x="388" y="480">
+    pad 01
+  </text>
+</g>

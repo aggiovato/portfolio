@@ -1,0 +1,31 @@
+---
+/** Watermark drawing (Watermark.astro draws the grid, places and styles it): Business → product → tools on a base that grows. About. */
+---
+
+{/* Business → product → tools, top to bottom, joined by the trail. */}
+<rect class="line" x="170" y="70" width="180" height="64" rx="12" />
+<rect class="accent" x="190" y="200" width="140" height="56" rx="12" />
+<rect class="line" x="90" y="326" width="110" height="48" rx="10" />
+<rect class="line" x="210" y="326" width="100" height="48" rx="10" />
+<rect class="line" x="320" y="326" width="110" height="48" rx="10" />
+<path class="trail" d="M260 134v66M260 256v34M145 290h230M145 290v36M260 290v36M375 290v36" />
+{/* The base everything rests on, and the growth it allows. */}
+<path class="line" d="M60 430h400" />
+<path class="trail" d="M60 452h400" />
+<path class="line" d="M440 410l20 20-20 20" />
+<g class="calc">
+  <text x="182" y="108">
+    business
+  </text>
+  <text x="212" y="234">
+    product
+  </text>
+  <text x="108" y="356">
+    tools
+  </text>
+  <text x="66" y="480">
+    base → scale
+  </text>
+</g>
+{/* Drafting compass arc. */}
+<path class="line" d="M470 60a120 120 0 0 1-40 150" />

@@ -5,10 +5,12 @@
  * hero (> 50 % visible) the FAB dissolves and the rocket returns to its last landing point.
  * 15/50 hysteresis so it does not flicker at the threshold.
  * Mobile (no rocket in the hero) or reduced motion: the FAB just appears/disappears.
- * Markup: the `.sky` layer in Hero.astro.
+ * Markup: the `.sky` layer in Hero.astro, whose [data-fab-driver] tells BackToTop to stay out; the
+ * FAB is reached only through src/scripts/fab.ts.
  */
 import type { Vec } from '../../lib/flight/gravity';
 import { cubicPoint, easeInOut, headingDeg, lerpAngle, smoothstep, trailDots } from '../../lib/flight/path';
+import { backToTop, findFab, hideFab, showFab } from '../fab';
 import { ROCKET, svgEl, type HeroFlight } from './flight';
 
 type FabState = 'hero' | 'descending' | 'fab' | 'returning';
@@ -21,7 +23,7 @@ export function initRocketFab(flight: HeroFlight): void {
   const sky = document.querySelector<HTMLElement>('.sky');
   const skyRocket = sky?.querySelector<HTMLElement>('.sky-rocket');
   const skyTrail = sky?.querySelector<SVGSVGElement>('.sky-trail');
-  const fab = document.querySelector<HTMLButtonElement>('.fab');
+  const fab = findFab();
   if (!sky || !skyRocket || !skyTrail || !fab) return;
 
   let state: FabState = 'hero';
@@ -134,27 +136,12 @@ export function initRocketFab(flight: HeroFlight): void {
     skyFrame = requestAnimationFrame(tick);
   };
 
-  const showFab = (animate: boolean) => {
-    fab.hidden = false;
-    fab.classList.remove('is-entering');
-    if (animate) {
-      void fab.offsetWidth;
-      fab.classList.add('is-entering');
-    }
-  };
-
-  const hideFab = () => {
-    // If the FAB had focus, do not lose it to <body>.
-    if (document.activeElement === fab) document.getElementById('main')?.focus({ preventScroll: true });
-    fab.hidden = true;
-  };
-
   const descend = () => {
     const start = flyer.hidden ? null : flyer.getBoundingClientRect();
     if (!flies() || !start || start.width === 0) {
       // No visible rocket to move: the FAB just appears.
       state = 'fab';
-      showFab(!reduced.matches);
+      showFab(fab, !reduced.matches);
       return;
     }
     state = 'descending';
@@ -178,7 +165,7 @@ export function initRocketFab(flight: HeroFlight): void {
         skyRocket.hidden = true;
         fadeTrail();
         state = 'fab';
-        showFab(false); // the icon already has the same position and size: seamless hand-over
+        showFab(fab, false); // the icon already has the same position and size: seamless hand-over
         if (ratio > 0.5) returnHome();
       },
     });
@@ -186,7 +173,7 @@ export function initRocketFab(flight: HeroFlight): void {
 
   const returnHome = () => {
     const home = heroRocketViewport();
-    hideFab();
+    hideFab(fab);
     if (!flies() || !home) {
       state = 'hero';
       if (desktop.matches && flight.hasPosition()) flyer.style.visibility = '';
@@ -221,11 +208,7 @@ export function initRocketFab(flight: HeroFlight): void {
     { threshold: [0, 0.1, 0.15, 0.3, 0.5, 0.6, 1] },
   ).observe(hero);
 
-  fab.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: reduced.matches ? 'auto' : 'smooth' });
-    // Focus goes back to the start of the content (like the skip link) for keyboard users.
-    document.getElementById('main')?.focus({ preventScroll: true });
-  });
+  fab.addEventListener('click', () => backToTop(fab));
 
   // After a resize the hero rocket is repositioned; if it was away, it stays hidden.
   window.addEventListener('resize', () => {
