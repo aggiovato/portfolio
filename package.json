@@ -20,7 +20,7 @@
     "test:e2e": "playwright test",
     "verify:drafts": "bash scripts/verify-drafts.sh",
     "assets:placeholders": "node scripts/placeholder-assets.mjs",
-    "preversion": "node scripts/changelog.mjs check Unreleased",
+    "preversion": "node scripts/release-guard.mjs && node scripts/changelog.mjs check Unreleased",
     "version": "node scripts/changelog.mjs release && git add CHANGELOG.md"
   },
   "dependencies": {

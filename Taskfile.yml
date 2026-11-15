@@ -162,6 +162,7 @@ tasks:
         silent: true
 
   # ── Release ────────────────────────────────────────────────────────────────
+  # Run from an up-to-date main (scripts/release-guard.mjs stops it otherwise).
   # Write the changes under «## [Unreleased]» in CHANGELOG.md first. `npm version` bumps
   # package.json, dates that section (scripts/changelog.mjs), commits and tags vX.Y.Z.
   # Then `git push --follow-tags`: CI runs the full pipeline and deploys the tag to production
