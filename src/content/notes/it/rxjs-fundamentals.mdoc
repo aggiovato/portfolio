@@ -62,7 +62,7 @@ ancora nulla. {% highlight %}`subscribe()`{% /highlight %} collega un consumator
 ogni sottoscrizione invia una richiesta. La pipe `async` di Angular può gestire la sottoscrizione
 al posto tuo.
 
-## map cambia il valore, filter decide cosa passa
+## {% highlight %}map{% /highlight %} cambia il valore, {% highlight %}filter{% /highlight %} decide cosa passa
 
 ![Diagramma a biglie: map(n => n * 10) trasforma 1, 2 e 3 in 10, 20 e 30.](../../../assets/notes/rxjs-fundamentals/map.webp "map cambia ogni valore.")
 
@@ -70,7 +70,7 @@ al posto tuo.
 
 `filter` scarta le emissioni; non emette `true` o `false`.
 
-## tap osserva senza trasformare
+## {% highlight %}tap{% /highlight %} osserva senza trasformare
 
 ![Diagramma a biglie: 20 e 30 entrano in tap, la console registra 20 e poi 30, e gli stessi 20 e 30 escono invariati.](../../../assets/notes/rxjs-fundamentals/tap.webp "tap registra ogni valore; il flusso prosegue invariato.")
 
@@ -97,6 +97,6 @@ source$
 
 `2` diventa `20`. Supera il filtro. `tap` registra `20` e il sottoscrittore riceve `20`.
 
-**map** trasforma, **filter** seleziona, **tap** osserva.
+{% highlight %}map{% /highlight %} trasforma, {% highlight %}filter{% /highlight %} seleziona, {% highlight %}tap{% /highlight %} osserva.
 
 Fonti: la documentazione di RxJS su Observable e operatori, e la guida di `HttpClient` di Angular.

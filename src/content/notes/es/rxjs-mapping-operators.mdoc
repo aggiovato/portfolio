@@ -17,10 +17,10 @@ cover:
 ¿Qué debería pasar cuando llega otra petición antes de que termine la actual? Los cuatro
 operadores de mapeo de orden superior responden a esa pregunta de cuatro formas distintas:
 
-- **switchMap**: cambia a la más reciente.
-- **concatMap**: la pone en cola y mantiene el orden.
-- **mergeMap**: deja que las operaciones se solapen.
-- **exhaustMap**: la ignora mientras está ocupado.
+- {% highlight %}switchMap{% /highlight %}: cambia a la más reciente.
+- {% highlight %}concatMap{% /highlight %}: la pone en cola y mantiene el orden.
+- {% highlight %}mergeMap{% /highlight %}: deja que las operaciones se solapen.
+- {% highlight %}exhaustMap{% /highlight %}: la ignora mientras está ocupado.
 
 Mismas entradas, mismas duraciones. Solo cambia el operador.
 
@@ -42,7 +42,7 @@ líneas de tiempo usan la misma escala.
 events$.pipe(operator((id) => request$(id)));
 ```
 
-## switchMap: sigue al más reciente
+## {% highlight %}switchMap{% /highlight %}: sigue al más reciente
 
 Un evento nuevo cancela la suscripción al flujo interno anterior.
 
@@ -52,7 +52,7 @@ A se detiene a los 1 s, B a los 2 s, y solo responde C, a los 3 s. Úsalo para r
 que deben seguir a la última consulta. Cancelar la suscripción no deshace los cambios en el
 servidor.
 
-## concatMap: espera tu turno
+## {% highlight %}concatMap{% /highlight %}: espera tu turno
 
 Los valores nuevos esperan en una cola; cada uno empieza cuando termina el anterior.
 
@@ -61,7 +61,7 @@ Los valores nuevos esperan en una cola; cada uno empieza cuando termina el anter
 A responde a los 5 s, luego B a los 8 s y C a los 9 s. Úsalo para guardados ordenados que deben
 ejecutarse todos. Si un flujo interno nunca se completa, la cola se atasca.
 
-## mergeMap: deja que el trabajo se solape
+## {% highlight %}mergeMap{% /highlight %}: deja que el trabajo se solape
 
 Se suscribe a medida que llegan los eventos y reenvía las respuestas según llegan.
 
@@ -71,7 +71,7 @@ Las respuestas llegan C, B, A: no se conserva el orden de entrada. Úsalo para p
 independientes que pueden solaparse. La concurrencia es ilimitada por defecto; pasa un límite si lo
 necesitas.
 
-## exhaustMap: ¿ocupado? Ignóralo
+## {% highlight %}exhaustMap{% /highlight %}: ¿ocupado? Ignóralo
 
 Los eventos nuevos se ignoran hasta que se completa el flujo interno activo.
 

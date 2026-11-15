@@ -18,10 +18,10 @@ Cosa dovrebbe succedere quando arriva un'altra richiesta prima che finisca quell
 quattro operatori di mapping di ordine superiore rispondono a questa domanda in quattro modi
 diversi:
 
-- **switchMap**: passa all'ultima.
-- **concatMap**: la mette in coda e mantiene l'ordine.
-- **mergeMap**: lascia che le operazioni si sovrappongano.
-- **exhaustMap**: la ignora mentre è occupato.
+- {% highlight %}switchMap{% /highlight %}: passa all'ultima.
+- {% highlight %}concatMap{% /highlight %}: la mette in coda e mantiene l'ordine.
+- {% highlight %}mergeMap{% /highlight %}: lascia che le operazioni si sovrappongano.
+- {% highlight %}exhaustMap{% /highlight %}: la ignora mentre è occupato.
 
 Stessi ingressi, stesse durate. Cambia solo l'operatore.
 
@@ -43,7 +43,7 @@ le linee del tempo usano la stessa scala.
 events$.pipe(operator((id) => request$(id)));
 ```
 
-## switchMap: segui l'ultimo
+## {% highlight %}switchMap{% /highlight %}: segui l'ultimo
 
 Un nuovo evento annulla la sottoscrizione al flusso interno precedente.
 
@@ -52,7 +52,7 @@ Un nuovo evento annulla la sottoscrizione al flusso interno precedente.
 A si ferma a 1 s, B a 2 s, e risponde solo C, a 3 s. Usalo per i risultati di ricerca che devono
 seguire l'ultima query. Annullare la sottoscrizione non annulla le modifiche lato server.
 
-## concatMap: aspetta il tuo turno
+## {% highlight %}concatMap{% /highlight %}: aspetta il tuo turno
 
 I nuovi valori aspettano in coda; ognuno parte quando il precedente si completa.
 
@@ -61,7 +61,7 @@ I nuovi valori aspettano in coda; ognuno parte quando il precedente si completa.
 A risponde a 5 s, poi B a 8 s e C a 9 s. Usalo per salvataggi ordinati che devono essere eseguiti
 tutti. Se un flusso interno non si completa mai, la coda si blocca.
 
-## mergeMap: lascia sovrapporre il lavoro
+## {% highlight %}mergeMap{% /highlight %}: lascia sovrapporre il lavoro
 
 Sottoscrive man mano che arrivano gli eventi e inoltra le risposte man mano che arrivano.
 
@@ -71,7 +71,7 @@ Le risposte arrivano C, B, A: l'ordine di ingresso non è preservato. Usalo per 
 indipendenti che possono sovrapporsi. La concorrenza è illimitata per impostazione predefinita;
 passa un limite se ti serve.
 
-## exhaustMap: occupato? Ignoralo
+## {% highlight %}exhaustMap{% /highlight %}: occupato? Ignoralo
 
 I nuovi eventi vengono ignorati finché il flusso interno attivo non si completa.
 

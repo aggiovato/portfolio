@@ -61,7 +61,7 @@ doubled$.subscribe(console.log);
 connects a consumer and starts the work. With Angular's `HttpClient`, each subscription sends a
 request. Angular's `async` pipe can manage the subscription for you.
 
-## map changes the value, filter decides what passes
+## {% highlight %}map{% /highlight %} changes the value, {% highlight %}filter{% /highlight %} decides what passes
 
 ![Marble diagram: map(n => n * 10) turns 1, 2 and 3 into 10, 20 and 30.](../../../assets/notes/rxjs-fundamentals/map.webp "map changes every value.")
 
@@ -69,7 +69,7 @@ request. Angular's `async` pipe can manage the subscription for you.
 
 `filter` drops emissions; it does not emit `true` or `false`.
 
-## tap observes without transforming
+## {% highlight %}tap{% /highlight %} observes without transforming
 
 ![Marble diagram: 20 and 30 enter tap, the console logs 20 and then 30, and the same 20 and 30 come out unchanged.](../../../assets/notes/rxjs-fundamentals/tap.webp "tap logs each value; the stream carries on unchanged.")
 
@@ -96,6 +96,6 @@ source$
 
 `2` becomes `20`. It passes the filter. `tap` logs `20`, and the subscriber receives `20`.
 
-**map** transforms, **filter** selects, **tap** observes.
+{% highlight %}map{% /highlight %} transforms, {% highlight %}filter{% /highlight %} selects, {% highlight %}tap{% /highlight %} observes.
 
 Sources: the RxJS documentation on Observables and operators, and Angular's `HttpClient` guide.
