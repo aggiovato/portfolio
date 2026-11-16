@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [1.8.0] — 2026-11-16
+
 ### Added
 
 - «Check yourself» at the end of the three RxJS notes: a few questions on real cases, some with a
