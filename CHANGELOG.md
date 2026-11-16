@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [1.7.1] — 2026-11-16
+
 ### Fixed
 
 - Newsletter emails showed each note's summary wrapped in `<description>` tags; they now show
