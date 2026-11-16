@@ -38,6 +38,20 @@ export default defineMarkdocConfig({
         caption: { type: String },
       },
     },
+    // Self-check at the end of a note: {% quiz %} around {% question … /%} (Quiz.astro, Question.astro).
+    quiz: {
+      render: component('./src/components/Quiz.astro'),
+      children: ['tag'],
+    },
+    question: {
+      render: component('./src/components/Question.astro'),
+      attributes: {
+        text: { type: String, required: true },
+        options: { type: Array, required: true },
+        answer: { type: Number, required: true },
+        explanation: { type: String },
+      },
+    },
     decision: {
       render: component('./src/components/DecisionBlock.astro'),
       selfClosing: true,

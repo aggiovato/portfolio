@@ -96,4 +96,30 @@ source$
 
 {% highlight %}map{% /highlight %} transforms, {% highlight %}filter{% /highlight %} selects, {% highlight %}tap{% /highlight %} observes.
 
+{% quiz %}
+{% question text="How many requests does this code send?" options=["None: there is no `pipe()`", "One, shared by both subscribers", "Two: one per subscription"] answer=3 explanation="`HttpClient` returns a cold Observable: each `subscribe()` starts its own execution, and each execution sends a request." %}
+```ts
+const user$ = this.http.get<User>('/api/user');
+user$.subscribe(renderHeader);
+user$.subscribe(renderMenu);
+```
+{% /question %}
+
+{% question text="You call `pipe()` on a cold source but never `subscribe()`. What runs?" options=["The source, with its result cached for later", "Nothing: `pipe()` only composes a new Observable", "The operators, without the source"] answer=2 explanation="`pipe()` composes the operators without subscribing to the chain. On a cold source, nothing starts until `subscribe()`." /%}
+
+{% question text="What does `render` receive?" options=["`false`, `true`, `true`", "`20`, `30`", "`10`, `20`, `30`"] answer=2 explanation="`filter` decides what passes: it drops `10` and emits `20` and `30` unchanged. It never emits `true` or `false`." %}
+```ts
+of(10, 20, 30).pipe(filter((n) => n >= 20)).subscribe(render);
+```
+{% /question %}
+
+{% question text="What is logged?" options=["`10`", "`5`", "Nothing"] answer=2 explanation="Returning a value from `tap` does not change the emitted value: `tap` observes, `map` transforms." %}
+```ts
+of(5).pipe(tap((n) => n * 2)).subscribe(console.log);
+```
+{% /question %}
+
+{% question text="A stream has emitted complete (`|`). What can arrive after it?" options=["More values, if the source keeps producing", "Nothing: no values arrive after complete or error", "Only an error"] answer=2 explanation="Complete and error both end the stream. No more values arrive after either." /%}
+{% /quiz %}
+
 Sources: [Observable](https://rxjs.dev/guide/observable) and [operators](https://rxjs.dev/guide/operators) in the RxJS docs, and the [HTTP client guide](https://angular.dev/guide/http) in Angular's docs.

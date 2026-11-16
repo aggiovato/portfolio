@@ -96,4 +96,30 @@ source$
 
 {% highlight %}map{% /highlight %} transforma, {% highlight %}filter{% /highlight %} selecciona, {% highlight %}tap{% /highlight %} observa.
 
+{% quiz %}
+{% question text="¿Cuántas peticiones envía este código?" options=["Ninguna: no hay `pipe()`", "Una, compartida por los dos suscriptores", "Dos: una por suscripción"] answer=3 explanation="`HttpClient` devuelve un Observable frío: cada `subscribe()` inicia su propia ejecución, y cada ejecución envía una petición." %}
+```ts
+const user$ = this.http.get<User>('/api/user');
+user$.subscribe(renderHeader);
+user$.subscribe(renderMenu);
+```
+{% /question %}
+
+{% question text="Llamas a `pipe()` sobre una fuente fría pero nunca a `subscribe()`. ¿Qué se ejecuta?" options=["La fuente, con el resultado guardado para después", "Nada: `pipe()` solo compone un Observable nuevo", "Los operadores, sin la fuente"] answer=2 explanation="`pipe()` compone los operadores sin suscribirse a la cadena. En una fuente fría, nada empieza hasta `subscribe()`." /%}
+
+{% question text="¿Qué recibe `render`?" options=["`false`, `true`, `true`", "`20`, `30`", "`10`, `20`, `30`"] answer=2 explanation="`filter` decide qué pasa: descarta `10` y emite `20` y `30` sin cambios. Nunca emite `true` ni `false`." %}
+```ts
+of(10, 20, 30).pipe(filter((n) => n >= 20)).subscribe(render);
+```
+{% /question %}
+
+{% question text="¿Qué se muestra en la consola?" options=["`10`", "`5`", "Nada"] answer=2 explanation="Devolver un valor desde `tap` no cambia el valor emitido: `tap` observa, `map` transforma." %}
+```ts
+of(5).pipe(tap((n) => n * 2)).subscribe(console.log);
+```
+{% /question %}
+
+{% question text="Un flujo ha emitido complete (`|`). ¿Qué puede llegar después?" options=["Más valores, si la fuente sigue produciendo", "Nada: no llegan valores después de complete o error", "Solo un error"] answer=2 explanation="Complete y error terminan el flujo. Después de cualquiera de los dos no llegan más valores." /%}
+{% /quiz %}
+
 Fuentes: [Observable](https://rxjs.dev/guide/observable) y [operadores](https://rxjs.dev/guide/operators) en la documentación de RxJS, y la [guía del cliente HTTP](https://angular.dev/guide/http) de Angular.

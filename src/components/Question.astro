@@ -1,0 +1,260 @@
+---
+/**
+ * One question of a note's quiz, inside `{% quiz %}`:
+ *   {% question text="…" options=["`switchMap`", "…"] answer=2 explanation="…" %}
+ *   ```ts  optional context: a short code sample  ```
+ *   {% /question %}
+ * (or self-closing without context). `backticks` in text, options and explanation become inline code.
+ * Real radio buttons in a fieldset; picking one reveals, with CSS only, which option is right (in
+ * words and a tone dot, not only colour) and the explanation. The number comes from a CSS counter
+ * set in Quiz.astro, like the hero log's line numbers. A malformed question fails the build.
+ */
+import { checkQuestion, inlineCode, questionId } from '../lib/quiz';
+import { resolveLocale, useTranslations } from '../i18n';
+
+interface Props {
+  text: string;
+  options: string[];
+  answer: number;
+  explanation?: string;
+}
+
+const { text, options, answer, explanation } = Astro.props;
+checkQuestion({ text, options, answer, explanation });
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+const name = questionId(text);
+// An option that is only code (an operator name) reads as code without the inline chip.
+const isCodeOnly = (option: string) => {
+  const parts = inlineCode(option);
+  return parts.length === 1 && parts[0].code;
+};
+---
+
+<fieldset class="question" data-question data-answer={answer}>
+  <legend>
+    <span class="num" aria-hidden="true"></span>
+    <span class="prompt">{inlineCode(text).map((p) => (p.code ? <code>{p.text}</code> : p.text))}</span>
+  </legend>
+  <div class="body">
+    {Astro.slots.has('default') && (
+      <div class="context">
+        <slot />
+      </div>
+    )}
+    <ul role="list">
+      {options.map((option: string, i: number) => (
+        <li>
+          <label class="option" data-correct={i + 1 === answer ? '' : undefined}>
+            <input class="radio" type="radio" name={name} value={i + 1} />
+            <span class="text" data-code-only={isCodeOnly(option) ? '' : undefined}>
+              {inlineCode(option).map((p) => (p.code ? <code>{p.text}</code> : p.text))}
+            </span>
+            <span class="verdict">{i + 1 === answer ? t('quiz.correct') : t('quiz.incorrect')}</span>
+          </label>
+        </li>
+      ))}
+    </ul>
+    {explanation && (
+      <p class="explanation">
+        {inlineCode(explanation).map((p) => (p.code ? <code>{p.text}</code> : p.text))}
+      </p>
+    )}
+  </div>
+</fieldset>
+
+<style>
+  .question {
+    --indent: 0rem;
+    counter-increment: question;
+    margin: 0;
+    padding: var(--space-6) 0;
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    min-inline-size: 0;
+  }
+  @media (min-width: 640px) {
+    .question {
+      --indent: 2.75rem;
+    }
+  }
+
+  /* The number hangs in its own column from 640px, like a log entry; the text keeps one left line. */
+  legend {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    float: left;
+    width: 100%;
+    padding: 0;
+    margin-bottom: var(--space-4);
+    font-weight: 650;
+    line-height: 1.5;
+    color: var(--color-text);
+    text-wrap: pretty;
+  }
+  .num {
+    flex: 0 0 auto;
+    min-inline-size: calc(var(--indent) - var(--space-3));
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-accent);
+  }
+  .num::before {
+    content: counter(question, decimal-leading-zero);
+  }
+  .body {
+    clear: both;
+    padding-inline-start: var(--indent);
+  }
+  .context :global(pre) {
+    margin-block: 0 var(--space-4);
+  }
+  .context :global(p) {
+    margin-block: 0 var(--space-3);
+  }
+
+  ul {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .option {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 48px;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+  }
+  .option:hover {
+    border-color: var(--color-control-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+  /* The whole row carries the focus ring: the radio alone is a small target to spot. */
+  .option:has(.radio:focus-visible) {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+  .option:has(.radio:checked) {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  .text[data-code-only] > code {
+    padding: 0;
+    background: none;
+    color: inherit;
+    font-size: 0.95em;
+  }
+
+  /* A drawn radio: a thin ring that fills with a lavender dot, the site's action colour. */
+  .radio {
+    appearance: none;
+    display: grid;
+    place-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    border: 1.5px solid var(--color-control-border);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+  .radio:focus-visible {
+    outline: none;
+  }
+  .radio::before {
+    content: '';
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+    transform: scale(0);
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+  .radio:checked {
+    border-color: var(--color-accent);
+  }
+  .radio:checked::before {
+    transform: scale(1);
+  }
+
+  /* Verdicts: a mono label with a tone dot (mint right, rose wrong), the callouts' convention. */
+  .verdict {
+    display: none;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    white-space: nowrap;
+  }
+  .verdict::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .explanation {
+    display: none;
+  }
+
+  /* Once answered: the others step back, the right option says so, a wrong pick says so too. */
+  .question:has(.radio:checked) .option {
+    color: var(--color-text-subtle);
+  }
+  .question:has(.radio:checked) .option[data-correct] {
+    border-color: var(--color-success);
+    color: var(--color-text);
+  }
+  .question:has(.radio:checked) .option[data-correct] .verdict {
+    display: inline-flex;
+    color: var(--color-success);
+  }
+  .option[data-correct] .radio:checked {
+    border-color: var(--color-success);
+  }
+  .option[data-correct] .radio:checked::before {
+    background: var(--color-success);
+  }
+  /* Same reach as the dimming rule above, so a wrong pick stays readable. */
+  .question .option:not([data-correct]):has(.radio:checked) {
+    border-color: var(--color-error);
+    color: var(--color-text);
+  }
+  .option:not([data-correct]):has(.radio:checked) .verdict {
+    display: inline-flex;
+    color: var(--color-error);
+  }
+  .option:not([data-correct]) .radio:checked {
+    border-color: var(--color-error);
+  }
+  .option:not([data-correct]) .radio:checked::before {
+    background: var(--color-error);
+  }
+  .question:has(.radio:checked) .explanation {
+    display: block;
+    margin: var(--space-4) 0 0;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    background: var(--color-surface);
+    font-size: 0.9375em;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+</style>

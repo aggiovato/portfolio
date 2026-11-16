@@ -112,4 +112,24 @@ diversi.
 Questi strumenti combinano flussi; non creano thread. Un errore non gestito in qualsiasi input fa
 fallire l'output combinato.
 
+{% quiz %}
+{% question text="Il salvataggio deve usare l'ultimo stato del modulo, ma una modifica al modulo da sola non deve salvare nulla. Quale operatore va al posto di `???`?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=2 explanation="Con `withLatestFrom`, solo la sorgente (`submit$`) produce un'uscita; `form$` aggiorna solo il valore memorizzato." %}
+```ts
+submit$.pipe(???(form$)).subscribe(([, form]) => save(form));
+```
+{% /question %}
+
+{% question text="Il view model di una dashboard deve aggiornarsi ogni volta che cambiano i filtri o i dati. Quale operatore?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=1 explanation="`combineLatest` emette gli ultimi valori di tutti gli input ogni volta che uno cambia, dopo che ciascuno ha emesso almeno una volta." /%}
+
+{% question text="Una pagina ha bisogno di tre richieste HTTP finite, tutte, prima di essere mostrata. Quale operatore?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=4 explanation="`forkJoin` aspetta che ogni input emetta e si completi, poi emette i loro ultimi valori una volta: un'istantanea finale." /%}
+
+{% question text="Nell'esperimento (A1 a 1 s, B1 a 2 s), perché non c'è uscita a 1 s?" options=["A1 resta in coda finché B emette", "B non ha ancora emesso, quindi A1 viene saltato", "`withLatestFrom` aspetta che A si completi"] answer=2 explanation="Quando arriva A1, B non ha un valore da leggere, quindi A1 non produce nulla. Non viene messo in coda: la prima uscita è A2 con B1, a 4 s." %}
+```ts
+a$.pipe(withLatestFrom(b$));
+```
+{% /question %}
+
+{% question text="Passi a `forkJoin` un input che non si completa mai, come il `valueChanges` di un modulo. Cosa succede?" options=["Emette a ogni modifica del modulo", "Non emette mai: continua ad aspettare che quell'input si completi", "Emette una volta, con il primo valore del modulo"] answer=2 explanation="`forkJoin` emette solo dopo che tutti gli input si sono completati. Un input che non si completa mai lo lascia in attesa." /%}
+{% /quiz %}
+
 Fonti: l'API di RxJS 7 di [combineLatest](https://rxjs.dev/api/index/function/combineLatest), [withLatestFrom](https://rxjs.dev/api/operators/withLatestFrom), [zip](https://rxjs.dev/api/index/function/zip) e [forkJoin](https://rxjs.dev/api/index/function/forkJoin).

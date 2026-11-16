@@ -82,6 +82,12 @@ export const en = {
   'note.readingTime': '{minutes} min read',
   'note.all': 'All notes',
   'note.tags': 'Topics',
+  'quiz.title': 'Check yourself',
+  'quiz.intro': 'Pick an answer to see whether it is right, and why.',
+  'quiz.correct': 'Correct',
+  'quiz.incorrect': 'Not quite',
+  'quiz.score': '{correct} of {total} correct',
+  'quiz.retry': 'Try again',
   'newsletter.title': 'Get new notes by email',
   'newsletter.text':
     'One email when a note is published, in the language you choose. Unsubscribe from any email.',

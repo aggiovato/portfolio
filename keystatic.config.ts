@@ -115,6 +115,23 @@ const editorialTags = {
       caption: fields.text({ label: 'Caption' }),
     },
   }),
+  quiz: wrapper({
+    label: 'Quiz',
+    description: 'A self-check at the end of the note: put Question blocks inside.',
+    schema: {},
+  }),
+  question: block({
+    label: 'Question',
+    schema: {
+      text: fields.text({ label: 'Question', multiline: true }),
+      options: fields.array(fields.text({ label: 'Option' }), {
+        label: 'Options',
+        itemLabel: (props) => props.value || 'Option',
+      }),
+      answer: fields.integer({ label: 'Right option', description: 'Its number in the list, from 1.' }),
+      explanation: fields.text({ label: 'Explanation', multiline: true }),
+    },
+  }),
   decision: block({
     label: 'Decision',
     schema: {

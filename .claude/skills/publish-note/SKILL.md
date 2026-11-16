@@ -30,6 +30,10 @@ Standards: `.claude/rules/content.md` (notes contract, figures) and `.claude/rul
    (no paper margin or second frame), WebP ≤ 1600px. Every image needs an `alt` in the note's
    language.
 
+4. Optional self-check: a `{% quiz %}` of 3–4 `{% question %}` before the sources
+   (`.claude/rules/content.md`). Questions about what the note shows; draft them for the author
+   to review.
+
 ## 2. Translate
 
 Spanish and Italian with the same file name and slug (`translate-content`). Translate `alt` and
