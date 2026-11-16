@@ -1,0 +1,375 @@
+---
+slug: where-state-lives
+title: ¿Necesita mi frontend un store?
+summary: >-
+  Decidir dónde vive el estado antes de elegir una librería: qué es el estado, qué ganamos y qué
+  cuesta organizarlo, dónde va cada tipo y el mismo formulario de Angular con y sin SignalStore.
+publicationStatus: draft
+tags:
+  - Angular
+  - NgRx
+  - Gestión de estado
+cover:
+  src: ../../../assets/notes/where-state-lives/cover.webp
+  alt: 'Una pantalla de reservas con cada parte marcada según dónde vive su estado: filtros y página en la URL, filas del servidor, un menú de fila, un panel de edición con un borrador sin guardar, la organización activa y el número de filas seleccionadas.'
+---
+
+Cuando estoy desarrollando una aplicación, una de las decisiones que acaba apareciendo es cómo voy
+a manejar su estado.
+
+Lo primero que suelo pensar es cuánto va a crecer, qué información compartirán sus pantallas y qué
+ventajas tendría tenerla centralizada. Son preguntas útiles, pero con el tiempo he aprendido que no
+bastan.
+
+Porque una aplicación puede tener muchas pantallas y poca coordinación entre ellas. Y otra puede
+tener una sola pantalla, pero estar gestionando un formulario, un autoguardado, respuestas del
+servidor y cambios que todavía no se han confirmado.
+
+Entonces, ¿en qué deberíamos fijarnos? Gestionar estado consiste en decidir dónde vive la
+información, quién puede cambiarla y durante cuánto tiempo debe existir. La librería viene después.
+
+## Qué es el estado
+
+El estado es la información que la aplicación necesita recordar para saber qué mostrar y cómo
+responder en un momento determinado.
+
+Piensa en una tabla de reservas. Su estado puede incluir:
+
+- las reservas que has recibido del servidor,
+- los filtros que has aplicado,
+- la página que estás viendo,
+- las filas seleccionadas,
+- si hay una petición en curso,
+- los cambios que has escrito y todavía no has guardado.
+
+El estado ya existe aunque no utilices ninguna librería: un booleano que abre un modal también es
+estado. Y no todo necesita almacenarse. Si puedes calcular el número de filas seleccionadas a
+partir de la selección, normalmente no necesitas mantener ambos valores por separado.
+
+## Cuando varias partes deben ponerse de acuerdo
+
+Editas una reserva desde un diálogo. Al guardar, tiene que actualizarse la fila de la tabla, quizá
+el detalle y también algún contador. Si cada parte conserva su propia copia, alguien tendrá que
+mantenerlas sincronizadas.
+
+{% diagram src="where-state-lives/copies.es.svg" alt="Izquierda: un diálogo de edición guarda el estado confirmed pero solo actualiza la fila de la reserva; el detalle sigue mostrando pending y el contador sigue en 3. Derecha: el diálogo escribe en una sola fuente, la reserva 42, y la fila, el detalle y el contador leen de ella confirmed y 2." caption="Con copias, cada guardado tiene que llegar a todas. Con una sola fuente, todas las partes leen el mismo valor." /%}
+
+De ahí vienen los problemas conocidos:
+
+- una pantalla muestra información antigua,
+- dos componentes hacen la misma petición,
+- una respuesta tardía reemplaza un resultado más reciente,
+- cambias de registro y sigue apareciendo el borrador anterior,
+- no sabes qué operación activó un loading.
+
+Este es el problema que un store puede resolver. Aunque no es la única forma de hacerlo.
+
+## Qué aporta organizar el estado y qué cuesta
+
+Los beneficios vienen de organizar bien el estado, no de una herramienta concreta. Se puede tener
+un store global y seguir teniendo un estado mal diseñado.
+
+| Qué podemos ganar | Qué tenemos que asumir |
+| --- | --- |
+| Una fuente de referencia compartida | Definir quién es responsable de cada dato |
+| Cambios más predecibles | Reglas y convenciones de actualización |
+| Mejor seguimiento de los eventos | Más estructura y aprendizaje |
+| Menos sincronización manual entre vistas | Políticas de actualización e invalidación |
+| Lógica más fácil de probar por separado | Evitar que el store termine acumulándolo todo |
+
+Centralizar puede simplificar mucho las cosas, pero también puede convertir un problema local en
+una dependencia de toda la aplicación. No es un argumento contra los stores: tienen un coste, y
+necesitamos saber qué estamos comprando a cambio.
+
+## No todo el estado pertenece al mismo sitio
+
+Hazte unas preguntas sobre cada parte del estado:
+
+| Pregunta | Ejemplo | Lugar que valoraría |
+| --- | --- | --- |
+| ¿Solo importa a este componente? | Un desplegable abierto | Estado local |
+| ¿Quiero poder compartirlo en un enlace? | Filtros y paginación | La URL |
+| ¿Es información remota que puede quedar obsoleta? | Resultados de una búsqueda | Capa de consultas o caché |
+| ¿Pertenece a un proceso concreto? | Borrador de un asistente | Estado de la funcionalidad |
+| ¿Lo necesitan distintas áreas de la aplicación? | Organización activa | Estado compartido de aplicación |
+| ¿Se obtiene de otros valores? | Total seleccionado | Estado derivado |
+
+{% diagram src="where-state-lives/places.es.svg" alt="La pantalla de reservas con cada parte marcada según dónde vive: estado y página en la URL, las filas en una caché del servidor, el menú de fila abierto en el componente, el panel de edición con su borrador sin guardar en el estado de la funcionalidad, la organización activa Acme en el estado de toda la app y 2 seleccionadas como estado derivado." caption="Una pantalla, seis lugares. La leyenda indica dónde vive cada parte según su color." /%}
+
+Una distinción especialmente útil: la reserva guardada frente al borrador de su edición. Están
+relacionadas, pero tienen responsables y ciclos de vida diferentes. La reserva guardada es un dato
+del servidor que leen otras pantallas y que puede quedar obsoleto. El borrador pertenece a la
+edición: empieza al abrir el diálogo, guarda cambios que nadie ha confirmado y debería desaparecer
+al guardar o cancelar. Si los mantienes en el mismo objeto, cerrar el diálogo tiene que deshacer la
+mitad, o el siguiente registro se abre con el borrador anterior.
+
+## Cómo decides que necesitas más estructura
+
+No usaría una fórmula del tipo «más de cinco componentes = NgRx». Estas son las señales que me
+hacen reconsiderar la solución:
+
+- cada cambio exige avisar manualmente a varios componentes,
+- las reglas de actualización están repartidas por muchas pantallas,
+- hay operaciones concurrentes y respuestas que pueden llegar fuera de orden,
+- necesitas deshacer, reintentar o revertir cambios optimistas,
+- el equipo necesita una forma común de trabajar,
+- cuesta reconstruir por qué la aplicación llegó a un estado concreto.
+
+Me preocuparía menos cuántos componentes leen un dato y más cuántos pueden modificarlo, bajo qué
+reglas y con qué consecuencias.
+
+## Ahora sí: cómo elegir la herramienta
+
+Llegados aquí, la comparación ya tiene criterios. Empezaría por la necesidad:
+
+- **Estado local y sencillo:** las herramientas del framework.
+- **Una funcionalidad con lógica propia:** un servicio o un store acotado.
+- **Datos remotos:** algo que gestione consultas, caché e invalidación, como TanStack Query.
+- **Muchos eventos y efectos coordinados:** una arquitectura más explícita de acciones,
+  transiciones y efectos.
+
+NgRx Store encaja en el último caso en Angular, con acciones, reducers y efectos; Redux Toolkit
+cumple un papel parecido en React. NgRx SignalStore encaja en una funcionalidad con lógica propia, y
+también puede compartirse en toda la aplicación. Zustand es un store pequeño para React, sin
+acciones. No son intercambiables ni una clasificación de «pequeño, mediano y grande»: algunos
+pertenecen a frameworks distintos.
+
+También cuenta el equipo: la familiaridad, las convenciones existentes y el coste de mantener otra
+tecnología. Una herramienta no se elige solo por lo cómoda que resulta al escribir el primer
+componente.
+
+## El mismo formulario, con y sin {% highlight %}SignalStore{% /highlight %}
+
+Un formulario para crear clientes: nombre y email, una llamada a una API, y el estado de guardado,
+el error y los clientes creados durante la sesión. Ambas versiones manejan estado; la diferencia es
+dónde vive. El propio `FormGroup` ya gestiona valores, validación y cambios del formulario.
+
+Las dos comparten el servicio de la API, que hace la petición pero no almacena clientes, y una
+función que crea el formulario:
+
+```ts
+@Injectable({ providedIn: 'root' })
+export class CustomersApi {
+  private readonly http = inject(HttpClient);
+
+  create(input: CreateCustomer) {
+    return this.http.post<Customer>('/api/customers', input);
+  }
+}
+
+export function createCustomerForm() {
+  return new FormGroup({
+    name: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
+  });
+}
+```
+
+**Sin store**, el componente contiene el formulario, llama al servicio y actualiza sus propios
+signals:
+
+```ts
+export class CustomerFormLocalComponent {
+  private readonly api = inject(CustomersApi);
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly form = createCustomerForm();
+  readonly customers = signal<Customer[]>([]);
+  readonly saving = signal(false);
+  readonly error = signal<string | null>(null);
+
+  submit() {
+    if (this.saving()) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.saving.set(true);
+    this.error.set(null);
+
+    this.api
+      .create(this.form.getRawValue())
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.saving.set(false)),
+      )
+      .subscribe({
+        next: (customer) =>
+          this.customers.update((current) => [...current, customer]),
+        error: () =>
+          this.error.set('Could not create the customer. Try again.'),
+      });
+  }
+}
+```
+
+Si todo pertenece a esta pantalla, es una solución perfectamente razonable. No hay nada incorrecto
+en tener tres signals y una llamada HTTP dentro de un componente pequeño.
+
+**Con SignalStore**, los clientes creados, el estado de guardado, el error y la lógica que los
+actualiza pasan al store. El formulario continúa en el componente: sus controles y validaciones no
+necesitan convertirse en estado compartido.
+
+```ts
+export const CustomersStore = signalStore(
+  withState<CustomersState>({
+    customers: [],
+    saving: false,
+    error: null,
+  }),
+  withMethods((store, api = inject(CustomersApi)) => ({
+    create: rxMethod<CreateCustomer>(
+      pipe(
+        exhaustMap((input) => {
+          patchState(store, { saving: true, error: null });
+          return api.create(input).pipe(
+            tapResponse({
+              next: (customer) =>
+                patchState(store, (state) => ({
+                  customers: [...state.customers, customer],
+                })),
+              error: () =>
+                patchState(store, {
+                  error: 'Could not create the customer. Try again.',
+                }),
+              finalize: () => patchState(store, { saving: false }),
+            }),
+          );
+        }),
+      ),
+    ),
+  })),
+);
+```
+
+`exhaustMap` evita iniciar otra creación mientras la anterior sigue activa. La gestión del error
+está dentro de esa operación, para permitir nuevos intentos después de un fallo. El componente
+ahora lee los signals del store y llama a un método:
+
+```ts
+@Component({
+  selector: 'app-customer-form-store',
+  imports: [ReactiveFormsModule],
+  providers: [CustomersStore],
+  templateUrl: './customer-form.html',
+})
+export class CustomerFormStoreComponent {
+  readonly store = inject(CustomersStore);
+  readonly form = createCustomerForm();
+
+  // References to the store's signals, not copies of its state.
+  readonly customers = this.store.customers;
+  readonly saving = this.store.saving;
+  readonly error = this.store.error;
+
+  submit() {
+    if (this.saving()) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.store.create(this.form.getRawValue());
+  }
+}
+```
+
+La plantilla es exactamente la misma. Lo que cambió fue quién es responsable de la operación y del
+estado que produce.
+
+| | Estado en el componente | Estado en el store |
+| --- | --- | --- |
+| Valores y validación del formulario | Componente | Componente |
+| Guardado, error y resultado | Componente | Store |
+| Llamada HTTP | La coordina el componente | La coordina el store |
+| Pruebas de la operación | Junto al componente o extrayendo lógica | Separadas de la presentación |
+| Compartir entre componentes | Requiere inputs, outputs o un servicio | Pueden consumir una instancia compartida |
+| Coste inicial | Menor | Más estructura y dependencias |
+
+Para este formulario aislado, empezaría con la primera versión. Me plantearía la segunda cuando la
+creación del cliente forme parte de una funcionalidad con más consumidores, reglas o transiciones.
+La ventaja del store no es que desaparezca el estado ni que haya menos código total, sino que sus
+responsabilidades y sus reglas quedan en un lugar explícito.
+
+## Elegir un store no resuelve dónde debe vivir
+
+Hay tres preguntas distintas:
+
+- **Alcance:** ¿quién necesita acceder?
+- **Duración:** ¿cuándo debería reiniciarse?
+- **Carga:** ¿cuándo se incorpora su código a la aplicación?
+
+En Angular, `providers: [CustomersStore]` hace que ese store sea local al componente que lo
+proporciona: se crea una instancia con el componente y desaparece con él. No es global. Si después
+separas el formulario y la lista en componentes hermanos, proporciona el store en su contenedor:
+
+```ts
+@Component({
+  selector: 'app-customers-page',
+  imports: [CustomerCreateComponent, CustomerListComponent],
+  providers: [CustomersStore],
+  template: `
+    <app-customer-create />
+    <app-customer-list />
+  `,
+})
+export class CustomersPageComponent {}
+```
+
+Los dos hijos hacen `inject(CustomersStore)` y reciben la instancia del contenedor, siempre que no
+vuelvan a proporcionarlo ellos mismos. Una feature registrada en el store global de NgRx es
+distinta: se suma al único store que comparte toda la aplicación, y su estado sigue ahí cuando sales
+de la página.
+
+El caso más claro: si abro dos editores a la vez, ¿quiero que compartan el mismo borrador o que
+cada uno tenga el suyo?
+
+{% diagram src="where-state-lives/scope.es.svg" alt="Izquierda: customers-page proporciona CustomersStore, y sus hijos customer-create y customer-list inyectan la instancia número 1. Derecha: bookings-page tiene dos hijos booking-editor, y cada uno proporciona su propio DraftStore, así que reciben las instancias 1 y 2." caption="Dónde proporcionas el store decide quién comparte una instancia." /%}
+
+## Por dónde empiezo ahora
+
+El tamaño de la aplicación sigue siendo algo que tengo en cuenta, pero intento no empezar por ahí.
+
+Primero miro qué información necesito mantener, quién puede modificarla, qué partes dependen de
+ella y cuándo debería dejar de existir. Con esas respuestas, elegir una herramienta resulta
+bastante más sencillo. Y a veces la decisión es introducir un store. Otras veces es mantener ese
+estado en el componente, llevarlo a la URL o dejar que una caché gestione los datos del servidor.
+
+Lo que busco es que cada cambio tenga un lugar claro y que entender la aplicación no dependa de
+recordar cómo se sincronizan cinco pantallas.
+
+{% quiz %}
+{% question text="Los filtros y la página de la tabla de reservas deben seguir ahí cuando compartes el enlace con un compañero. ¿Dónde viven?" options=["Estado local", "La URL", "Estado de la funcionalidad", "Estado compartido de la aplicación"] answer=2 explanation="Si quieres compartirlo en un enlace, la nota lo lleva a la URL, como los filtros y la paginación." /%}
+
+{% question text="Puedes calcular cuántas filas hay seleccionadas a partir de la propia selección. ¿Qué sugiere la nota?" options=["Guardar el número junto a la selección", "Derivarlo: no hace falta mantener ambos", "Llevar los dos a un store global"] answer=2 explanation="No todo necesita almacenarse: un valor que se calcula a partir de otros es estado derivado." /%}
+
+{% question text="Al decidir si un dato necesita más estructura, ¿qué pesa más según la nota?" options=["Cuántos componentes lo leen", "Cuántos pueden modificarlo, con qué reglas y con qué consecuencias", "Cuántas pantallas tiene la aplicación"] answer=2 explanation="La nota se preocupa menos por cuántos componentes leen un dato y más por cuántos pueden modificarlo, bajo qué reglas y con qué consecuencias." /%}
+
+{% question text="Mueves la creación de clientes del componente a un SignalStore. ¿Cuál es la ventaja real?" options=["Hay menos código en total", "El formulario deja de tener estado", "Sus responsabilidades y reglas quedan en un lugar explícito"] answer=3 explanation="El estado no desaparece ni hay menos código: la operación y su estado tienen un responsable explícito. El formulario sigue en el componente." /%}
+
+{% question text="Abres dos editores de reservas a la vez. ¿Cuántas instancias de `DraftStore` hay?" options=["Una, compartida por los dos editores", "Dos: cada editor proporciona la suya", "Una para toda la aplicación"] answer=2 explanation="`providers: [DraftStore]` en el editor crea una instancia con cada editor, así que cada uno conserva su propio borrador." %}
+```ts
+@Component({
+  selector: 'app-booking-editor',
+  providers: [DraftStore],
+  templateUrl: './booking-editor.html',
+})
+export class BookingEditorComponent {
+  readonly draft = inject(DraftStore);
+}
+```
+{% /question %}
+{% /quiz %}
+
+Fuentes: las guías de Angular sobre [signals](https://angular.dev/guide/signals),
+[formularios reactivos](https://angular.dev/guide/forms/reactive-forms) e
+[inyección de dependencias jerárquica](https://angular.dev/guide/di/hierarchical-dependency-injection);
+y las de NgRx sobre [SignalStore](https://ngrx.io/guide/signals/signal-store),
+[integración con RxJS](https://ngrx.io/guide/signals/rxjs-integration) y
+[Store](https://ngrx.io/guide/store).
