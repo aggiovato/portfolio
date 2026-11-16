@@ -11,7 +11,7 @@ tags:
   - Angular
 cover:
   src: ../../../assets/notes/rxjs-combining-streams/cover.webp
-  alt: "I quattro modi di combinare: combineLatest quando cambia un qualsiasi input, withLatestFrom quando una fonte guida, zip per abbinare per posizione e forkJoin per attendere i valori finali."
+  alt: 'Coppie emesse da ciascun operatore con gli stessi due input: combineLatest A1,B1 a 2 s, A2,B1 a 4 s e A2,B2 a 5 s; withLatestFrom A2,B1 a 4 s; zip A1,B1 a 2 s e A2,B2 a 5 s; forkJoin A2,B2 a 7 s.'
 ---
 
 Quando dovrebbero i valori di fonti diverse diventare un unico risultato? Quattro operatori
@@ -34,7 +34,7 @@ e poi si completa. Non ci sono errori.
 | A | A1 a 1 s, A2 a 4 s | 6 s |
 | B | B1 a 2 s, B2 a 5 s | 7 s |
 
-![Linea temporale dei due input: A emette A1 a 1 s e A2 a 4 s e si completa a 6 s; B emette B1 a 2 s e B2 a 5 s e si completa a 7 s.](../../../assets/notes/rxjs-combining-streams/experiment.webp "Il tempo scorre da sinistra a destra; una barra verticale indica il completamento.")
+{% diagram id="rxjs-combining-streams/experiment" alt="Linea temporale dei due input: A emette A1 a 1 s e A2 a 4 s e si completa a 6 s; B emette B1 a 2 s e B2 a 5 s e si completa a 7 s." caption="Il tempo scorre da sinistra a destra; una barra verticale indica il completamento." /%}
 
 Negli output, `[A2,B1]` indica una coppia emessa. Le linee mostrano eventi nel tempo, non thread
 separati, e tutti i diagrammi usano la stessa scala.
@@ -48,7 +48,7 @@ uno dei due cambia.
 combineLatest([a$, b$]);
 ```
 
-![Linea temporale di combineLatest: l'output emette [A1,B1] a 2 s, [A2,B1] a 4 s e [A2,B2] a 5 s, e si completa a 7 s.](../../../assets/notes/rxjs-combining-streams/combinelatest.webp "I valori sono coppie: ogni punto su Out è un'emissione.")
+{% diagram id="rxjs-combining-streams/combinelatest" alt="Linea temporale di combineLatest: l'output emette [A1,B1] a 2 s, [A2,B1] a 4 s e [A2,B2] a 5 s, e si completa a 7 s." caption="I valori sono coppie: ogni punto su Out è un'emissione." /%}
 
 Primo risultato a 2 s; i successivi a 4 s e a 5 s. Un input senza valore iniziale? Ancora nessun
 valore combinato. Qui l'output si completa a 7 s, dopo entrambi gli input. Usalo per un view model
@@ -63,7 +63,7 @@ fonte è A.
 a$.pipe(withLatestFrom(b$));
 ```
 
-![Linea temporale di withLatestFrom: A1 a 1 s non produce nulla perché B non ha ancora emesso; A2 a 4 s emette [A2,B1]; B2 a 5 s non produce output; l'output si completa con A a 6 s.](../../../assets/notes/rxjs-combining-streams/withlatestfrom.webp "Solo le emissioni di A possono produrre un output.")
+{% diagram id="rxjs-combining-streams/withlatestfrom" alt="Linea temporale di withLatestFrom: A1 a 1 s non produce nulla perché B non ha ancora emesso; A2 a 4 s emette [A2,B1]; B2 a 5 s non produce output; l'output si completa con A a 6 s." caption="Solo le emissioni di A possono produrre un output." /%}
 
 A1 viene saltato: B non ha ancora emesso. Non viene messo in coda. A 4 s, A2 usa B1. B2, a 5 s, non
 produce output. Qui l'output si completa con A a 6 s. Usalo per un evento di invio che legge
@@ -78,7 +78,7 @@ nell'ordine degli input.
 zip(a$, b$);
 ```
 
-![Linea temporale di zip: l'output emette [A1,B1] a 2 s e [A2,B2] a 5 s; A2 attende B2 da 4 s a 5 s.](../../../assets/notes/rxjs-combining-streams/zip.webp "Ogni valore viene usato in esattamente una coppia.")
+{% diagram id="rxjs-combining-streams/zip" alt="Linea temporale di zip: l'output emette [A1,B1] a 2 s e [A2,B2] a 5 s; A2 attende B2 da 4 s a 5 s." caption="Ogni valore viene usato in esattamente una coppia." /%}
 
 A2 attende B2 da 4 s a 5 s. Non riusa B1. A 6 s, A si è completato e la sua coda è vuota: fine. Un
 input molto più veloce può accumulare una coda lunga. Usalo per due sequenze da abbinare per indice.
@@ -91,7 +91,7 @@ Attende che ogni input emetta e si completi. Poi emette i loro ultimi valori una
 forkJoin([a$, b$]);
 ```
 
-![Linea temporale di forkJoin: un unico output, [A2,B2], a 7 s, quando B si completa, e poi l'output si completa.](../../../assets/notes/rxjs-combining-streams/forkjoin.webp "Una sola emissione, solo dopo che tutti gli input si sono completati.")
+{% diagram id="rxjs-combining-streams/forkjoin" alt="Linea temporale di forkJoin: un unico output, [A2,B2], a 7 s, quando B si completa, e poi l'output si completa." caption="Una sola emissione, solo dopo che tutti gli input si sono completati." /%}
 
 Che A finisca a 6 s non basta: B finisce a 7 s. Un input che non si completa mai può lasciarti in
 attesa. In RxJS 7, un input vuoto completa l'unione senza alcun valore. Usalo per più richieste HTTP

@@ -11,7 +11,7 @@ tags:
   - Angular
 cover:
   src: ../../../assets/notes/rxjs-mapping-operators/cover.webp
-  alt: 'The four operators: switchMap switches to the latest, concatMap queues and keeps the order, mergeMap lets operations overlap, exhaustMap ignores new events while busy.'
+  alt: 'Responses of the same three requests under each operator: switchMap emits C at 3s; concatMap A at 5s, B at 8s and C at 9s; mergeMap C at 3s, B at 4s and A at 5s; exhaustMap only A at 5s.'
 ---
 
 What should happen when another request arrives before the current one finishes? The four
@@ -46,7 +46,7 @@ events$.pipe(operator((id) => request$(id)));
 
 A new event unsubscribes the previous inner stream.
 
-![Timeline for switchMap: A starts at 0s and is cancelled at 1s, B starts at 1s and is cancelled at 2s, C starts at 2s and responds at 3s.](../../../assets/notes/rxjs-mapping-operators/switchmap.webp "Bars are active subscriptions; Out shows the responses.")
+{% diagram id="rxjs-mapping-operators/switchmap" alt="Timeline for switchMap: A starts at 0s and is cancelled at 1s, B starts at 1s and is cancelled at 2s, C starts at 2s and responds at 3s." caption="Bars are active subscriptions; Out shows the responses." /%}
 
 A stops at 1s, B stops at 2s, and only C responds, at 3s. Use it for search results that must
 follow the latest query. Unsubscribing does not undo server-side changes.
@@ -55,7 +55,7 @@ follow the latest query. Unsubscribing does not undo server-side changes.
 
 New values wait in a queue; each starts after the previous one completes.
 
-![Timeline for concatMap: A runs from 0s and responds at 5s; B waits in the queue and runs from 5s to 8s; C waits and runs from 8s to 9s.](../../../assets/notes/rxjs-mapping-operators/concatmap.webp "The dotted lines are events waiting in the queue.")
+{% diagram id="rxjs-mapping-operators/concatmap" alt="Timeline for concatMap: A runs from 0s and responds at 5s; B waits in the queue and runs from 5s to 8s; C waits and runs from 8s to 9s." caption="The dotted lines are events waiting in the queue." /%}
 
 A responds at 5s, then B at 8s, then C at 9s. Use it for ordered saves that must all run. If an
 inner stream never completes, the queue stalls.
@@ -64,7 +64,7 @@ inner stream never completes, the queue stalls.
 
 Subscribe as events arrive and forward responses as they arrive.
 
-![Timeline for mergeMap: A, B and C start as they arrive and overlap; responses come out C at 3s, B at 4s and A at 5s.](../../../assets/notes/rxjs-mapping-operators/mergemap.webp "All three requests run at once; responses arrive in the order they finish.")
+{% diagram id="rxjs-mapping-operators/mergemap" alt="Timeline for mergeMap: A, B and C start as they arrive and overlap; responses come out C at 3s, B at 4s and A at 5s." caption="All three requests run at once; responses arrive in the order they finish." /%}
 
 Responses arrive C, B, A: input order is not preserved. Use it for independent requests that can
 overlap. Concurrency is unlimited by default; pass a limit if you need one.
@@ -73,7 +73,7 @@ overlap. Concurrency is unlimited by default; pass a limit if you need one.
 
 New events are ignored until the active inner stream completes.
 
-![Timeline for exhaustMap: A starts at 0s and responds at 5s; B and C arrive while A is running and are ignored.](../../../assets/notes/rxjs-mapping-operators/exhaustmap.webp "B and C are dropped, not queued.")
+{% diagram id="rxjs-mapping-operators/exhaustmap" alt="Timeline for exhaustMap: A starts at 0s and responds at 5s; B and C arrive while A is running and are ignored." caption="B and C are dropped, not queued." /%}
 
 Only A starts. B and C are dropped, not queued. After A completes, a future event can start a new
 request. Use it to ignore repeated clicks while a form is submitting.

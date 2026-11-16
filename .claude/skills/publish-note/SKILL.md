@@ -21,8 +21,14 @@ Standards: `.claude/rules/content.md` (notes contract, figures) and `.claude/rul
    the source is his (a post, a PDF); do not add facts.
 3. Images: `src/assets/notes/<slug>/`. Cover in the frontmatter (`src`, `alt`, optional
    `caption`); inline figures as `![alt](../../../assets/notes/<slug>/<file>.webp "Caption")`.
-   Diagrams from a PDF: render with `pdftoppm -r 240`, crop to the panel interior (no paper margin
-   or second frame), WebP ≤ 1600px. Every image needs an `alt` in the note's language.
+   Diagrams go on the notebook background with `{% diagram … alt="…" caption="…" /%}`:
+   `src="<slug>/<file>.svg"` for a drawing made anywhere (Figma, Excalidraw, a diagram tool;
+   it needs a viewBox, text in the site's fonts or outlined), or `id="<slug>/<figure>"` for a
+   marble diagram described in `src/lib/diagrams/specs.ts` (labels translated). A marble cover:
+   `node scripts/note-covers.mjs`.
+   Only when a drawing is not possible, crop from the PDF: `pdftoppm -r 240`, the panel interior
+   (no paper margin or second frame), WebP ≤ 1600px. Every image needs an `alt` in the note's
+   language.
 
 ## 2. Translate
 

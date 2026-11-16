@@ -1,0 +1,89 @@
+---
+/**
+ * Markdoc tag `{% diagram … /%}`: any figure of a note on the notebook background
+ * (src/assets/notes/backgrounds/), in a <figure> like Figure.astro. It draws one of:
+ * - `id="rxjs-fundamentals/map"`: a marble diagram (src/lib/diagrams/), its prose labels in the
+ *   page's language;
+ * - `src="my-note/flow.svg"`: an SVG made anywhere (Figma, Excalidraw, a diagram tool), inlined so
+ *   it scales and can use the site's fonts; it needs a viewBox;
+ * - `src="my-note/shot.webp"`: a raster image, optimised like any other.
+ * `alt` and `caption` come from each translation. A missing id or file fails the build.
+ */
+import type { ImageMetadata } from 'astro';
+import { getImage, Image } from 'astro:assets';
+import background from '../assets/notes/backgrounds/orbital-log.webp';
+import { renderDiagram } from '../lib/diagrams/marble';
+import { diagramSource, inlineSvg } from '../lib/diagrams/source';
+import { DIAGRAMS, isDiagramId } from '../lib/diagrams/specs';
+import { resolveLocale } from '../i18n';
+
+interface Props {
+  id?: string;
+  src?: string;
+  alt: string;
+  caption?: string;
+}
+
+const { alt, caption } = Astro.props;
+const source = diagramSource(Astro.props);
+const ROOT = '/src/assets/notes/';
+const svgFiles = import.meta.glob<string>('/src/assets/notes/**/*.svg', { query: '?raw', import: 'default' });
+const imageFiles = import.meta.glob<ImageMetadata>('/src/assets/notes/**/*.{png,jpg,jpeg,webp,avif}', {
+  import: 'default',
+});
+
+let markup: string | undefined;
+let image: ImageMetadata | undefined;
+if (source.kind === 'marble') {
+  if (!isDiagramId(source.id)) throw new Error(`Unknown diagram «${source.id}» (src/lib/diagrams/specs.ts).`);
+  const { svg } = renderDiagram(DIAGRAMS[source.id], resolveLocale(Astro.currentLocale));
+  markup = inlineSvg(svg, alt, source.id);
+} else {
+  const load = (source.kind === 'svg' ? svgFiles : imageFiles)[ROOT + source.path];
+  if (!load) throw new Error(`Diagram src «${source.path}» not found in src/assets/notes/.`);
+  if (source.kind === 'svg') markup = inlineSvg((await load()) as string, alt, source.path);
+  else image = (await load()) as ImageMetadata;
+}
+const bg = await getImage({ src: background, width: 1280, format: 'webp' });
+---
+
+<figure class="diagram">
+  <div class="sheet" style={`background-image: url(${bg.src})`}>
+    {markup ? (
+      <Fragment set:html={markup} />
+    ) : (
+      image && (
+        <Image src={image} alt={alt} widths={[640, 960, 1280]} sizes="(min-width: 1024px) 40rem, 92vw" />
+      )
+    )}
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .diagram {
+    margin-block: var(--space-8);
+  }
+  /* The notebook page: the generated texture, cropped to the sheet; the figure on top. */
+  .sheet {
+    padding: var(--space-4) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    background-color: #15161e;
+    background-size: cover;
+    background-position: center;
+  }
+  .sheet :global(svg),
+  .sheet :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  figcaption {
+    margin-top: var(--space-3);
+    font-size: var(--text-meta);
+    line-height: 1.5;
+    color: var(--color-text-subtle);
+    text-wrap: pretty;
+  }
+</style>

@@ -40,7 +40,7 @@ condividere un produttore già in funzione. Le emissioni possono essere sincrone
 
 Il tempo scorre da sinistra a destra. Ogni punto è un valore; ogni linea è un flusso.
 
-![Un diagramma di flusso: i valori A e B su una linea che va da prima a dopo, poi una barra verticale che segna il completamento.](../../../assets/notes/rxjs-fundamentals/reading-a-diagram.webp "Due valori, poi il completamento.")
+{% diagram id="rxjs-fundamentals/reading" alt="Un diagramma di flusso: i valori A e B su una linea che va da prima a dopo, poi una barra verticale che segna il completamento." caption="Due valori, poi il completamento." /%}
 
 - `next(A)`: viene emesso un valore.
 - `|` complete: il flusso termina normalmente.
@@ -61,15 +61,15 @@ doubled$.subscribe(console.log);
 
 ## {% highlight %}map{% /highlight %} cambia il valore, {% highlight %}filter{% /highlight %} decide cosa passa
 
-![Diagramma a biglie: map(n => n * 10) trasforma 1, 2 e 3 in 10, 20 e 30.](../../../assets/notes/rxjs-fundamentals/map.webp "map cambia ogni valore.")
+{% diagram id="rxjs-fundamentals/map" alt="Diagramma a biglie: map(n => n * 10) trasforma 1, 2 e 3 in 10, 20 e 30." caption="map cambia ogni valore." /%}
 
-![Diagramma a biglie: filter(n => n >= 20) riceve 10, 20 e 30 e lascia passare solo 20 e 30.](../../../assets/notes/rxjs-fundamentals/filter.webp "filter scarta i valori che non superano la prova.")
+{% diagram id="rxjs-fundamentals/filter" alt="Diagramma a biglie: filter(n => n >= 20) riceve 10, 20 e 30 e lascia passare solo 20 e 30." caption="filter scarta i valori che non superano la prova." /%}
 
 `filter` scarta le emissioni; non emette `true` o `false`.
 
 ## {% highlight %}tap{% /highlight %} osserva senza trasformare
 
-![Diagramma a biglie: 20 e 30 entrano in tap, la console registra 20 e poi 30, e gli stessi 20 e 30 escono invariati.](../../../assets/notes/rxjs-fundamentals/tap.webp "tap registra ogni valore; il flusso prosegue invariato.")
+{% diagram id="rxjs-fundamentals/tap" alt="Diagramma a biglie: 20 e 30 entrano in tap, la console registra 20 e poi 30, e gli stessi 20 e 30 escono invariati." caption="tap registra ogni valore; il flusso prosegue invariato." /%}
 
 Restituire un valore da `tap` non cambia il valore emesso. Usalo per osservare; evita di modificare
 oggetti al suo interno.

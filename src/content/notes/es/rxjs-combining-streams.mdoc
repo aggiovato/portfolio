@@ -11,7 +11,7 @@ tags:
   - Angular
 cover:
   src: ../../../assets/notes/rxjs-combining-streams/cover.webp
-  alt: 'Las cuatro formas de combinar: combineLatest cuando cambia cualquier entrada, withLatestFrom cuando una fuente manda, zip para emparejar por posición y forkJoin para esperar los valores finales.'
+  alt: 'Pares que emite cada operador con las mismas dos entradas: combineLatest A1,B1 a los 2 s, A2,B1 a los 4 s y A2,B2 a los 5 s; withLatestFrom A2,B1 a los 4 s; zip A1,B1 a los 2 s y A2,B2 a los 5 s; forkJoin A2,B2 a los 7 s.'
 ---
 
 ¿Cuándo deberían los valores de fuentes distintas convertirse en un único resultado? Cuatro
@@ -34,7 +34,7 @@ valores y después se completa. No hay errores.
 | A | A1 a los 1 s, A2 a los 4 s | 6 s |
 | B | B1 a los 2 s, B2 a los 5 s | 7 s |
 
-![Línea de tiempo de las dos entradas: A emite A1 a los 1 s y A2 a los 4 s y se completa a los 6 s; B emite B1 a los 2 s y B2 a los 5 s y se completa a los 7 s.](../../../assets/notes/rxjs-combining-streams/experiment.webp "El tiempo avanza de izquierda a derecha; una barra vertical marca la finalización.")
+{% diagram id="rxjs-combining-streams/experiment" alt="Línea de tiempo de las dos entradas: A emite A1 a los 1 s y A2 a los 4 s y se completa a los 6 s; B emite B1 a los 2 s y B2 a los 5 s y se completa a los 7 s." caption="El tiempo avanza de izquierda a derecha; una barra vertical marca la finalización." /%}
 
 En las salidas, `[A2,B1]` significa un par emitido. Las líneas muestran eventos en el tiempo, no
 hilos separados, y todos los diagramas usan la misma escala.
@@ -48,7 +48,7 @@ cambia cualquiera de ellas.
 combineLatest([a$, b$]);
 ```
 
-![Línea de tiempo de combineLatest: la salida emite [A1,B1] a los 2 s, [A2,B1] a los 4 s y [A2,B2] a los 5 s, y se completa a los 7 s.](../../../assets/notes/rxjs-combining-streams/combinelatest.webp "Los valores son pares: cada punto en Out es una emisión.")
+{% diagram id="rxjs-combining-streams/combinelatest" alt="Línea de tiempo de combineLatest: la salida emite [A1,B1] a los 2 s, [A2,B1] a los 4 s y [A2,B2] a los 5 s, y se completa a los 7 s." caption="Los valores son pares: cada punto en Out es una emisión." /%}
 
 Primer resultado a los 2 s; los siguientes, a los 4 s y a los 5 s. ¿Una entrada sin valor inicial?
 Todavía no hay valor combinado. Aquí, la salida se completa a los 7 s, después de las dos entradas.
@@ -63,7 +63,7 @@ A es la fuente.
 a$.pipe(withLatestFrom(b$));
 ```
 
-![Línea de tiempo de withLatestFrom: A1 a los 1 s no produce nada porque B aún no ha emitido; A2 a los 4 s emite [A2,B1]; B2 a los 5 s no produce salida; la salida se completa con A a los 6 s.](../../../assets/notes/rxjs-combining-streams/withlatestfrom.webp "Solo las emisiones de A pueden producir una salida.")
+{% diagram id="rxjs-combining-streams/withlatestfrom" alt="Línea de tiempo de withLatestFrom: A1 a los 1 s no produce nada porque B aún no ha emitido; A2 a los 4 s emite [A2,B1]; B2 a los 5 s no produce salida; la salida se completa con A a los 6 s." caption="Solo las emisiones de A pueden producir una salida." /%}
 
 A1 se descarta: B todavía no ha emitido. No se pone en cola. A los 4 s, A2 usa B1. B2, a los 5 s,
 no produce salida. Aquí, la salida se completa con A a los 6 s. Úsalo para un evento de envío que
@@ -78,7 +78,7 @@ vez, en el orden de entrada.
 zip(a$, b$);
 ```
 
-![Línea de tiempo de zip: la salida emite [A1,B1] a los 2 s y [A2,B2] a los 5 s; A2 espera a B2 de los 4 s a los 5 s.](../../../assets/notes/rxjs-combining-streams/zip.webp "Cada valor se usa en exactamente un par.")
+{% diagram id="rxjs-combining-streams/zip" alt="Línea de tiempo de zip: la salida emite [A1,B1] a los 2 s y [A2,B2] a los 5 s; A2 espera a B2 de los 4 s a los 5 s." caption="Cada valor se usa en exactamente un par." /%}
 
 A2 espera a B2 de los 4 s a los 5 s. No reutiliza B1. A los 6 s, A se ha completado y su cola está
 vacía: terminado. Una entrada mucho más rápida puede acumular una cola grande. Úsalo para dos
@@ -93,7 +93,7 @@ completa.
 forkJoin([a$, b$]);
 ```
 
-![Línea de tiempo de forkJoin: una única salida, [A2,B2], a los 7 s, cuando B se completa, y después la salida se completa.](../../../assets/notes/rxjs-combining-streams/forkjoin.webp "Una sola emisión, solo cuando todas las entradas se han completado.")
+{% diagram id="rxjs-combining-streams/forkjoin" alt="Línea de tiempo de forkJoin: una única salida, [A2,B2], a los 7 s, cuando B se completa, y después la salida se completa." caption="Una sola emisión, solo cuando todas las entradas se han completado." /%}
 
 Que A termine a los 6 s no basta: B termina a los 7 s. Una entrada que nunca se completa puede
 dejarte esperando. En RxJS 7, una entrada vacía completa la unión sin ningún valor. Úsalo para
