@@ -5,7 +5,9 @@
  * emails/ into Brevo's HTML editor:
  *   - notes-<locale>.html    the RSS integration of that language: the new notes of the feed
  *   - confirm-<locale>.html  the double opt-in email of that language's form
- * It also renders public/email/jupiter.png, the masthead planet.
+ * It also renders public/email/jupiter.png, the masthead planet, and public/email/lockup.png, the
+ * logo with its wordmark (email clients cannot use the site's font; a new file name also skips the
+ * image proxies' cache of the old logo.png, which stays for emails already sent).
  *
  * Email HTML, not web HTML: tables and inline styles (Gmail and Outlook drop most CSS), a 600px
  * column, PNG images at fixed URLs under /email/ (fingerprinted /_astro/ URLs change with every
@@ -16,7 +18,7 @@
  * `{{ doubleoptin }}`. The feed date (PUBDATE) arrives unformatted, so it is not shown.
  * Copy lives here, not in src/i18n: these files are built outside Astro.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 const SITE = 'https://aggiovato.netlify.app';
 const LINKS = { github: 'https://github.com/aggiovato', linkedin: 'https://www.linkedin.com/in/heberlugo' };
@@ -118,9 +120,11 @@ export const copy = {
 const home = (locale) => `${SITE}${locale === 'en' ? '/' : `/${locale}/`}`;
 const notesUrl = (locale) => `${SITE}${locale === 'en' ? '/notes/' : `/${locale}/notes/`}`;
 
+// Every table carries cellpadding/cellspacing/border inline: clients that drop the <style> block
+// (the Gmail app with other accounts) otherwise open gaps between the masthead rows.
 /** Lavender button as a table, so Outlook keeps its padding. */
 const button = (href, label) =>
-  `<table role="presentation" class="cta" style="margin-top:22px;"><tr><td bgcolor="${c.accent}" style="border-radius:5px;text-align:center;mso-padding-alt:15px 24px;"><a class="button" href="${href}" style="display:inline-block;padding:15px 24px;font-family:${sans};font-size:15px;font-weight:bold;line-height:20px;color:${c.ink};text-decoration:none;border-radius:5px;">${label} &rarr;</a></td></tr></table>`;
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="cta" style="margin-top:22px;"><tr><td bgcolor="${c.accent}" style="border-radius:5px;text-align:center;mso-padding-alt:15px 24px;"><a class="button" href="${href}" style="display:inline-block;padding:15px 24px;font-family:${sans};font-size:15px;font-weight:bold;line-height:20px;color:${c.ink};text-decoration:none;border-radius:5px;">${label} &rarr;</a></td></tr></table>`;
 
 /** Shared frame: night masthead with Jupiter, a lavender rule, the paper body and the footer. */
 function layout({ locale, preheader, title, eyebrow, heroTitle, heroSub, content, footer }) {
@@ -137,17 +141,17 @@ html,body{margin:0!important;padding:0!important;width:100%!important}table{bord
 </head>
 <body style="margin:0;padding:0;background-color:${c.page};color:${c.ink};font-family:${sans};">
 <div style="display:none;font-size:1px;line-height:1px;color:${c.page};max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">${preheader}</div>
-<table role="presentation" width="100%" bgcolor="${c.page}"><tr><td class="outer" align="center" style="padding:32px 12px;">
-<!--[if mso]><table role="presentation" width="600" align="center"><tr><td><![endif]-->
-<table role="presentation" class="shell" width="100%" style="max-width:600px;background-color:${c.paper};" bgcolor="${c.paper}">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${c.page}"><tr><td class="outer" align="center" style="padding:32px 12px;">
+<!--[if mso]><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" align="center"><tr><td><![endif]-->
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="shell" width="100%" style="max-width:600px;background-color:${c.paper};" bgcolor="${c.paper}">
 <tr><td bgcolor="${c.night}" class="pad" style="padding:30px 40px 0;color:${c.starlight};">
-<table role="presentation" width="100%"><tr>
-<td><a href="${home(locale)}" style="font-family:${sans};font-size:23px;font-weight:bold;letter-spacing:-.7px;text-decoration:none;color:${c.starlight};"><img src="${SITE}/email/logo.png" width="30" height="24" alt="" style="display:inline-block;vertical-align:middle;margin-right:10px;border:0;">aggiovato</a></td>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+<td><a href="${home(locale)}" style="font-family:${sans};font-size:23px;font-weight:bold;text-decoration:none;color:${c.starlight};"><img src="${SITE}/email/lockup.png" width="129" height="28" alt="aggiovato" style="display:block;width:129px;height:28px;border:0;"></a></td>
 <td align="right" style="font-family:${mono};font-size:10px;letter-spacing:1.5px;color:${c.accent};">${copy[locale].journal}</td>
 </tr></table>
 </td></tr>
 <tr><td bgcolor="${c.night}" class="pad" style="padding:28px 40px 32px;color:${c.starlight};">
-<table role="presentation" width="100%"><tr>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
 <td valign="middle" style="padding-right:16px;">
 <p style="font-family:${mono};font-size:11px;line-height:18px;letter-spacing:1.5px;color:${c.accent};">${eyebrow}</p>
 <h1 class="hero-title" style="margin:12px 0 12px;font-family:${sans};font-size:40px;line-height:44px;letter-spacing:-1.4px;color:${c.starlight};">${heroTitle}</h1>
@@ -187,6 +191,8 @@ const footerLinks = (locale) => {
  */
 export function notesEmail(locale) {
   const t = copy[locale];
+  // Brevo hands DESCRIPTION over with its <description> element and escapes it, so the tags
+  // showed as text in the email: `striptags` keeps only the summary, still escaped.
   // Brevo's tags sit inside a cell: text between table rows is moved out of the table by any HTML
   // parser (and by Brevo's editor), which would leave the loop wrapping nothing.
   const content = `<tr><td class="pad" style="padding:30px 40px 24px;">
@@ -194,21 +200,21 @@ export function notesEmail(locale) {
 </td></tr>
 <tr><td class="pad" style="padding:0 40px;">
 {% for item in params.items %}{% if forloop.First %}
-<table role="presentation" width="100%"><tr><td style="padding:0 0 22px;">{% if item.ENCLOSURE %}<a href="{{ item.LINK }}"><img src="{{ item.ENCLOSURE }}" width="520" alt="{{ item.TITLE }}" style="display:block;width:100%;max-width:520px;height:auto;border-radius:8px;"></a>{% endif %}</td></tr>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="padding:0 0 22px;">{% if item.ENCLOSURE %}<a href="{{ item.LINK }}"><img src="{{ item.ENCLOSURE }}" width="520" alt="{{ item.TITLE }}" style="display:block;width:100%;max-width:520px;height:auto;border-radius:8px;"></a>{% endif %}</td></tr>
 <tr><td style="padding:0 0 30px;">
 <h2 class="article-title" style="margin:0 0 14px;font-family:${serif};font-size:32px;line-height:39px;letter-spacing:-.6px;color:${c.ink};"><a href="{{ item.LINK }}" style="color:${c.ink};text-decoration:none;">{{ item.TITLE }}</a></h2>
-<p style="font-family:${sans};font-size:16px;line-height:27px;color:${c.body};">{{ item.DESCRIPTION }}</p>
+<p style="font-family:${sans};font-size:16px;line-height:27px;color:${c.body};">{{ item.DESCRIPTION|striptags }}</p>
 ${button('{{ item.LINK }}', t.read)}
 </td></tr></table>
-{% else %}{% if forloop.Counter == 2 %}<table role="presentation" width="100%"><tr><td style="border-top:1px solid ${c.rule};padding-top:24px;"><p style="font-family:${mono};font-size:10px;line-height:18px;letter-spacing:1.5px;color:${c.label};">${t.also}</p></td></tr></table>{% endif %}
-<table role="presentation" width="100%"><tr><td style="padding:18px 0 8px;">
+{% else %}{% if forloop.Counter == 2 %}<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="border-top:1px solid ${c.rule};padding-top:24px;"><p style="font-family:${mono};font-size:10px;line-height:18px;letter-spacing:1.5px;color:${c.label};">${t.also}</p></td></tr></table>{% endif %}
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="padding:18px 0 8px;">
 <h2 style="margin:0 0 9px;font-family:${sans};font-size:21px;line-height:29px;letter-spacing:-.3px;"><a href="{{ item.LINK }}" style="color:#352847;text-decoration:underline;">{{ item.TITLE }}&nbsp;&rarr;</a></h2>
-<p style="font-family:${sans};font-size:14px;line-height:24px;color:${c.soft};">{{ item.DESCRIPTION }}</p>
+<p style="font-family:${sans};font-size:14px;line-height:24px;color:${c.soft};">{{ item.DESCRIPTION|striptags }}</p>
 </td></tr></table>
 {% endif %}{% endfor %}
 </td></tr>
 <tr><td class="pad" style="padding:28px 40px 34px;">
-<table role="presentation" width="100%"><tr><td style="border-top:1px solid ${c.rule};padding-top:24px;font-family:${sans};">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="border-top:1px solid ${c.rule};padding-top:24px;font-family:${sans};">
 <p style="font-size:15px;line-height:25px;color:${c.body};">${t.signoff}<br><strong style="color:${c.ink};">Heber Alejandro</strong></p>
 <p style="margin-top:14px;font-size:13px;line-height:22px;color:${c.soft};">${t.replyAsk} <a href="mailto:aggiovato@gmail.com" style="color:${c.link};text-decoration:underline;">${t.replyLink}</a></p>
 </td></tr></table>
@@ -260,6 +266,20 @@ async function renderJupiter() {
   console.log('  ✓ public/email/jupiter.png');
 }
 
+/** The masthead logo: the dark lockup (outlined), cropped like Lockup.astro, 3× for 28 px. */
+async function renderLockup() {
+  const { default: sharp } = await import('sharp');
+  const svg = readFileSync(new URL('../src/assets/brand/lockup-dark.svg', import.meta.url), 'utf8').replace(
+    /width="[\d.]+" height="[\d.]+" viewBox="[^"]*"/,
+    'width="406.6" height="88" viewBox="30 15.5 406.6 88"',
+  );
+  await sharp(Buffer.from(svg), { density: 300 })
+    .resize({ height: 84 })
+    .png({ compressionLevel: 9 })
+    .toFile(new URL('../public/email/lockup.png', import.meta.url).pathname);
+  console.log('  ✓ public/email/lockup.png');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   const out = new URL('../emails/', import.meta.url);
   mkdirSync(out, { recursive: true });
@@ -269,4 +289,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(`  ✓ emails/notes-${locale}.html, emails/confirm-${locale}.html`);
   }
   await renderJupiter();
+  await renderLockup();
 }

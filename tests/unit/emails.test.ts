@@ -27,7 +27,7 @@ describe('newsletter emails', () => {
   it.each(locales)('the %s emails use fixed image URLs that survive rebuilds', (locale) => {
     for (const html of [notesEmail(locale), confirmEmail(locale)]) {
       expect(html).toContain('https://aggiovato.netlify.app/email/jupiter.png');
-      expect(html).toContain('https://aggiovato.netlify.app/email/logo.png');
+      expect(html).toContain('https://aggiovato.netlify.app/email/lockup.png');
       expect(html).not.toContain('/_astro/');
       expect(html).toContain('https://www.linkedin.com/in/heberlugo');
     }

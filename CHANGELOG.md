@@ -12,6 +12,13 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Fixed
+
+- Newsletter emails showed each note's summary wrapped in `<description>` tags; they now show
+  the summary alone.
+- Newsletter emails show the full logo with its wordmark, and no gap opens between the masthead
+  rows in mail apps that drop the email's styles.
+
 ---
 
 ## [1.7.0] — 2026-11-15
