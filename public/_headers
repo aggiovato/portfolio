@@ -8,8 +8,9 @@
 /site.webmanifest
   Content-Type: application/manifest+json
 
-# Baseline security headers for every page. No CSP yet: inline scripts (early `js` class,
-# speculation rules) would need hashes; add one once the inline set is stable.
+# Baseline security headers for every page. The Content Security Policy is a <meta> that Astro
+# writes into each page with the hashes of its scripts (astro.config.mjs `security.csp`); a <meta>
+# cannot set frame-ancestors, so X-Frame-Options keeps covering framing.
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

@@ -22,6 +22,11 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 - The web app manifest is served as `application/manifest+json` instead of a generic binary
   type.
 
+### Security
+
+- A Content Security Policy on every page: only the site's own scripts (by their hashes), styles,
+  images and fonts load, and forms can only post to the site or the newsletter.
+
 ---
 
 ## [1.8.0] — 2026-11-16
