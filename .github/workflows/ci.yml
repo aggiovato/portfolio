@@ -87,6 +87,9 @@ jobs:
         run: npm run build
       - name: Drafts stay out of dist/ and the sitemap
         run: npm run verify:drafts
+      # JS and CSS per page (gzip) against scripts/perf-budget.mjs; the table goes to the job summary.
+      - name: Performance budget
+        run: npm run perf:budget
       - uses: actions/upload-artifact@v7
         with:
           name: dist

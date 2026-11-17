@@ -19,6 +19,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "verify:drafts": "bash scripts/verify-drafts.sh",
+    "perf:budget": "node scripts/perf-budget.mjs",
     "assets:placeholders": "node scripts/placeholder-assets.mjs",
     "preversion": "node scripts/release-guard.mjs && node scripts/changelog.mjs check Unreleased",
     "version": "node scripts/changelog.mjs release && git add CHANGELOG.md"
