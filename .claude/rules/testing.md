@@ -21,7 +21,9 @@ Do not write tests that only repeat CSS classes or tokens.
 | E2E       | Playwright (+ axe) on a prod build                     | `tests/e2e/`       | Navigation, i18n, menu, carousel, transitions, overflow, a11y                     | `npm run test:e2e`                             |
 
 `task preflight` runs all of them in CI order. CI (`.github/workflows/ci.yml`) runs the same gates on
-every PR and push to `main`.
+every PR and push to `main`. Links are checked weekly outside CI (`.github/workflows/links.yml`,
+`lychee.toml`): a broken link opens an issue instead of failing a PR. Exclude a host in `lychee.toml`
+only when it refuses automated requests, never to silence a real 404.
 
 ## When a test is required
 

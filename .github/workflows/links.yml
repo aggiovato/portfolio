@@ -1,0 +1,74 @@
+name: Links
+
+# Weekly link check (roadmap C3): builds the site and checks every link in dist/ with lychee:
+# external ones over the network, internal ones against the built files. Settings and exclusions
+# live in lychee.toml. It never blocks CI: other people's sites go down for a while.
+#   schedule / manual run → broken links open (or refresh) one issue labelled `broken-links`;
+#                           a clean run closes it.
+#   pull request touching this workflow or lychee.toml → the report in the job summary only.
+# Costs no Netlify credits: nothing is deployed.
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Mondays, 06:00 UTC
+  workflow_dispatch:
+  pull_request:
+    paths: ['.github/workflows/links.yml', 'lychee.toml']
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: links-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  links:
+    name: Check links
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Placeholder images
+        run: npm run assets:placeholders
+      - name: Build (production)
+        run: npm run build
+
+      - name: Check links
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          lycheeVersion: v0.24.2
+          args: --config lychee.toml --root-dir ${{ github.workspace }}/dist --no-progress dist
+          output: lychee/out.md
+          jobSummary: true
+          fail: false
+
+      - name: Open or refresh the broken-links issue
+        if: github.event_name != 'pull_request' && steps.lychee.outputs.exit_code != 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create broken-links --color d73a4a --description "Reported by the weekly link check" --force
+          number=$(gh issue list --label broken-links --state open --json number --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file lychee/out.md
+            gh issue comment "$number" --body "Still broken in the check of $(date -u +%F) (report above)."
+          else
+            gh issue create --title "Broken links" --label broken-links --body-file lychee/out.md
+          fi
+
+      - name: Close the broken-links issue when everything works again
+        if: github.event_name != 'pull_request' && steps.lychee.outputs.exit_code == 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          number=$(gh issue list --label broken-links --state open --json number --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue close "$number" --comment "All links work again in the check of $(date -u +%F)."
+          fi

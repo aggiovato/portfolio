@@ -31,6 +31,8 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 - Performance budget in CI: every page's JavaScript and CSS (gzip) is measured after the build, and
   the build fails when a page goes over (home ≤ 50 KB of JS, other pages ≤ 30 KB, CSS ≤ 25 KB).
+- Weekly link check: every link of the built site, external and internal, is checked on Mondays;
+  broken ones open an issue.
 
 ---
 
