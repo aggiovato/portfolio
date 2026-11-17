@@ -1,6 +1,6 @@
 # aggiovato — portfolio
 
-Personal portfolio of Alejandro Lugo. Astro 7 · TypeScript strict · Content Collections + Markdoc ·
+Personal portfolio of Heber Alejandro Lugo. Astro 7 · TypeScript strict · Content Collections + Markdoc ·
 CSS tokens · static output · English (default) + Spanish (`/es/`) + Italian (`/it/`).
 
 - **Spec:** `docs/especificacion.md` (Spanish, **local only**, gitignored like all of `docs/`). Design and

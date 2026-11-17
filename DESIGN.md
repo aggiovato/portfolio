@@ -192,6 +192,8 @@ A night sky with one lavender signal and a trace of Jovian warmth.
 to remember". It is never a background wash, a decorative fill or body text. The last role is the
 shining word (`.shine` in global.css): one per screen, in the page title or the call to action
 («explore.», «shipped.», «a product»), and in long-form text the `highlight` tag for a key term.
+One exception: the body of the logo is lavender because that is the brand's own colour, not a
+signal; it marks no action and never shines.
 
 **The Gradual Atmosphere Rule.** Plum is never a shaped band with an edge. It appears through a long
 gradient from graphite (about 28rem) and leaves the same way, so no seam can show.
@@ -282,6 +284,24 @@ the case-study index and the gallery orbit, and nothing else.
 
 ## Components
 
+### Logo («Soft Ascent»)
+
+An A that is also a rocket, drawn in Figma (`src/assets/brand/`): the legs end in nozzles, the peach
+crossbar is the horizon, and landed it stands on two peach pads. Two tones: the body in
+`currentColor` (lavender on the dark ground), the accent in Jovian peach. In the lockup the wordmark
+is outlined in Starlight, part of the drawing rather than live text; the link around it carries the
+name.
+
+- **Lockup:** header 28px (24px on phones), footer 23px, cropped to its own drawing so the A sits
+  exactly on the content edge.
+- **Mark alone:** the hero rocket (40px), which lands standing on Jupiter's limb and whose pads turn
+  into flames in flight; the back-to-top button (26px, `micro`: from 28px down, no pads and heavier
+  strokes so it stays legible); the favicon and the watermarks.
+- **Email:** the lockup as an image (`public/email/lockup.png`, at 3×), since mail clients cannot
+  load the site's font.
+- **Don't:** recolour it, separate the wordmark from the mark, stretch it, or add glows outside the
+  hero scene (there it floats in the sky, so it gets the scene's glow).
+
 ### Buttons
 
 Precise and calm: one filled style, everything else is a link.
@@ -366,8 +386,8 @@ the head for feed readers. Date and reading time are mono
 marginalia. A note's header, cover and closing links start on the reading column's edge, so title,
 picture and text share one left line; the body reads in the 56ch column at 1.7 leading. Images are
 figures (`![alt](path "Caption")`): the image framed by a hairline at the control radius, the caption
-in mono-size Starlight Subtle beneath. Notebook diagrams keep their light paper; they are content,
-not decoration.
+in mono-size Starlight Subtle beneath. Diagrams are drawn as SVG in the site's fonts and the note's
+language, on a dark notebook page (the `diagram` tag); they are content, not decoration.
 
 ### Page frame
 
