@@ -79,6 +79,11 @@ tasks:
     cmd: bash scripts/verify-drafts.sh
     silent: true
 
+  perf:budget:
+    desc: Fail if a page's JS or CSS (gzip) goes over its budget (scripts/perf-budget.mjs)
+    deps: [build]
+    cmd: '{{.NODE}} node scripts/perf-budget.mjs'
+
   # ── Quality ────────────────────────────────────────────────────────────────
 
   check:
@@ -147,6 +152,7 @@ tasks:
       - task: check
       - task: test
       - task: verify:drafts
+      - task: perf:budget
       - task: test:e2e
       - cmd: |
           printf "\n\033[1;34m┌──────────────────────────────────────────┐\033[0m\n"
@@ -157,6 +163,7 @@ tasks:
           printf "  \033[1;32m✓\033[0m  \033[1mcheck\033[0m           \033[2mtypes and content schemas clean\033[0m\n"
           printf "  \033[1;32m✓\033[0m  \033[1mtest\033[0m            \033[2munit + component tests passed\033[0m\n"
           printf "  \033[1;32m✓\033[0m  \033[1mbuild\033[0m           \033[2mproduction build ok, no drafts leaked\033[0m\n"
+          printf "  \033[1;32m✓\033[0m  \033[1mperf:budget\033[0m     \033[2mJS and CSS within budget\033[0m\n"
           printf "  \033[1;32m✓\033[0m  \033[1mtest:e2e\033[0m        \033[2me2e, i18n and a11y tests passed\033[0m\n"
           printf "\n  \033[1;32m→  All checks passed — safe to push\033[0m\n\n"
         silent: true
