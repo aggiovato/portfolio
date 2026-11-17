@@ -3,6 +3,11 @@
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Netlify serves .webmanifest as application/octet-stream; with nosniff a browser may then refuse
+# it, so name the type the Web App Manifest spec registers.
+/site.webmanifest
+  Content-Type: application/manifest+json
+
 # Baseline security headers for every page. The Content Security Policy is a <meta> that Astro
 # writes into each page with the hashes of its scripts (astro.config.mjs `security.csp`); a <meta>
 # cannot set frame-ancestors, so X-Frame-Options keeps covering framing.

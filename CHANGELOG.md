@@ -12,6 +12,16 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Changed
+
+- Home: «See all projects» sits on the cards' edge, the process step numbers are grey like the
+  hero's line numbers, and the footer's logo lines up with its links over a full-width rule.
+
+### Fixed
+
+- The web app manifest is served as `application/manifest+json` instead of a generic binary
+  type.
+
 ### Security
 
 - A Content Security Policy on every page: only the site's own scripts (by their hashes), styles,

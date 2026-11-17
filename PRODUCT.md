@@ -9,7 +9,7 @@ web
 ## Users
 
 Primary: **technical leads** (engineering managers, CTOs, senior developers on a hiring loop) who
-evaluate how Alejandro Lugo works before contacting or hiring him. They read case studies to judge
+evaluate how Heber Alejandro Lugo works before contacting or hiring him. They read case studies to judge
 architecture, decisions, quality and the real scope of his contribution. When audiences pull in
 different directions, this one decides.
 
@@ -21,7 +21,7 @@ Secondary, confirmed in the local spec (`docs/especificacion.md` §2):
 
 ## Product Purpose
 
-aggiovato is the personal portfolio of Alejandro Lugo, a full-stack developer focused on frontend
+aggiovato is the personal portfolio of Heber Alejandro Lugo, a full-stack developer focused on frontend
 and product. It shows what he can build, how he makes decisions and what he brings to a product,
 through case studies with their own URLs rather than a gallery of badges.
 
@@ -59,7 +59,8 @@ reasoning behind each decision.
 ## Brand Commitments
 
 - Name **aggiovato**, meaning “landed on Jupiter”; tagline “Grounded in code. Built to explore.”
-- The A-rocket logo and the Jupiter scene are provisional assets, not final.
+- The logo, «Soft Ascent» (an A that is also a rocket, drawn in Figma), is final. The Jupiter scene
+  is still provisional.
 - Spatial language appears only in small details; navigation uses plain words (Work, About,
   Contact).
 - Voice: curious, competent, close and meticulous. No military imagery, no game-like interfaces,
