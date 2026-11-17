@@ -12,6 +12,11 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Fixed
+
+- The web app manifest is served as `application/manifest+json` instead of a generic binary
+  type.
+
 ---
 
 ## [1.8.0] — 2026-11-16
