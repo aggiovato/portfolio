@@ -37,7 +37,7 @@
     "@axe-core/playwright": "^4.14.0",
     "@keystatic/astro": "^6.0.0",
     "@keystatic/core": "^0.6.9",
-    "@playwright/test": "^1.65.0",
+    "@playwright/test": "^1.65.1",
     "@typescript-eslint/parser": "^8.72.2",
     "@vitest/coverage-v8": "^5.1.0",
     "eslint": "^10.14.0",
