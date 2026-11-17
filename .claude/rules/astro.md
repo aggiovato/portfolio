@@ -70,6 +70,15 @@ Own JS on the home ≲ 50 KB compressed · hero image ≈ 100–180 KB mobile / 
 LCP ≤ 2.5 s · CLS ≤ 0.1. Fonts are self-hosted variable WOFF2 (`@fontsource-variable/*`); do not add
 families or weights without a reason.
 
+## Content Security Policy
+
+`security.csp` in `astro.config.mjs` writes a `<meta>` CSP into every page; Astro hashes the
+scripts and styles it emits, so new inline `<script>`s need nothing. A new external origin (an image
+CDN, an embed, a form target) must be added to its directive there. Stylesheets are never inlined
+(`build.inlineStylesheets: 'never'`): Astro does not hash the inline styles of components rendered by
+Markdoc. `tests/e2e/csp.spec.ts` fails on any violation; add pages with new features to its list.
+Not testable in `astro dev`: use `build` + `preview` or the e2e suite.
+
 ## SEO
 
 `BaseLayout` sets title, description, canonical, OG and hreflang. Pages pass `title`/`description`
