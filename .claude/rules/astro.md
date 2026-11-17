@@ -70,6 +70,11 @@ Own JS on the home ≲ 50 KB compressed · hero image ≈ 100–180 KB mobile / 
 LCP ≤ 2.5 s · CLS ≤ 0.1. Fonts are self-hosted variable WOFF2 (`@fontsource-variable/*`); do not add
 families or weights without a reason.
 
+CI enforces the JS and CSS part per page (`npm run perf:budget`, `scripts/perf-budget.mjs`): the
+home ≤ 50 KB of JS, other pages ≤ 30 KB, CSS ≤ 25 KB, all gzip, counting each page's scripts with
+their static imports (code loaded later with `import()` is not counted). Raise a budget only in the
+change that needs it, and say why.
+
 ## Content Security Policy
 
 `security.csp` in `astro.config.mjs` writes a `<meta>` CSP into every page; Astro hashes the

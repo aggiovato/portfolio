@@ -12,13 +12,13 @@ paths:
 Tests proportional to risk (§21): validate content, cover logic, smoke-test what a visitor does.
 Do not write tests that only repeat CSS classes or tokens.
 
-| Layer     | Tool                               | Location           | Covers                                                            | Command                 |
-| --------- | ---------------------------------- | ------------------ | ----------------------------------------------------------------- | ----------------------- |
-| Static    | Prettier, ESLint, `astro check`    | —                  | Formatting, lint, types of `.astro`/`.ts`, **content schemas**    | `task check` / `lint`   |
-| Unit      | Vitest (node)                      | `tests/unit/`      | Pure logic in `src/lib/` and `src/i18n/`                          | `npm test`              |
-| Component | Vitest + Container API             | `tests/component/` | `.astro` components with logic (rows, labels, conditional output) | `npm test`              |
-| Build     | `astro build` + `verify-drafts.sh` | `scripts/`         | Production output: routes, sitemap, no draft leaks                | `npm run verify:drafts` |
-| E2E       | Playwright (+ axe) on a prod build | `tests/e2e/`       | Navigation, i18n, menu, carousel, transitions, overflow, a11y     | `npm run test:e2e`      |
+| Layer     | Tool                                                   | Location           | Covers                                                                            | Command                                        |
+| --------- | ------------------------------------------------------ | ------------------ | --------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Static    | Prettier, ESLint, `astro check`                        | —                  | Formatting, lint, types of `.astro`/`.ts`, **content schemas**                    | `task check` / `lint`                          |
+| Unit      | Vitest (node)                                          | `tests/unit/`      | Pure logic in `src/lib/` and `src/i18n/`                                          | `npm test`                                     |
+| Component | Vitest + Container API                                 | `tests/component/` | `.astro` components with logic (rows, labels, conditional output)                 | `npm test`                                     |
+| Build     | `astro build` + `verify-drafts.sh` + `perf-budget.mjs` | `scripts/`         | Production output: routes, sitemap, no draft leaks; JS/CSS per page within budget | `npm run verify:drafts`, `npm run perf:budget` |
+| E2E       | Playwright (+ axe) on a prod build                     | `tests/e2e/`       | Navigation, i18n, menu, carousel, transitions, overflow, a11y                     | `npm run test:e2e`                             |
 
 `task preflight` runs all of them in CI order. CI (`.github/workflows/ci.yml`) runs the same gates on
 every PR and push to `main`.

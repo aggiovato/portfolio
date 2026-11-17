@@ -31,6 +31,7 @@ CSS tokens · static output · English (default) + Spanish (`/es/`) + Italian (`
 | Unit + component tests    | `npm test`                               | `task test`                       |
 | E2E (prod build + drafts) | `npm run test:e2e`                       | `task test:e2e`                   |
 | Build + draft leak check  | `npm run build && npm run verify:drafts` | `task verify:drafts`              |
+| Performance budget        | `npm run build && npm run perf:budget`   | `task perf:budget`                |
 | Everything, CI order      | —                                        | `task preflight`                  |
 | Default share images      | `node scripts/og-default.mjs`            | —                                 |
 | Newsletter email HTML     | `node scripts/emails.mjs`                | —                                 |
