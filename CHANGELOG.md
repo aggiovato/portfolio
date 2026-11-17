@@ -27,6 +27,11 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 - A Content Security Policy on every page: only the site's own scripts (by their hashes), styles,
   images and fonts load, and forms can only post to the site or the newsletter.
 
+### Infrastructure
+
+- Performance budget in CI: every page's JavaScript and CSS (gzip) is measured after the build, and
+  the build fails when a page goes over (home ≤ 50 KB of JS, other pages ≤ 30 KB, CSS ≤ 25 KB).
+
 ---
 
 ## [1.8.0] — 2026-11-16
