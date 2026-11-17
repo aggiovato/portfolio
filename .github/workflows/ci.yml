@@ -202,7 +202,7 @@ jobs:
         with:
           sparse-checkout: .nvmrc
           sparse-checkout-cone-mode: false
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         if: steps.creds.outputs.ok == 'true'
         with:
           name: dist
