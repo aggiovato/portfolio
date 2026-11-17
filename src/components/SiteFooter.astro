@@ -85,10 +85,14 @@ const year = new Date().getFullYear();
     flex-shrink: 0;
   }
 
+  /* The rule spans the footer; only the form keeps a reading width. */
   .subscribe {
-    max-width: 40rem;
     padding-top: var(--space-8);
     border-top: 1px solid var(--color-border);
+  }
+
+  .subscribe > :global(*) {
+    max-width: 40rem;
   }
 
   .legal {
@@ -117,7 +121,8 @@ const year = new Date().getFullYear();
   @media (min-width: 900px) {
     .inner {
       grid-template-columns: 1fr auto;
-      align-items: start;
+      /* Centred: the lockup (23 px) and the 44 px link targets share one optical line. */
+      align-items: center;
     }
     .legal,
     .subscribe {
