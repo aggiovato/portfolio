@@ -12,6 +12,11 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Changed
+
+- Home: «See all projects» sits on the cards' edge, the process step numbers are grey like the
+  hero's line numbers, and the footer's logo lines up with its links over a full-width rule.
+
 ---
 
 ## [1.8.0] — 2026-11-16
