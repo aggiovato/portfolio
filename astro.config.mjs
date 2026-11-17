@@ -43,6 +43,32 @@ const SITE_URL = 'https://aggiovato.netlify.app';
 export default defineConfig({
   site: SITE_URL,
   trailingSlash: 'always',
+  // Content Security Policy (spec §16, roadmap C1): Astro hashes the scripts and <style>s it emits
+  // into a <meta> per page; these directives close everything else. A <meta> CSP cannot set
+  // frame-ancestors: X-Frame-Options in public/_headers covers framing.
+  // Stylesheets as files, never inlined: Astro does not hash the inline <style> of components that
+  // Markdoc renders (callout, decision, figure…), which the CSP would then block. 'self' covers files.
+  build: { inlineStylesheets: 'never' },
+  security: {
+    csp: {
+      directives: [
+        "default-src 'self'",
+        "img-src 'self' data:",
+        // Vite inlines the two smallest font subsets as data: URIs.
+        "font-src 'self' data:",
+        "connect-src 'self'",
+        "object-src 'none'",
+        "base-uri 'self'",
+        // The newsletter form posts straight to Brevo (src/data/site.ts).
+        "form-action 'self' https://*.sibforms.com",
+      ],
+      styleDirective: {
+        // 'self' for the bundled stylesheets; then style *attributes* only: Shiki colours code with
+        // them and the inline diagram SVGs set their fonts with them. <style> elements stay hashed.
+        resources: ["'self'", { resource: "'unsafe-inline'", kind: 'attribute' }],
+      },
+    },
+  },
   i18n: {
     locales: [...locales],
     defaultLocale,
