@@ -41,7 +41,9 @@ CI: `.github/workflows/ci.yml` (quality → build → e2e → deploy). PRs get a
 to `main` is tested only; a version tag `vX.Y.Z` (from `task release:patch|minor|major` on an up-to-date `main`, after
 writing «Unreleased» in `CHANGELOG.md`) is checked against `package.json` and the changelog, deployed to
 production, and gets a GitHub Release when it is minor or major. Netlify never builds itself; secrets
-`NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`. Headers live in `public/_headers`.
+`NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`. Headers live in `public/_headers`. Every Monday
+`.github/workflows/links.yml` checks every link of the built site with lychee (`lychee.toml`) and
+opens or refreshes one `broken-links` issue; it never blocks CI.
 
 ## Sharing and newsletter
 
