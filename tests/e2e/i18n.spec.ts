@@ -55,6 +55,14 @@ test.describe('i18n', () => {
     await expect(page.getByRole('heading', { level: 2, name: 'Problema' })).toBeVisible();
   });
 
+  test('on the 404 page the switcher leads to each language home, not to a missing 404', async ({ page }) => {
+    await page.goto('/this-page-does-not-exist/');
+    // The 404 is rendered once, in English: there is no /es/404/ or /it/404/ to switch to.
+    await expect(page.locator('[data-locale-switch="en"]')).toHaveAttribute('href', '/');
+    await expect(page.locator('[data-locale-switch="es"]')).toHaveAttribute('href', '/es/');
+    await expect(page.locator('[data-locale-switch="it"]')).toHaveAttribute('href', '/it/');
+  });
+
   test('an unknown Spanish case study is a real 404', async ({ page }) => {
     const response = await page.goto('/es/work/this-project-does-not-exist/');
     expect(response?.status()).toBe(404);
