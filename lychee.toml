@@ -1,0 +1,23 @@
+# Weekly link check (roadmap C3, .github/workflows/links.yml): every link in the built site, external
+# ones over the network and internal ones against the files in dist/ (root_dir on the command line).
+
+max_concurrency = 8
+max_retries = 3
+retry_wait_time = 5
+timeout = 20
+# A real browser's agent: some hosts answer bots with 403 or 999.
+user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0 Safari/537.36"
+# 429 is a busy host, not a broken link.
+accept = ["200..=299", "429"]
+
+exclude = [
+  # The production site itself (canonical, og:image, feeds): new pages exist in dist/ before they
+  # are released; internal links are checked against the files instead.
+  '^https://aggiovato\.netlify\.app',
+  # LinkedIn refuses automated requests (status 999) whatever the URL.
+  '^https://(www\.)?linkedin\.com',
+  # Brevo form endpoints only take POST.
+  '^https://[0-9a-f]+\.sibforms\.com/serve/',
+  # JSON-LD vocabulary, not a link.
+  '^https?://schema\.org',
+]
