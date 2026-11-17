@@ -119,16 +119,15 @@ const process = [
 
     .work > :global(.container),
     .work :global(.carousel .head),
-    .work :global(.carousel .foot),
     .process-container,
     .about,
     :global(main:has([data-launchpad]) .contact-cta > .container) {
       padding-left: calc(max(var(--gutter), env(safe-area-inset-left)) + var(--hero-indent));
     }
 
-    /* The carousel block already sits inside the gutter: only the indent is added. */
-    .work :global(.carousel .head),
-    .work :global(.carousel .foot) {
+    /* The carousel block already sits inside the gutter: only the indent is added. Its «See all»
+       link stays on the cards' edge, as part of that block. */
+    .work :global(.carousel .head) {
       padding-left: var(--hero-indent);
     }
   }
@@ -149,7 +148,8 @@ const process = [
     max-width: 36ch;
   }
 
-  /* The steps are a real sequence, so the numbers carry it: large mono numerals in peach. */
+  /* The steps are a real sequence, so the numbers carry it: large mono numerals in the subtle grey
+     of the hero log's line numbers (peach stays a small accent, DESIGN.md). */
   .step {
     display: block;
     font-family: var(--font-mono);
@@ -157,7 +157,7 @@ const process = [
     font-weight: 300;
     line-height: 1;
     letter-spacing: -0.02em;
-    color: var(--color-jupiter);
+    color: var(--color-text-subtle);
     padding-bottom: var(--space-4);
     margin-bottom: var(--space-6);
     border-bottom: 1px solid var(--color-border);
