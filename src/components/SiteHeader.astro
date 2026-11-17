@@ -30,7 +30,9 @@ const languages = locales.map((l) => ({
   locale: l,
   name: localeNames[l],
   code: l.toUpperCase(),
-  href: l === locale ? Astro.url.pathname : (alternates[l] ?? localizePath(sectionIndex, l)),
+  // The current language keeps the page itself unless the page names its own address (the 404).
+  href:
+    l === locale ? (alternates[l] ?? Astro.url.pathname) : (alternates[l] ?? localizePath(sectionIndex, l)),
 }));
 ---
 

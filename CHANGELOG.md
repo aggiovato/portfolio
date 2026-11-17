@@ -21,6 +21,8 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 - The web app manifest is served as `application/manifest+json` instead of a generic binary
   type.
+- On the 404 page, the language switcher led to pages that do not exist (`/es/404/`, `/it/404/`);
+  it now leads to each language's home.
 
 ### Security
 
