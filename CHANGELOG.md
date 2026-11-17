@@ -34,6 +34,11 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 - Weekly link check: every link of the built site, external and internal, is checked on Mondays;
   broken ones open an issue.
 
+### Fixed
+
+- On the 404 page, the language switcher led to pages that do not exist (`/es/404/`, `/it/404/`);
+  it now leads to each language's home.
+
 ---
 
 ## [1.8.0] — 2026-11-16
