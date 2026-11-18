@@ -2,344 +2,214 @@
 slug: where-state-lives
 title: Does my frontend need a store?
 summary: >-
-  Deciding where state lives before choosing a library: what state is, what organising it buys and
-  costs, where each kind belongs, and the same Angular form with and without a SignalStore.
-publicationStatus: draft
+  Which state management strategy should my frontend have? Where each piece of state belongs, when a store pays off, and the same Angular form with and without a SignalStore.
+publicationStatus: published
+publishedAt: 2026-11-18
 tags:
   - Angular
   - NgRx
   - State management
 cover:
   src: ../../../assets/notes/where-state-lives/cover.webp
-  alt: 'A bookings screen with each piece outlined by where its state lives: filters and page in the URL, rows from the server, a row menu, an edit drawer with an unsaved draft, the active organisation and a count of selected rows.'
+  alt: 'A bookingsStore holding bookings, status, saving and selected: an edit dialog writes to it with patch, and the booking row, the booking detail and the pending count all read from it. Outside the store, three other places for state: ?page=2 in the URL, signal(false) in a component and computed() for derived values.'
 ---
 
-When I build an application, one decision always shows up sooner or later: how I am going to
-handle its state.
+In modern frontend architecture we keep running into screens where the data never sits still:
+lists that refresh, forms that save as you type, filters, selections, server responses arriving at
+their own pace. Single-page apps give us that flexibility, and with it a question shows up quite
+naturally as soon as we see the complexity coming: which state management strategy should my
+frontend have?
 
-The first things I think about are how much it will grow, what information its screens will
-share and what I would gain by centralising it. They are useful questions, but over time I have
-learned they are not enough.
+My short answer: before picking a library to centralise state management, decide *where each piece of
+information lives*, *who can change it* and *how long it should exist*. The tool comes after.
 
-An application can have many screens and little coordination between them. Another can have a
-single screen and still be juggling a form, an autosave, server responses and changes nobody has
-confirmed yet.
+## What we call {% highlight %}state{% /highlight %}
 
-So what should we look at? Managing state means deciding where information lives, who can change
-it and how long it should exist. The library comes after.
+State is whatever the app needs to remember to know what to show. Let's take a hypothetical example:
+a system for managing flight bookings. In its bookings table, the state is the rows that came from
+the server, the filters, the page you are on, the selected rows, whether a request is in flight and
+the changes you have not saved yet.
 
-## What state is
+You have state even without a library: a boolean that opens a modal is state too. And not everything
+needs storing: if you can count the selected rows from the selection, keep the selection (**component
+state**) and compute how many rows are selected (**derived state**).
 
-State is the information the application needs to remember to know what to show and how to
-respond at a given moment.
+## The real problem: copies that disagree
 
-Take a bookings table. Its state can include:
-
-- the bookings received from the server,
-- the filters you applied,
-- the page you are on,
-- the selected rows,
-- whether a request is in flight,
-- the changes you typed but have not saved.
-
-State exists even without a library: a boolean that opens a modal is state too. And not
-everything needs storing. If the number of selected rows can be computed from the selection, you
-usually do not need to keep both.
-
-## When several parts must agree
-
-You edit a booking from a dialog. On save, the table row must update, maybe the detail too, and a
-counter. If each part keeps its own copy, someone has to keep the copies in sync.
+You edit one of the bookings in a dialog and save. The row should update, and maybe the detail and a
+counter too. If each part keeps *its own copy*, someone has to remember to update all of them,
+component by component.
 
 {% diagram src="where-state-lives/copies.en.svg" alt="Left: an edit dialog saves status confirmed but updates only the booking row; the detail still shows pending and the counter still shows 3. Right: the dialog writes one source, booking 42, and the row, the detail and the counter all read confirmed and 2 from it." caption="With copies, every save has to reach every copy. With one source, every part reads the same value." /%}
 
-That is where the familiar problems come from:
+That is how the classic bugs show up: a screen showing old data, two components sending the same
+request, a slow response overwriting a newer one. From there, the need to centralise these moments
+in the data's life cycle comes naturally, so that every component reads the up-to-date version. One
+of the most common strategies in frontend development is the **store pattern**, though it is not the
+only one we could use.
 
-- a screen shows old information,
-- two components send the same request,
-- a late response replaces a newer result,
-- you switch to another record and the previous draft is still there,
-- you cannot tell which operation started a loading indicator.
+## When a {% highlight %}store{% /highlight %} pays off
 
-This is the problem a store can solve. Not the only way to solve it, though.
+A store gives you one place to look, predictable updates and logic you can test on its own. It
+also costs: more structure, conventions to agree on, and the temptation to put everything in it.
+Centralising can simplify a lot, or turn a local problem into a dependency of the whole app.
 
-## What organising state buys, and what it costs
+If I have to pick a criterion for reaching for more structure, I don't start by counting components:
+I give more weight to these signs:
 
-The benefits come from organising state well, not from a particular tool. You can have a global
-store and still have badly designed state.
+- every change means updating several components by hand,
+- the update rules are scattered across screens,
+- responses can arrive out of order, or you need to retry or undo,
+- it is hard to explain how the app got into a given state.
 
-| What we can gain | What we have to take on |
-| --- | --- |
-| A shared source of reference | Deciding who is responsible for each piece of data |
-| More predictable changes | Rules and conventions for updates |
-| Easier tracking of events | More structure, and more to learn |
-| Less manual syncing between views | Policies for refreshing and invalidating |
-| Logic that is easier to test on its own | Keeping the store from collecting everything |
+The question is not how many components read a piece of data, but **how many can change it**, under
+which rules and with what consequences.
 
-Centralising can simplify a lot, but it can also turn a local problem into a dependency of the
-whole application. That is not an argument against stores: they have a cost, and we need to know
-what we are buying with it.
+Then the tool follows the need:
 
-## Not all state belongs in one place
+- **local state:** the framework's own tools;
+- **a feature with its own logic:** a service or a scoped store, like NgRx SignalStore;
+- **server data:** a server data cache, such as TanStack Query;
+- **many events to coordinate:** actions and effects, with NgRx Store in Angular or Redux Toolkit in
+  React.
 
-Ask a few questions about each piece of state:
+Mind you, they are not small and large versions of the same thing but tools for different problems.
+And when choosing, what your team already knows weighs as much as how nice the API is.
+
+## Each piece in its place
+
+Let's say that, with these signs, we have already decided that our frontend needs a store to scale
+well. One store for the whole app, then? Not necessarily: it is time to ask the question for each
+piece of state.
 
 | Question | Example | Where I would put it |
 | --- | --- | --- |
-| Does it only matter to this component? | An open dropdown | Local state |
+| Does it only matter to this component? | An open dropdown | Local (component) state |
 | Do I want to share it in a link? | Filters and pagination | The URL |
-| Is it remote data that can go stale? | Search results | A query layer or cache |
+| Is it server data that can go stale? | Search results | Server data cache |
 | Does it belong to one process? | The draft of a wizard | Feature state |
 | Do different areas of the app need it? | The active organisation | Shared app state |
 | Can it be computed from other values? | The selected total | Derived state |
 
 {% diagram src="where-state-lives/places.en.svg" alt="The bookings screen with each piece outlined by where it lives: status and page in the URL, the rows in a server cache, the open row menu in the component, the edit drawer with its unsaved draft in feature state, the active organisation Acme in app-wide state, and 2 selected as derived state." caption="One screen, six places. The legend maps each colour to where that piece of state lives." /%}
 
-One distinction is especially useful: the saved booking and the draft of its edit. They are
-related, but they have different owners and different lifetimes. The saved booking is server data
-that other screens read and that can go stale. The draft belongs to the edit: it starts when you
-open the dialog, holds changes nobody has confirmed, and should disappear when you save or cancel.
-Keep them in the same object and closing the dialog has to undo half of it, or the next record
-opens with the previous draft.
+A note on two rows of the table: if a piece of state is used by one component only, it is component
+state; if several components of the same process share it, like the steps of a wizard, it is feature
+state.
 
-## When you need more structure
-
-I would not use a formula like «more than five components means NgRx». These are the signals that
-make me reconsider:
-
-- every change requires telling several components by hand,
-- the update rules are spread across many screens,
-- there are concurrent operations and responses that can arrive out of order,
-- you need to undo, retry or roll back optimistic changes,
-- the team needs a shared way of working,
-- it is hard to reconstruct why the application reached a given state.
-
-I worry less about how many components read a piece of data and more about how many can change
-it, under which rules and with what consequences.
-
-## Choosing the tool
-
-By now the comparison has criteria. I would start from the need:
-
-- **Simple local state:** the framework's own tools.
-- **A feature with its own logic:** a service or a scoped store.
-- **Remote data:** something that handles queries, caching and invalidation, such as TanStack
-  Query.
-- **Many events and coordinated effects:** a more explicit architecture of actions, transitions
-  and effects.
-
-NgRx Store fits the last case in Angular, with actions, reducers and effects; Redux Toolkit plays a
-similar role in React. NgRx SignalStore fits a feature with its own logic, and can also be shared
-across the app. Zustand is a small store for React without actions. They are not interchangeable,
-and they are not a ranking of small, medium and large: some belong to different frameworks.
-
-The team matters too: familiarity, existing conventions and the cost of maintaining one more
-technology. A tool is not chosen by how comfortable the first component feels.
+The most useful distinction is between the **saved booking** and the **draft of its edit**. The
+saved booking comes from the server and other screens read it: by nature it is shared app state, or the server data cache. The draft only lives while the dialog is open and should disappear when you
+save or cancel: it is component state and, if you want it to survive a reload while editing, you can
+persist it in the browser's storage (`sessionStorage`, one per tab). Keep both in one object and,
+sooner or later, the next record opens with the previous draft.
 
 ## The same form, with and without {% highlight %}SignalStore{% /highlight %}
 
-A form to create customers: name and email, a call to an API, and the saving state, the error and
-the customers created in this session. Both versions manage state; the difference is where it
-lives. The `FormGroup` itself already handles values, validation and changes.
+Let's move to code with a small, practical example: the dialog that creates a booking, first without
+a store and then with one. In both versions the form itself (`FormGroup`, with its values and
+validation) stays in the component; what moves is the operation and the state it produces.
 
-They share the API service, which makes the request but stores no customers, and a function that
-builds the form:
+**Without a store**, three signals and a call:
 
 ```ts
-@Injectable({ providedIn: 'root' })
-export class CustomersApi {
-  private readonly http = inject(HttpClient);
+readonly bookings = signal<Booking[]>([]);
+readonly saving = signal(false);
+readonly error = signal<string | null>(null);
 
-  create(input: CreateCustomer) {
-    return this.http.post<Customer>('/api/customers', input);
-  }
-}
-
-export function createCustomerForm() {
-  return new FormGroup({
-    name: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    email: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.email],
-    }),
-  });
+submit() {
+  this.saving.set(true);
+  this.api
+    .create(this.form.getRawValue())
+    .pipe(finalize(() => this.saving.set(false)))
+    .subscribe({
+      next: (b) => this.bookings.update((list) => [...list, b]),
+      error: () => this.error.set('Could not save.'),
+    });
 }
 ```
 
-**Without a store**, the component holds the form, calls the service and updates its own signals:
+For a dialog that only lives on this screen, this is perfectly fine. But should the form carry all
+this responsibility? That is another thing to weigh when designing: whether we want the presentation
+(the template and the component's API) kept apart from the data's life cycle.
+
+**With SignalStore**, the same state and logic move to the store:
 
 ```ts
-export class CustomerFormLocalComponent {
-  private readonly api = inject(CustomersApi);
-  private readonly destroyRef = inject(DestroyRef);
-
-  readonly form = createCustomerForm();
-  readonly customers = signal<Customer[]>([]);
-  readonly saving = signal(false);
-  readonly error = signal<string | null>(null);
-
-  submit() {
-    if (this.saving()) return;
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    this.saving.set(true);
-    this.error.set(null);
-
-    this.api
-      .create(this.form.getRawValue())
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.saving.set(false)),
-      )
-      .subscribe({
-        next: (customer) =>
-          this.customers.update((current) => [...current, customer]),
-        error: () =>
-          this.error.set('Could not create the customer. Try again.'),
-      });
-  }
-}
-```
-
-If everything belongs to this screen, this is a perfectly reasonable solution. There is nothing
-wrong with three signals and an HTTP call in a small component.
-
-**With SignalStore**, the customers, the saving state, the error and the logic that updates them
-move to the store. The form stays in the component: its controls and validation do not need to
-become shared state.
-
-```ts
-export const CustomersStore = signalStore(
-  withState<CustomersState>({
-    customers: [],
+export const BookingsStore = signalStore(
+  withState({
+    bookings: [] as Booking[],
     saving: false,
-    error: null,
+    error: null as string | null,
   }),
-  withMethods((store, api = inject(CustomersApi)) => ({
-    create: rxMethod<CreateCustomer>(
-      pipe(
-        exhaustMap((input) => {
-          patchState(store, { saving: true, error: null });
-          return api.create(input).pipe(
-            tapResponse({
-              next: (customer) =>
-                patchState(store, (state) => ({
-                  customers: [...state.customers, customer],
-                })),
-              error: () =>
-                patchState(store, {
-                  error: 'Could not create the customer. Try again.',
-                }),
-              finalize: () => patchState(store, { saving: false }),
-            }),
-          );
-        }),
-      ),
+  withMethods((store, api = inject(BookingsApi)) => ({
+    create: rxMethod<NewBooking>(
+      exhaustMap((input) => {
+        patchState(store, { saving: true, error: null });
+        return api.create(input).pipe(
+          tapResponse({
+            next: (b) =>
+              patchState(store, (s) => ({
+                bookings: [...s.bookings, b],
+              })),
+            error: () => patchState(store, { error: 'Could not save.' }),
+            finalize: () => patchState(store, { saving: false }),
+          }),
+        );
+      }),
     ),
   })),
 );
 ```
 
-`exhaustMap` keeps a second creation from starting while one is still running. The error is
-handled inside that operation, so you can try again after a failure. The component now reads the
-store's signals and calls one method:
+And the component just asks for it:
 
 ```ts
-@Component({
-  selector: 'app-customer-form-store',
-  imports: [ReactiveFormsModule],
-  providers: [CustomersStore],
-  templateUrl: './customer-form.html',
-})
-export class CustomerFormStoreComponent {
-  readonly store = inject(CustomersStore);
-  readonly form = createCustomerForm();
+readonly store = inject(BookingsStore);
 
-  // References to the store's signals, not copies of its state.
-  readonly customers = this.store.customers;
-  readonly saving = this.store.saving;
-  readonly error = this.store.error;
-
-  submit() {
-    if (this.saving()) return;
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-    this.store.create(this.form.getRawValue());
-  }
+submit() {
+  this.store.create(this.form.getRawValue());
 }
 ```
 
-The template is exactly the same. What changed is who is responsible for the operation and the
-state it produces.
+Now the form just calls its action's method on the store: all the logic of the request and of
+handling the data is out of its hands. `exhaustMap` ignores a second click while a creation is
+running, and the template does not change. There is not less code: the gain is that the operation
+and its rules have **one explicit owner**, which pays off once more components or rules depend on
+it.
 
-| | State in the component | State in the store |
-| --- | --- | --- |
-| Form values and validation | Component | Component |
-| Saving, error and result | Component | Store |
-| The HTTP call | Coordinated by the component | Coordinated by the store |
-| Testing the operation | With the component, or by extracting logic | Apart from the presentation |
-| Sharing between components | Needs inputs, outputs or a service | They can use one shared instance |
-| Initial cost | Lower | More structure and dependencies |
+## Where the store lives
 
-For this isolated form I would start with the first version. I would consider the second when
-creating a customer becomes part of a feature with more consumers, rules or transitions. The
-advantage of the store is not that state disappears or that there is less code in total: its
-responsibilities and rules end up in an explicit place.
-
-## A store still needs a place
-
-Choosing a store does not decide where it lives. Three separate questions:
-
-- **Scope:** who needs access?
-- **Lifetime:** when should it reset?
-- **Loading:** when does its code join the application?
-
-In Angular, `providers: [CustomersStore]` makes that store local to the component that provides
-it: an instance is created with the component and goes away with it. It is not global. If you
-later split the form and the list into sibling components, provide the store in their container:
+The component only needs `inject(BookingsStore)`, but where does that instance come from? Picking a
+store does not decide where it lives. Three questions: who needs it, when it should reset, and when
+its code loads. In Angular, where you provide it answers all three:
 
 ```ts
 @Component({
-  selector: 'app-customers-page',
-  imports: [CustomerCreateComponent, CustomerListComponent],
-  providers: [CustomersStore],
-  template: `
-    <app-customer-create />
-    <app-customer-list />
-  `,
+  selector: 'app-bookings-page',
+  providers: [BookingsStore],
+  template: `<app-booking-dialog /> <app-booking-list />`,
 })
-export class CustomersPageComponent {}
+export class BookingsPageComponent {}
 ```
 
-Both children `inject(CustomersStore)` and get the container's instance, as long as they do not
-provide it again themselves. A feature registered in NgRx's global store is different: it joins
-the one store the whole application shares, and its state stays there after you leave the page.
+Provided in a component, the store is born and dies with it, and its children `inject()` that same
+instance. Provided in each editor, every editor gets its own. A feature in NgRx's global store, on
+the other hand, lives as long as the app. And if you provide it in a lazy-loaded route, its code
+arrives with that route instead of weighing on the first load.
 
-The clearest case: if I open two editors at once, do I want them to share the same draft, or each
-to have its own?
+The clearest test: if I open two editors at once, should they share the draft or each have their
+own?
 
-{% diagram src="where-state-lives/scope.en.svg" alt="Left: customers-page provides CustomersStore, and its children customer-create and customer-list both inject instance number 1. Right: bookings-page has two booking-editor children, each providing its own DraftStore, so they get instances 1 and 2." caption="Where you provide the store decides who shares an instance." /%}
+{% diagram src="where-state-lives/scope.en.svg" alt="Left: bookings-page provides BookingsStore, and its children booking-dialog and booking-list both inject instance number 1. Right: bookings-page has two booking-editor children, each providing its own DraftStore, so they get instances 1 and 2." caption="Where you provide the store decides who shares an instance." /%}
 
-## Where I start now
+## In short
 
-The size of the application is still something I take into account, but I try not to start
-there.
-
-First I look at what information I need to keep, who can change it, which parts depend on it and
-when it should stop existing. With those answers, choosing a tool gets much easier. Sometimes the
-answer is a store. Other times it is keeping that state in the component, moving it to the URL,
-or letting a cache handle the server's data.
-
-What I am after is that every change has a clear place, and that understanding the application
-does not depend on remembering how five screens keep each other in sync.
+So, back to the opening question: which state management strategy should my frontend have? Not a
+single one, but the one that gives each piece of data its place. I still think about how big the app
+will get, but I no longer start there. I start with what I need to keep, who can change it, who
+depends on it and when it should go away. Sometimes the answer is a store; other times a signal in
+the component, the URL, or a cache for the server's data. What I am after is that *every change has
+an obvious place*.
 
 {% quiz %}
 {% question text="The bookings table's filters and page should still be there when you share the link with a colleague. Where do they live?" options=["Local state", "The URL", "Feature state", "Shared app state"] answer=2 explanation="If you want to share it in a link, the note puts it in the URL, like filters and pagination." /%}
@@ -348,7 +218,7 @@ does not depend on remembering how five screens keep each other in sync.
 
 {% question text="Deciding whether a piece of data needs more structure, what does the note weigh most?" options=["How many components read it", "How many can change it, under which rules and with what consequences", "How many screens the application has"] answer=2 explanation="The note worries less about how many components read a piece of data and more about how many can change it, under which rules and with what consequences." /%}
 
-{% question text="You move the customer creation from the component to a SignalStore. What is the real advantage?" options=["There is less code in total", "The form no longer has state", "Its responsibilities and rules end up in an explicit place"] answer=3 explanation="State does not disappear and there is not less code: the operation and its state get an explicit owner. The form stays in the component." /%}
+{% question text="You move the booking creation from the component to a SignalStore. What is the real advantage?" options=["There is less code in total", "The form no longer has state", "Its responsibilities and rules end up in an explicit place"] answer=3 explanation="State does not disappear and there is not less code: the operation and its state get an explicit owner. The form stays in the component." /%}
 
 {% question text="You open two booking editors at once. How many `DraftStore` instances are there?" options=["One, shared by both editors", "Two: each editor provides its own", "One for the whole application"] answer=2 explanation="`providers: [DraftStore]` on the editor creates an instance with each editor, so each one keeps its own draft." %}
 ```ts

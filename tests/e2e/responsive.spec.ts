@@ -76,6 +76,31 @@ test.describe('mobile menu', () => {
     await expect(header).toHaveCSS('view-transition-name', 'site-header');
   });
 
+  test('a link closes the panel before the next page, which arrives without it', async ({ page }) => {
+    await page.goto('/');
+    const toggle = page.getByRole('button', { name: 'Menu' });
+    await toggle.click();
+    const nav = page.getByRole('navigation', { name: 'Main' });
+    await nav.getByRole('link', { name: 'Work' }).click();
+    // Closed at once on click (its transition plays), so the page transition never captures it open.
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(page).toHaveURL(/\/work\/$/);
+    await expect(page.getByRole('button', { name: 'Menu' })).toHaveAttribute('aria-expanded', 'false');
+    await expect(
+      page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Work' }),
+    ).toBeHidden();
+  });
+
+  test('shows the language by name, at the size of the row above', async ({ page }) => {
+    await page.goto('/es/');
+    await page.getByRole('button', { name: 'Menú' }).click();
+    const summary = page.locator('.lang summary');
+    await expect(summary).toContainText('Español');
+    const github = page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: 'GitHub' });
+    const size = (l: typeof summary) => l.evaluate((el) => getComputedStyle(el).fontSize);
+    expect(await size(summary)).toBe(await size(github));
+  });
+
   test('the close icon is centred in its button', async ({ browser }) => {
     // Reduced motion: no transition to wait for before measuring the final X.
     const ctx = await browser.newContext({ ...test.info().project.use, reducedMotion: 'reduce' });

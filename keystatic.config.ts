@@ -120,7 +120,8 @@ const editorialTags = {
     description: 'A self-check at the end of the note: put Question blocks inside.',
     schema: {},
   }),
-  question: block({
+  // A wrapper, not a block: a question can carry a code sample as its body (Question.astro).
+  question: wrapper({
     label: 'Question',
     schema: {
       text: fields.text({ label: 'Question', multiline: true }),
