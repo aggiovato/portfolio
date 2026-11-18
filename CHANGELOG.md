@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [1.9.0] — 2026-11-18
+
 ### Added
 
 - Note «Does my frontend need a store?»: deciding where each piece of state lives before choosing
