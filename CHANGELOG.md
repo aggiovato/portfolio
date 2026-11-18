@@ -12,6 +12,12 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- Note «Does my frontend need a store?»: deciding where each piece of state lives before choosing
+  a library, with a flight-booking example, diagrams, the same Angular form with and without a
+  SignalStore, and a self-check; in English, Spanish and Italian.
+
 ### Changed
 
 - Home: «See all projects» sits on the cards' edge, the process step numbers are grey like the
@@ -25,6 +31,7 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
   type.
 - On the 404 page, the language switcher led to pages that do not exist (`/es/404/`, `/it/404/`);
   it now leads to each language's home.
+- The local editor (Keystatic) opens notes whose quiz questions carry a code sample.
 
 ### Security
 
