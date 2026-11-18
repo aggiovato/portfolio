@@ -10,7 +10,7 @@ tags:
   - Gestione dello stato
 cover:
   src: ../../../assets/notes/where-state-lives/cover.webp
-  alt: 'Una schermata di prenotazioni con ogni parte evidenziata secondo dove vive il suo stato: filtri e pagina nell''URL, righe dal server, un menu di riga, un pannello di modifica con una bozza non salvata, l''organizzazione attiva e il numero di righe selezionate.'
+  alt: "Un bookingsStore con bookings, status, saving e selected: una finestra di modifica ci scrive con patch, e la riga, il dettaglio della prenotazione e il contatore delle pendenti leggono da lì. Fuori dallo store, altri tre posti per lo stato: ?page=2 nell'URL, signal(false) in un componente e computed() per i valori derivati."
 ---
 
 Nell'architettura frontend moderna ci troviamo spesso davanti a schermate in cui i dati non
@@ -20,87 +20,103 @@ nasce una domanda piuttosto naturale appena vediamo arrivare la complessità: qu
 gestione dello stato dovrebbe avere il mio frontend?
 
 La mia risposta breve: prima di scegliere una libreria per centralizzare la gestione dello stato,
-decidi dove vive ogni dato, chi può cambiarlo e per quanto deve esistere. Lo strumento viene dopo.
+decidi *dove vive ogni dato*, *chi può cambiarlo* e *per quanto deve esistere*. Lo strumento viene dopo.
 
-## Cosa chiamiamo stato
+## Cosa chiamiamo {% highlight %}stato{% /highlight %}
 
-Lo stato è ciò che l'applicazione deve ricordare per sapere cosa mostrare. Pensa a una tabella di
-prenotazioni: le righe arrivate dal server, i filtri, la pagina in cui sei, le righe selezionate,
-se c'è una richiesta in corso, le modifiche non ancora salvate.
+Lo stato è ciò che l'applicazione deve ricordare per sapere cosa mostrare. Facciamo un esempio
+ipotetico: un sistema di gestione delle prenotazioni aeree. Nella sua tabella delle prenotazioni, lo
+stato sono le righe arrivate dal server, i filtri, la pagina in cui sei, le righe selezionate, se
+c'è una richiesta in corso e le modifiche non ancora salvate.
 
 Hai stato anche senza una libreria: un booleano che apre una modale è stato anche lui. E non tutto
-va memorizzato: se puoi contare le righe selezionate dalla selezione, tieni la selezione (stato del
-componente) e calcola il numero di righe selezionate (stato derivato).
+va memorizzato: se puoi contare le righe selezionate dalla selezione, tieni la selezione (**stato del
+componente**) e calcola il numero di righe selezionate (**stato derivato**).
 
 ## Il vero problema: copie che non coincidono
 
-Facciamo un esempio ipotetico: un sistema di gestione delle prenotazioni aeree. Modifichi una delle
-prenotazioni in una finestra di dialogo e salvi. La riga dovrebbe aggiornarsi, e forse anche il
-dettaglio e un contatore. Se ogni parte tiene la propria copia, qualcuno deve ricordarsi di
-aggiornarle tutte, componente per componente.
+Modifichi una delle prenotazioni in una finestra di dialogo e salvi. La riga dovrebbe aggiornarsi, e
+forse anche il dettaglio e un contatore. Se ogni parte tiene *la propria copia*, qualcuno deve
+ricordarsi di aggiornarle tutte, componente per componente.
 
 {% diagram src="where-state-lives/copies.it.svg" alt="A sinistra: una finestra di modifica salva lo stato confirmed ma aggiorna solo la riga della prenotazione; il dettaglio mostra ancora pending e il contatore è ancora a 3. A destra: la finestra scrive in un'unica fonte, la prenotazione 42, e riga, dettaglio e contatore leggono da lì confirmed e 2." caption="Con le copie, ogni salvataggio deve raggiungerle tutte. Con un'unica fonte, tutte le parti leggono lo stesso valore." /%}
 
 Così compaiono i soliti bug: una schermata con dati vecchi, due componenti che fanno la stessa
 richiesta, una risposta lenta che sovrascrive una più recente. Da qui nasce, in modo naturale, il
 bisogno di centralizzare questi momenti del ciclo di vita del dato, perché tutti i componenti
-leggano la versione aggiornata. Una delle strategie più comuni nello sviluppo frontend è il pattern
-store, anche se non è l'unica che possiamo usare.
+leggano la versione aggiornata. Una delle strategie più comuni nello sviluppo frontend è il **pattern
+store**, anche se non è l'unica che possiamo usare.
 
-## Ogni dato al suo posto
-
-Invece di chiederti «store sì o no?» per tutta l'applicazione, fatti la domanda per ogni parte
-dello stato:
-
-| Domanda | Esempio | Dove lo metterei |
-| --- | --- | --- |
-| Interessa solo a questo componente? | Un menu a tendina aperto | Stato locale |
-| Voglio condividerlo in un link? | Filtri e paginazione | L'URL |
-| È un dato del server che può diventare vecchio? | Risultati di una ricerca | Un livello di query o una cache |
-| Appartiene a un processo? | La bozza di una procedura guidata | Stato della funzionalità |
-| Serve a diverse aree dell'applicazione? | L'organizzazione attiva | Stato condiviso dell'applicazione |
-| Si ricava da altri valori? | Il totale selezionato | Stato derivato |
-
-{% diagram src="where-state-lives/places.it.svg" alt="La schermata delle prenotazioni con ogni parte evidenziata secondo dove vive: stato e pagina nell'URL, le righe in una cache del server, il menu di riga aperto nel componente, il pannello di modifica con la bozza non salvata nello stato della funzionalità, l'organizzazione attiva Acme nello stato di tutta l'app e 2 selezionate come stato derivato." caption="Una schermata, sei posti. La legenda indica dove vive ogni parte secondo il colore." /%}
-
-La distinzione più utile è tra la prenotazione salvata e la bozza della sua modifica. La
-prenotazione salvata viene dal server e altre schermate la leggono. La bozza vive solo mentre la
-finestra è aperta, e dovrebbe sparire quando salvi o annulli. Se le tieni nello stesso oggetto,
-prima o poi il record successivo si apre con la bozza precedente.
-
-## Quando conviene uno store
+## Quando conviene uno {% highlight %}store{% /highlight %}
 
 Uno store ti dà un unico posto dove guardare, aggiornamenti prevedibili e logica che puoi testare
 da sola. Ha anche un costo: più struttura, convenzioni da concordare e la tentazione di metterci
 dentro tutto. Centralizzare può semplificare molto, oppure trasformare un problema locale in una
 dipendenza di tutta l'applicazione.
 
-Io non conto i componenti. Questi sono i segnali che mi fanno cercare più struttura:
+Se devo scegliere un criterio per cercare più struttura, non parto contando i componenti: do più
+peso a questi segnali:
 
 - ogni modifica obbliga ad aggiornare a mano diversi componenti,
 - le regole di aggiornamento sono sparse in varie schermate,
 - le risposte possono arrivare fuori ordine, o devi ritentare o annullare,
 - è difficile spiegare come l'applicazione è arrivata a un certo stato.
 
-La domanda non è quanti componenti leggono un dato, ma quanti possono modificarlo, con quali regole
+La domanda non è quanti componenti leggono un dato, ma **quanti possono modificarlo**, con quali regole
 e con quali conseguenze.
 
-Poi lo strumento segue il bisogno: quelli del framework per lo stato locale; un servizio o uno
-store circoscritto, come NgRx SignalStore, per una funzionalità; una cache delle query, come
-TanStack Query, per i dati del server; azioni ed effetti, NgRx Store in Angular o Redux Toolkit in
-React, quando bisogna coordinare molti eventi. Non sono una scala dal piccolo al grande, e quello
-che il tuo team conosce già conta quanto l'API.
+Poi lo strumento segue il bisogno:
+
+- **stato locale:** gli strumenti del framework;
+- **una funzionalità con una logica propria:** un servizio o uno store circoscritto, come NgRx
+  SignalStore;
+- **dati del server:** una cache dei dati del server, come TanStack Query;
+- **molti eventi da coordinare:** azioni ed effetti, con NgRx Store in Angular o Redux Toolkit in
+  React.
+
+Attenzione: non sono versioni piccole e grandi della stessa cosa, ma strumenti per problemi diversi.
+E nella scelta, quello che il tuo team conosce già pesa quanto la comodità dell'API.
+
+## Ogni dato al suo posto
+
+Supponiamo di aver già deciso, con questi segnali, che il nostro frontend ha bisogno di uno store
+per crescere bene. Uno store per tutta l'applicazione, allora? Non per forza: è il momento di farsi
+la domanda per ogni parte dello stato.
+
+| Domanda | Esempio | Dove lo metterei |
+| --- | --- | --- |
+| Interessa solo a questo componente? | Un menu a tendina aperto | Stato locale (del componente) |
+| Voglio condividerlo in un link? | Filtri e paginazione | L'URL |
+| È un dato del server che può diventare vecchio? | Risultati di una ricerca | Cache dei dati del server |
+| Appartiene a un processo? | La bozza di una procedura guidata | Stato della funzionalità |
+| Serve a diverse aree dell'applicazione? | L'organizzazione attiva | Stato condiviso dell'applicazione |
+| Si ricava da altri valori? | Il totale selezionato | Stato derivato |
+
+{% diagram src="where-state-lives/places.it.svg" alt="La schermata delle prenotazioni con ogni parte evidenziata secondo dove vive: stato e pagina nell'URL, le righe in una cache del server, il menu di riga aperto nel componente, il pannello di modifica con la bozza non salvata nello stato della funzionalità, l'organizzazione attiva Acme nello stato di tutta l'app e 2 selezionate come stato derivato." caption="Una schermata, sei posti. La legenda indica dove vive ogni parte secondo il colore." /%}
+
+Una precisazione su due righe della tabella: se una parte dello stato la usa un solo componente, è
+stato del componente; se la condividono più componenti di uno stesso processo, come i passi di una
+procedura guidata, è stato della funzionalità.
+
+La distinzione più utile è tra la **prenotazione salvata** e la **bozza della sua modifica**. La
+prenotazione salvata viene dal server e altre schermate la leggono: per natura è stato condiviso
+dell'applicazione, o della cache dei dati del server. La bozza vive solo mentre la finestra è aperta
+e dovrebbe sparire quando salvi o annulli: è stato del componente e, se vuoi che sopravviva a un
+ricaricamento mentre modifichi, puoi conservarla nello storage del browser (`sessionStorage`, uno
+per scheda). Se le tieni nello stesso oggetto, prima o poi il record successivo si apre con la bozza
+precedente.
 
 ## Lo stesso modulo, con e senza {% highlight %}SignalStore{% /highlight %}
 
-Un modulo che crea clienti ed elenca quelli creati in questa sessione. In entrambe le versioni il
-modulo stesso (`FormGroup`, con i suoi valori e la sua validazione) resta nel componente; quello
-che si sposta è l'operazione e lo stato che produce.
+Passiamo al codice con un piccolo esempio pratico: la finestra che crea una prenotazione, prima
+senza store e poi con uno. In entrambe le versioni il modulo stesso (`FormGroup`, con i suoi valori
+e la sua validazione) resta nel componente; quello che si sposta è l'operazione e lo stato che
+produce.
 
 **Senza store**, tre signal e una chiamata:
 
 ```ts
-readonly customers = signal<Customer[]>([]);
+readonly bookings = signal<Booking[]>([]);
 readonly saving = signal(false);
 readonly error = signal<string | null>(null);
 
@@ -110,32 +126,34 @@ submit() {
     .create(this.form.getRawValue())
     .pipe(finalize(() => this.saving.set(false)))
     .subscribe({
-      next: (c) => this.customers.update((list) => [...list, c]),
+      next: (b) => this.bookings.update((list) => [...list, b]),
       error: () => this.error.set('Could not save.'),
     });
 }
 ```
 
-Per un modulo che vive solo in questa schermata, va benissimo così.
+Per una finestra che vive solo in questa schermata, va benissimo così. Ma spetta al modulo tutta
+questa responsabilità? È un'altra cosa da valutare in fase di progettazione: se vogliamo che la
+presentazione (il template e l'API del componente) resti separata dal ciclo di vita del dato.
 
 **Con SignalStore**, lo stesso stato e la stessa logica passano allo store:
 
 ```ts
-export const CustomersStore = signalStore(
+export const BookingsStore = signalStore(
   withState({
-    customers: [] as Customer[],
+    bookings: [] as Booking[],
     saving: false,
     error: null as string | null,
   }),
-  withMethods((store, api = inject(CustomersApi)) => ({
-    create: rxMethod<CreateCustomer>(
+  withMethods((store, api = inject(BookingsApi)) => ({
+    create: rxMethod<NewBooking>(
       exhaustMap((input) => {
         patchState(store, { saving: true, error: null });
         return api.create(input).pipe(
           tapResponse({
-            next: (c) =>
+            next: (b) =>
               patchState(store, (s) => ({
-                customers: [...s.customers, c],
+                bookings: [...s.bookings, b],
               })),
             error: () => patchState(store, { error: 'Could not save.' }),
             finalize: () => patchState(store, { saving: false }),
@@ -150,46 +168,52 @@ export const CustomersStore = signalStore(
 E il componente si limita a chiederlo:
 
 ```ts
-readonly store = inject(CustomersStore);
+readonly store = inject(BookingsStore);
 
 submit() {
   this.store.create(this.form.getRawValue());
 }
 ```
 
-`exhaustMap` ignora un secondo clic mentre una creazione è in corso, e il template non cambia. Il
-codice non diminuisce: il guadagno è che l'operazione e le sue regole hanno un responsabile
-esplicito, e questo ripaga quando più componenti o regole dipendono da essa.
+Ora il modulo si limita a chiamare il metodo della sua azione nello store: tutta la logica della
+richiesta e della gestione del dato esce dalle sue competenze. `exhaustMap` ignora un secondo clic
+mentre una creazione è in corso, e il template non cambia. Il codice non diminuisce: il guadagno è
+che l'operazione e le sue regole hanno **un responsabile esplicito**, e questo ripaga quando più
+componenti o regole dipendono da essa.
 
 ## Dove vive lo store
 
-Scegliere uno store non decide dove vive. Tre domande: chi ne ha bisogno, quando dovrebbe ripartire
-da zero e quando si carica il suo codice. In Angular, dove lo fornisci risponde alle prime due:
+Al componente basta `inject(BookingsStore)`, ma da dove arriva quell'istanza? Scegliere uno store
+non decide dove vive. Tre domande: chi ne ha bisogno, quando dovrebbe ripartire da zero e quando si
+carica il suo codice. In Angular, dove lo fornisci risponde a tutte e tre:
 
 ```ts
 @Component({
-  selector: 'app-customers-page',
-  providers: [CustomersStore],
-  template: `<app-customer-create /> <app-customer-list />`,
+  selector: 'app-bookings-page',
+  providers: [BookingsStore],
+  template: `<app-booking-dialog /> <app-booking-list />`,
 })
-export class CustomersPageComponent {}
+export class BookingsPageComponent {}
 ```
 
 Fornito in un componente, lo store nasce e muore con lui, e i suoi figli fanno `inject()` di quella
 stessa istanza. Fornito in ogni editor, ogni editor ha il proprio. Una feature nello store globale
-di NgRx, invece, vive quanto l'applicazione.
+di NgRx, invece, vive quanto l'applicazione. E se lo fornisci in una rotta a caricamento differito,
+il suo codice arriva con quella rotta e non pesa sul primo caricamento.
 
 La prova più chiara: se apro due editor insieme, voglio che condividano la bozza o che ognuno abbia
 la propria?
 
-{% diagram src="where-state-lives/scope.it.svg" alt="A sinistra: customers-page fornisce CustomersStore, e i suoi figli customer-create e customer-list iniettano l'istanza numero 1. A destra: bookings-page ha due figli booking-editor, ognuno fornisce il proprio DraftStore, quindi ricevono le istanze 1 e 2." caption="Dove fornisci lo store decide chi condivide un'istanza." /%}
+{% diagram src="where-state-lives/scope.it.svg" alt="A sinistra: bookings-page fornisce BookingsStore, e i suoi figli booking-dialog e booking-list iniettano l'istanza numero 1. A destra: bookings-page ha due figli booking-editor, ognuno fornisce il proprio DraftStore, quindi ricevono le istanze 1 e 2." caption="Dove fornisci lo store decide chi condivide un'istanza." /%}
 
 ## In breve
 
-Penso ancora a quanto crescerà l'applicazione, ma non parto più da lì. Parto da cosa devo
-mantenere, chi può cambiarlo, chi ne dipende e quando dovrebbe sparire. A volte la risposta è uno
-store; altre, un signal nel componente, l'URL o una cache per i dati del server. Quello che cerco è
-che ogni modifica abbia un posto evidente.
+Quindi, tornando alla domanda iniziale: quale strategia di gestione dello stato dovrebbe avere il
+mio frontend? Non una sola, ma quella che dà a ogni dato il suo posto. Penso ancora a quanto
+crescerà l'applicazione, ma non parto più da lì. Parto da cosa devo mantenere, chi può cambiarlo,
+chi ne dipende e quando dovrebbe sparire. A volte la risposta è uno store; altre, un signal nel
+componente, l'URL o una cache per i dati del server. Quello che cerco è che *ogni modifica abbia un
+posto evidente*.
 
 {% quiz %}
 {% question text="I filtri e la pagina della tabella delle prenotazioni devono restare quando condividi il link con un collega. Dove vivono?" options=["Stato locale", "L'URL", "Stato della funzionalità", "Stato condiviso dell'applicazione"] answer=2 explanation="Se vuoi condividerlo in un link, la nota lo mette nell'URL, come i filtri e la paginazione." /%}
@@ -198,7 +222,7 @@ che ogni modifica abbia un posto evidente.
 
 {% question text="Per decidere se un dato ha bisogno di più struttura, cosa pesa di più secondo la nota?" options=["Quanti componenti lo leggono", "Quanti possono modificarlo, con quali regole e con quali conseguenze", "Quante schermate ha l'applicazione"] answer=2 explanation="La nota si preoccupa meno di quanti componenti leggono un dato e più di quanti possono modificarlo, con quali regole e con quali conseguenze." /%}
 
-{% question text="Sposti la creazione dei clienti dal componente a un SignalStore. Qual è il vero vantaggio?" options=["C'è meno codice in totale", "Il modulo non ha più stato", "Le sue responsabilità e regole stanno in un posto esplicito"] answer=3 explanation="Lo stato non sparisce e il codice non diminuisce: l'operazione e il suo stato hanno un responsabile esplicito. Il modulo resta nel componente." /%}
+{% question text="Sposti la creazione delle prenotazioni dal componente a un SignalStore. Qual è il vero vantaggio?" options=["C'è meno codice in totale", "Il modulo non ha più stato", "Le sue responsabilità e regole stanno in un posto esplicito"] answer=3 explanation="Lo stato non sparisce e il codice non diminuisce: l'operazione e il suo stato hanno un responsabile esplicito. Il modulo resta nel componente." /%}
 
 {% question text="Apri due editor di prenotazioni insieme. Quante istanze di `DraftStore` ci sono?" options=["Una, condivisa dai due editor", "Due: ogni editor fornisce la propria", "Una per tutta l'applicazione"] answer=2 explanation="`providers: [DraftStore]` nell'editor crea un'istanza con ogni editor, quindi ognuno conserva la propria bozza." %}
 ```ts
