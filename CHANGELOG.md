@@ -16,6 +16,8 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 - Home: «See all projects» sits on the cards' edge, the process step numbers are grey like the
   hero's line numbers, and the footer's logo lines up with its links over a full-width rule.
+- Mobile menu: sections at a calmer size, GitHub and the language (now shown by name) as one
+  secondary row, and a link closes the panel before the next page instead of leaving it over it.
 
 ### Fixed
 
