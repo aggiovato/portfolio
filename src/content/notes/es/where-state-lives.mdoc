@@ -19,8 +19,8 @@ selecciones, respuestas del servidor que llegan a su ritmo. Las SPA nos dan esa 
 ella surge una pregunta bastante natural en cuanto vemos venir la complejidad: ¿qué estrategia de
 manejo de estado debería tener mi frontend?
 
-Mi respuesta corta: antes de elegir una librería, decide dónde vive cada dato, quién puede
-cambiarlo y cuánto tiempo debe existir. La herramienta viene después.
+Mi respuesta corta: antes de elegir una librería para centralizar el manejo del estado, decide dónde
+vive cada dato, quién puede cambiarlo y cuánto tiempo debe existir. La herramienta viene después.
 
 ## Qué llamamos estado
 
@@ -28,21 +28,24 @@ El estado es lo que la aplicación necesita recordar para saber qué mostrar. Pi
 reservas: las filas que llegaron del servidor, los filtros, la página en la que estás, las filas
 seleccionadas, si hay una petición en curso, los cambios que todavía no has guardado.
 
-Tienes estado aunque no uses ninguna librería: un booleano que abre un modal también es estado. Y
-no todo hay que guardarlo: si puedes contar las filas seleccionadas a partir de la selección,
-guarda la selección y calcula el número.
+Tienes estado aunque no uses ninguna librería: un booleano que abre un modal también es estado. Y no
+todo hay que guardarlo: si puedes contar las filas seleccionadas a partir de la selección, guarda la
+selección (estado del componente) y calcula el número de filas seleccionadas (estado derivado).
 
 ## El problema de verdad: copias que no coinciden
 
-Editas una reserva en un diálogo y guardas. La fila debería actualizarse, y quizá también el
-detalle y un contador. Si cada parte guarda su propia copia, alguien tiene que acordarse de
-actualizarlas todas.
+Pongamos un ejemplo hipotético: un sistema de gestión de reservas aéreas. Editas una de las reservas
+en un diálogo y guardas. La fila debería actualizarse, y quizá también el detalle y un contador. Si
+cada parte guarda su propia copia, alguien tiene que acordarse de actualizarlas todas, componente a
+componente.
 
 {% diagram src="where-state-lives/copies.es.svg" alt="Izquierda: un diálogo de edición guarda el estado confirmed pero solo actualiza la fila de la reserva; el detalle sigue mostrando pending y el contador sigue en 3. Derecha: el diálogo escribe en una sola fuente, la reserva 42, y la fila, el detalle y el contador leen de ella confirmed y 2." caption="Con copias, cada guardado tiene que llegar a todas. Con una sola fuente, todas las partes leen el mismo valor." /%}
 
-De ahí vienen los fallos de siempre: una pantalla con datos antiguos, dos componentes haciendo la
-misma petición, una respuesta lenta que pisa a otra más reciente. Un store es una forma de
-resolverlo, no la única.
+Así aparecen los fallos de siempre: una pantalla con datos antiguos, dos componentes haciendo la
+misma petición, una respuesta lenta que pisa a otra más reciente. De ahí nace, de forma natural, la
+necesidad de centralizar esos momentos del ciclo de vida del dato, para que todos los componentes
+consuman la versión actualizada. Una de las estrategias más habituales en el desarrollo frontend es
+el patrón store, aunque no es la única que podemos usar.
 
 ## Cada dato en su sitio
 

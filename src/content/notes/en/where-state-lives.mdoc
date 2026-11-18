@@ -19,8 +19,8 @@ their own pace. Single-page apps give us that flexibility, and with it a questio
 naturally as soon as we see the complexity coming: which state management strategy should my
 frontend have?
 
-My short answer: before picking a library, decide where each piece of information lives, who can
-change it and how long it should exist. The tool comes after.
+My short answer: before picking a library to centralise state management, decide where each piece of
+information lives, who can change it and how long it should exist. The tool comes after.
 
 ## What we call state
 
@@ -28,20 +28,23 @@ State is whatever the app needs to remember to know what to show. Take a booking
 that came from the server, the filters, the page you are on, the selected rows, whether a request is
 in flight, the changes you have not saved yet.
 
-You have state even without a library: a boolean that opens a modal is state too. And not
-everything needs storing: if you can count the selected rows from the selection, keep the selection
-and compute the number.
+You have state even without a library: a boolean that opens a modal is state too. And not everything
+needs storing: if you can count the selected rows from the selection, keep the selection (component
+state) and compute how many rows are selected (derived state).
 
 ## The real problem: copies that disagree
 
-You edit a booking in a dialog and save. The row should update, and maybe the detail and a counter
-too. If each part keeps its own copy, someone has to remember to update all of them.
+Let's take a hypothetical example: a system for managing flight bookings. You edit one of the
+bookings in a dialog and save. The row should update, and maybe the detail and a counter too. If
+each part keeps its own copy, someone has to remember to update all of them, component by component.
 
 {% diagram src="where-state-lives/copies.en.svg" alt="Left: an edit dialog saves status confirmed but updates only the booking row; the detail still shows pending and the counter still shows 3. Right: the dialog writes one source, booking 42, and the row, the detail and the counter all read confirmed and 2 from it." caption="With copies, every save has to reach every copy. With one source, every part reads the same value." /%}
 
-That is where the classic bugs come from: a screen showing old data, two components sending the
-same request, a slow response overwriting a newer one. A store is one way to fix this, not the only
-one.
+That is how the classic bugs show up: a screen showing old data, two components sending the same
+request, a slow response overwriting a newer one. From there, the need to centralise these moments
+in the data's life cycle comes naturally, so that every component reads the up-to-date version. One
+of the most common strategies in frontend development is the store pattern, though it is not the
+only one we could use.
 
 ## Each piece in its place
 

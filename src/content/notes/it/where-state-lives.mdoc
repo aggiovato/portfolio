@@ -19,8 +19,8 @@ risposte del server che arrivano con i loro tempi. Le SPA ci danno questa flessi
 nasce una domanda piuttosto naturale appena vediamo arrivare la complessità: quale strategia di
 gestione dello stato dovrebbe avere il mio frontend?
 
-La mia risposta breve: prima di scegliere una libreria, decidi dove vive ogni dato, chi può
-cambiarlo e per quanto deve esistere. Lo strumento viene dopo.
+La mia risposta breve: prima di scegliere una libreria per centralizzare la gestione dello stato,
+decidi dove vive ogni dato, chi può cambiarlo e per quanto deve esistere. Lo strumento viene dopo.
 
 ## Cosa chiamiamo stato
 
@@ -29,20 +29,23 @@ prenotazioni: le righe arrivate dal server, i filtri, la pagina in cui sei, le r
 se c'è una richiesta in corso, le modifiche non ancora salvate.
 
 Hai stato anche senza una libreria: un booleano che apre una modale è stato anche lui. E non tutto
-va memorizzato: se puoi contare le righe selezionate dalla selezione, tieni la selezione e calcola
-il numero.
+va memorizzato: se puoi contare le righe selezionate dalla selezione, tieni la selezione (stato del
+componente) e calcola il numero di righe selezionate (stato derivato).
 
 ## Il vero problema: copie che non coincidono
 
-Modifichi una prenotazione in una finestra di dialogo e salvi. La riga dovrebbe aggiornarsi, e
-forse anche il dettaglio e un contatore. Se ogni parte tiene la propria copia, qualcuno deve
-ricordarsi di aggiornarle tutte.
+Facciamo un esempio ipotetico: un sistema di gestione delle prenotazioni aeree. Modifichi una delle
+prenotazioni in una finestra di dialogo e salvi. La riga dovrebbe aggiornarsi, e forse anche il
+dettaglio e un contatore. Se ogni parte tiene la propria copia, qualcuno deve ricordarsi di
+aggiornarle tutte, componente per componente.
 
 {% diagram src="where-state-lives/copies.it.svg" alt="A sinistra: una finestra di modifica salva lo stato confirmed ma aggiorna solo la riga della prenotazione; il dettaglio mostra ancora pending e il contatore è ancora a 3. A destra: la finestra scrive in un'unica fonte, la prenotazione 42, e riga, dettaglio e contatore leggono da lì confirmed e 2." caption="Con le copie, ogni salvataggio deve raggiungerle tutte. Con un'unica fonte, tutte le parti leggono lo stesso valore." /%}
 
-Da qui vengono i soliti bug: una schermata con dati vecchi, due componenti che fanno la stessa
-richiesta, una risposta lenta che sovrascrive una più recente. Uno store è un modo per risolverlo,
-non l'unico.
+Così compaiono i soliti bug: una schermata con dati vecchi, due componenti che fanno la stessa
+richiesta, una risposta lenta che sovrascrive una più recente. Da qui nasce, in modo naturale, il
+bisogno di centralizzare questi momenti del ciclo di vita del dato, perché tutti i componenti
+leggano la versione aggiornata. Una delle strategie più comuni nello sviluppo frontend è il pattern
+store, anche se non è l'unica che possiamo usare.
 
 ## Ogni dato al suo posto
 
