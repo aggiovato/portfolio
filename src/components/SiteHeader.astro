@@ -99,6 +99,9 @@ const languages = locales.map((l) => ({
               <span class="lang-current" aria-hidden="true">
                 {locale.toUpperCase()}
               </span>
+              <span class="lang-current-name" aria-hidden="true">
+                {localeNames[locale]}
+              </span>
               <span class="visually-hidden">
                 {locale.toUpperCase()} — {t('nav.language')}: {localeNames[locale]}
               </span>
@@ -179,6 +182,22 @@ const languages = locales.map((l) => ({
       if (isOpen() && !navEl.contains(target) && !toggle.contains(target)) setOpen(false);
     });
     mq.addEventListener('change', () => isOpen() && setOpen(false, { focus: false }));
+    // A link in the open panel: close it with its own transition, then navigate. Closing only at
+    // pageswap left the half-faded panel inside the header's transition layer, over the new page.
+    navEl.addEventListener('click', (e) => {
+      const link = (e.target as Element).closest('a');
+      if (!link || !isOpen() || !mq.matches || e.defaultPrevented) return;
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (link.target && link.target !== '_self') return;
+      const url = new URL(link.href, location.href);
+      if (url.origin !== location.origin) return;
+      e.preventDefault();
+      setOpen(false, { focus: false });
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      // The panel's opacity transition, from the styles (0 when motion is reduced).
+      const ms = reduced ? 0 : parseFloat(getComputedStyle(navEl).transitionDuration) * 1000;
+      setTimeout(() => location.assign(url), ms);
+    });
     addEventListener('pageswap', () => isOpen() && setOpen(false, { focus: false }));
     // Back/forward cache restores the page as it was left.
     addEventListener('pageshow', (e) => e.persisted && isOpen() && setOpen(false, { focus: false }));
@@ -333,6 +352,10 @@ const languages = locales.map((l) => ({
     cursor: pointer;
     list-style: none;
     transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .lang-current-name {
+    display: none;
   }
 
   .lang summary::-webkit-details-marker {
@@ -509,9 +532,14 @@ const languages = locales.map((l) => ({
       align-items: stretch;
     }
 
+    /* Two levels: the sections, then GitHub and the language as a quieter row of the same size. */
     :global(.js) .nav a {
-      font-size: 1.25rem;
+      font-size: 1.125rem;
       padding-inline: 0;
+    }
+
+    :global(.js) .nav-github a {
+      font-size: 1rem;
     }
 
     :global(.js) .nav-github {
@@ -523,6 +551,19 @@ const languages = locales.map((l) => ({
 
     :global(.js) .lang summary {
       padding-inline: 0;
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    /* The panel has room for the language's own name; the code stays on desktop. */
+    :global(.js) .lang-current {
+      display: none;
+    }
+
+    :global(.js) .lang-current-name {
+      display: inline;
     }
 
     :global(.js) .nav .lang-list {
