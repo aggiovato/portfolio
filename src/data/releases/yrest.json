@@ -1,0 +1,17 @@
+{
+  "slug": "yrest",
+  "status": "active",
+  "version": "0.14.0",
+  "releasedAt": "2026-11-05",
+  "links": {
+    "playground": "https://yrest-docs.netlify.app/playground/",
+    "code": "https://github.com/aggiovato/yRest",
+    "docs": "https://yrest-docs.netlify.app",
+    "install": "https://www.npmjs.com/package/@yrest/cli"
+  },
+  "source": {
+    "repository": "aggiovato/yRest",
+    "commit": "2046d18",
+    "run": "https://github.com/aggiovato/yRest/actions/runs/42132135241"
+  }
+}
