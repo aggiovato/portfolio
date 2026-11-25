@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [2.0.0] — 2026-11-25
+
 ### Changed
 
 - The site moves to Cloudflare Workers at `portfolio.aggiovato.workers.dev`: canonical links,
