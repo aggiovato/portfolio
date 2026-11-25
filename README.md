@@ -3,7 +3,7 @@
 [![CI](https://github.com/aggiovato/portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/aggiovato/portfolio/actions/workflows/ci.yml)
 
 Personal portfolio of Heber Alejandro Lugo, built with Astro 7, TypeScript and Markdoc. Static output in
-English, Spanish (`/es/`), Italian (`/it/`) and Japanese (`/ja/`).
+English, Spanish (`/es/`) and Italian (`/it/`).
 
 ## Getting started
 
