@@ -33,3 +33,13 @@ npm run dev                  # http://localhost:4321 (drafts visible)
 
 Case studies live in `src/content/projects/<locale>/<name>.mdoc`, one file per language with the same
 name and `slug`. Use `publicationStatus: draft` while writing; drafts never reach production.
+
+## Project releases
+
+Each project's own pipeline keeps its case study current: when one of its versions reaches
+production, it calls [`project-release.yml`](.github/workflows/project-release.yml), which sends
+the facts in the project's `portfolio.yml` (status, links) plus the version and its day. The
+portfolio records them in `src/data/releases/<slug>.json` and deploys the last release with them
+([`project-sync.yml`](.github/workflows/project-sync.yml)), without a new site version. The case
+study shows the latest version; its prose stays hand-written. Setup for a project is in the header
+of `project-release.yml`.

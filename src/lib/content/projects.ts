@@ -11,10 +11,12 @@ import {
   translationKey,
   withFallback,
 } from './project-utils';
+import { applyRelease } from './release';
 
 export { getNextProject } from './project-utils';
 
-export type Project = CollectionEntry<'projects'>;
+/** A case study, with its project's latest release applied (`version`, status, links, updatedAt). */
+export type Project = CollectionEntry<'projects'> & { data: { version?: string } };
 
 /**
  * Single visibility filter (spec §13 «Security and drafts»).
@@ -29,7 +31,9 @@ async function getVisibleProjects(): Promise<Project[]> {
   const all = await getCollection('projects', (p) => isVisibleStatus(p.data.publicationStatus, SHOW_DRAFTS));
   assertUniqueSlugs(all);
   assertTranslationParity(all);
-  return all.sort(byRecency);
+  // Facts sent by each project's own pipeline (src/data/releases/<slug>.json) win over the frontmatter.
+  const releases = new Map((await getCollection('releases')).map((r) => [r.data.slug, r.data]));
+  return all.map((p) => ({ ...p, data: applyRelease(p.data, releases.get(p.data.slug)) })).sort(byRecency);
 }
 
 /** Projects written in `locale`: the case study routes of that locale. */

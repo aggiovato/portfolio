@@ -12,6 +12,12 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- Project releases: a project's pipeline can tell the portfolio when a version reaches production
+  (`project-release.yml`). The facts are recorded and deployed without a site release, and the case
+  study shows its latest version and date, with the status and links the project declares.
+
 ---
 
 ## [2.0.0] — 2026-11-25

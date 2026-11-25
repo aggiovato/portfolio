@@ -1,6 +1,7 @@
 ---
 /**
- * Case study fact sheet: type, period, status, role and context.
+ * Case study fact sheet: type, period, status, latest release (when the project's pipeline sent
+ * one, src/data/releases/), role and context.
  * Lays itself out from its own width (container query): one column when narrow (next to the
  * cover on desktop, small phones), a two-or-more column grid otherwise.
  */
@@ -11,13 +12,22 @@ interface Props {
   data: Project['data'];
 }
 const { data } = Astro.props;
-const t = useTranslations(resolveLocale(Astro.currentLocale));
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
 const status = t(`project.status.${data.projectStatus}`);
 // Professional work without a public demo: say so instead of leaving the reader looking for a link.
 const statusText =
   data.projectType === 'professional' && !data.links.demo
     ? `${status} · ${t('project.privateProduct')}`
     : status;
+// A release moves updatedAt to its day, so the date shown is when that version went live.
+const releasedOn =
+  data.version && data.updatedAt
+    ? {
+        iso: data.updatedAt.toISOString().slice(0, 10),
+        text: new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(data.updatedAt),
+      }
+    : undefined;
 // The dot only reinforces the status text; it carries no meaning of its own.
 const tone = ({ active: 'live', prototype: 'warm', completed: 'neutral', paused: 'neutral' } as const)[
   data.projectStatus
@@ -43,6 +53,15 @@ const tone = ({ active: 'live', prototype: 'warm', completed: 'neutral', paused:
         {statusText}
       </dd>
     </div>
+    {data.version && (
+      <div>
+        <dt>{t('project.meta.release')}</dt>
+        <dd class="release">
+          <span class="version">v{data.version}</span>
+          {releasedOn && <time datetime={releasedOn.iso}>{releasedOn.text}</time>}
+        </dd>
+      </div>
+    )}
     <div>
       <dt>{t('project.meta.role')}</dt>
       <dd>
@@ -99,6 +118,19 @@ const tone = ({ active: 'live', prototype: 'warm', completed: 'neutral', paused:
     display: flex;
     align-items: center;
     gap: var(--space-2);
+  }
+  .release {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-2);
+  }
+  .version {
+    font-family: var(--font-mono);
+  }
+  .release time {
+    font-weight: 400;
+    color: var(--color-text-subtle);
   }
   .dot {
     flex: none;

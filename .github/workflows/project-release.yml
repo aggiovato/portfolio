@@ -1,0 +1,90 @@
+name: Project release
+
+# Shared workflow for other repositories: called by a project's pipeline right after one of its
+# versions reaches production, it tells the portfolio, which updates that project's case study
+# (project-sync.yml). It runs inside the caller's run, on the caller's checkout.
+#
+# In the project:
+#   1. portfolio.yml at its root, with the facts that do not depend on the language:
+#        slug: yrest                 # the case study it updates (src/content/projects/*/<slug>.mdoc)
+#        status: active              # optional: active | completed | prototype | paused
+#        links:                      # optional: demo, playground, code, docs, install
+#          install: https://www.npmjs.com/package/@yrest/cli
+#   2. A secret PORTFOLIO_TOKEN: a fine-grained token for aggiovato/portfolio only, with
+#      Contents: read and write (what a repository_dispatch needs).
+#   3. A job after the one that publishes to production, for stable versions:
+#        portfolio:
+#          needs: publish-npm
+#          uses: aggiovato/portfolio/.github/workflows/project-release.yml@main
+#          with:
+#            version: ${{ github.ref_name }}
+#          secrets:
+#            PORTFOLIO_TOKEN: ${{ secrets.PORTFOLIO_TOKEN }}
+# The version and its day are added here; the portfolio validates everything again.
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: The version now in production (v1.2.3 or 1.2.3); pre-releases are ignored
+        type: string
+        required: true
+      manifest:
+        description: Path of the manifest in the calling repository
+        type: string
+        default: portfolio.yml
+    secrets:
+      PORTFOLIO_TOKEN:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Tell the portfolio
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: ${{ inputs.manifest }}
+          sparse-checkout-cone-mode: false
+      # yq and jq come with GitHub's Ubuntu runners.
+      - name: Manifest plus the release facts
+        id: payload
+        env:
+          VERSION: ${{ inputs.version }}
+          MANIFEST: ${{ inputs.manifest }}
+        run: |
+          version="${VERSION#v}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::notice::$VERSION is not a stable version: the portfolio is not told."
+            exit 0
+          fi
+          if [ ! -f "$MANIFEST" ]; then
+            echo "::error::$MANIFEST not found: it declares what the portfolio shows (see project-release.yml)."
+            exit 1
+          fi
+          yq -o=json "$MANIFEST" | jq \
+            --arg version "$version" \
+            --arg day "$(TZ=Europe/Madrid date +%F)" \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg commit "${GITHUB_SHA::7}" \
+            --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            '{event_type: "project-release", client_payload: {project: (. + {
+              version: $version, releasedAt: $day,
+              source: {repository: $repository, commit: $commit, run: $run}})}}' > "$RUNNER_TEMP/dispatch.json"
+          # A first check where the mistake was made; the portfolio runs the full schema.
+          if ! jq -e '.client_payload.project.slug | type == "string"' "$RUNNER_TEMP/dispatch.json" > /dev/null; then
+            echo "::error::$MANIFEST needs a slug: the case study it updates."
+            exit 1
+          fi
+          jq . "$RUNNER_TEMP/dispatch.json"
+          echo "send=true" >> "$GITHUB_OUTPUT"
+      - name: Send it
+        if: steps.payload.outputs.send == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PORTFOLIO_TOKEN }}
+        run: |
+          gh api repos/aggiovato/portfolio/dispatches --input "$RUNNER_TEMP/dispatch.json"
+          echo "Sent to aggiovato/portfolio: see its «Project sync» runs." >> "$GITHUB_STEP_SUMMARY"

@@ -29,6 +29,9 @@ time; Keystatic will edit the same files later (§13), so keep the format editor
   (`getPublicProjects`, `getProjectsInLocale`, `getFeaturedProjects`, `projectPath`,
   `getProjectAlternates`). Never `getCollection('projects')` elsewhere: it would bypass the draft filter.
 - Logic that does not need `astro:content` goes to `project-utils.ts` with a unit test.
+- Release facts (`src/data/releases/<slug>.json`, the `releases` collection) are written only by
+  `project-sync.yml`; `projects.ts` applies them (`applyRelease` in `release.ts`). Never edit them by
+  hand: the next release of that project overwrites them. Prose and translations stay in the .mdoc.
 - Notes (`src/content/notes/<locale>/`) follow the same model: English original, optional
   translations with the same file name and slug, read only through `src/lib/content/notes.ts`
   (`getPublicNotes`, `getNotesInLocale`, `notePath`, `getNoteAlternates`, `hasNotes`). Published
