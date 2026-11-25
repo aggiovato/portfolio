@@ -86,7 +86,7 @@ jobs:
             wrangler.jsonc
           sparse-checkout-cone-mode: false
       # The very build the e2e job tested, where wrangler.jsonc expects it.
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         if: steps.creds.outputs.ok == 'true'
         with:
           name: dist
