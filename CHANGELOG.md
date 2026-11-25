@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [2.1.0] — 2026-11-25
+
 ### Added
 
 - Project releases: a project's pipeline can tell the portfolio when a version reaches production
