@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [2.2.0] — 2026-11-25
+
 ### Added
 
 - Case study «Super 3T»: Ultimate Tic Tac Toe grown into a collection of classic games, with its
