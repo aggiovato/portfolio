@@ -12,6 +12,12 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- Case study «Super 3T»: Ultimate Tic Tac Toe grown into a collection of classic games, with its
+  engine, computer players, offline play and online rooms on Cloudflare; in English, Spanish and
+  Italian. It is the second project on the home.
+
 ---
 
 ## [2.1.0] — 2026-11-25
