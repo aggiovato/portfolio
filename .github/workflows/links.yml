@@ -6,7 +6,7 @@ name: Links
 #   schedule / manual run → broken links open (or refresh) one issue labelled `broken-links`;
 #                           a clean run closes it.
 #   pull request touching this workflow or lychee.toml → the report in the job summary only.
-# Costs no Netlify credits: nothing is deployed.
+# Deploys nothing: it only builds and checks.
 on:
   schedule:
     - cron: '0 6 * * 1' # Mondays, 06:00 UTC

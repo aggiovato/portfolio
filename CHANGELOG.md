@@ -12,6 +12,12 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Changed
+
+- The site moves to Cloudflare Workers at `portfolio.aggiovato.workers.dev`: canonical links,
+  sitemap, feeds, share images and the newsletter emails point there. Netlify
+  (`aggiovato.netlify.app`) stays as a backup host, deployed only when `DEPLOY_TARGETS` names it.
+
 ---
 
 ## [1.9.0] — 2026-11-18

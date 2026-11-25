@@ -53,7 +53,8 @@ reasoning behind each decision.
 - Main content and navigation must work without JavaScript; JavaScript only enhances.
 - Adding a project must not require new components or a hand-made route.
 - Projects can be drafts: visible in development, never generated in production.
-- Hosted on Netlify at `aggiovato.netlify.app` until a custom domain is chosen. Undecided: analytics tool,
+- Hosted on Cloudflare Workers at `portfolio.aggiovato.workers.dev` (Netlify as a backup) until a
+  custom domain is chosen. Undecided: analytics tool,
   whether a contact form exists (email and verified profiles are enough for the first version).
 
 ## Brand Commitments

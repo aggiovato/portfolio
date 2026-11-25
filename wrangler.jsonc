@@ -1,0 +1,19 @@
+// Cloudflare Workers: the static build served as assets, with no Worker code (assets are free and
+// never run a script). Deployed by CI (.github/workflows/deploy.yml) from the tested dist/ artifact:
+// `wrangler deploy` for a version tag, `wrangler versions upload --preview-alias pr-N` for a PR
+// preview. `task serve:cf` serves a local build the same way. Netlify stays as the backup host.
+{
+  "name": "portfolio",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    // The production build; CI downloads the build job's artifact to the same path.
+    "directory": "./dist",
+    // /work → /work/ (the site uses trailingSlash: 'always'), as Netlify did.
+    "html_handling": "auto-trailing-slash",
+    // Unknown paths get the nearest 404.html: Astro writes one, at the root (src/pages/404.astro).
+    "not_found_handling": "404-page",
+  },
+  // https://portfolio.aggiovato.workers.dev until a custom domain, and a URL per previewed version.
+  "workers_dev": true,
+  "preview_urls": true,
+}

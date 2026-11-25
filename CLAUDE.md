@@ -37,17 +37,22 @@ CSS tokens · static output · English (default) + Spanish (`/es/`) + Italian (`
 | Newsletter email HTML     | `node scripts/emails.mjs`                | —                                 |
 | Note covers (diagrams)    | `node scripts/note-covers.mjs`           | —                                 |
 
-CI: `.github/workflows/ci.yml` (quality → build → e2e → deploy). PRs get a Netlify preview; a push
+CI: `.github/workflows/ci.yml` (quality → build → e2e → deploy). PRs get a Cloudflare preview; a push
 to `main` is tested only; a version tag `vX.Y.Z` (from `task release:patch|minor|major` on an up-to-date `main`, after
 writing «Unreleased» in `CHANGELOG.md`) is checked against `package.json` and the changelog, deployed to
-production, and gets a GitHub Release when it is minor or major. Netlify never builds itself; secrets
-`NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`. Headers live in `public/_headers`. Every Monday
+production, and gets a GitHub Release when it is minor or major. Hosting: Cloudflare Workers static
+assets (`wrangler.jsonc`, worker `portfolio`), deployed by `.github/workflows/deploy.yml` from the
+tested `dist/`; secrets `CLOUDFLARE_API_TOKEN` (Workers Scripts: Edit) and `CLOUDFLARE_ACCOUNT_ID`.
+Netlify stays as a backup host: the repository variable `DEPLOY_TARGETS` picks where deploys go
+(`cloudflare` by default, `netlify`, or `cloudflare,netlify`), with `NETLIFY_AUTH_TOKEN` and
+`NETLIFY_SITE_ID`. No host builds on its own. `task serve:cf` serves a build as Cloudflare does.
+Headers and redirects live in `public/_headers` and `public/_redirects` (both hosts read them). Every Monday
 `.github/workflows/links.yml` checks every link of the built site with lychee (`lychee.toml`) and
 opens or refreshes one `broken-links` issue; it never blocks CI.
 
 ## Sharing and newsletter
 
-- Site URL: `SITE_URL` in `astro.config.mjs` (`https://aggiovato.netlify.app` until a custom domain);
+- Site URL: `SITE_URL` in `astro.config.mjs` (`https://portfolio.aggiovato.workers.dev` until a custom domain);
   canonical links, hreflang, sitemap, feeds and share images derive from it. `robots.txt` is an endpoint.
 - Share images: `src/lib/share-image.ts` makes every page's `og:image` a 1200×630 JPEG (the cover
   fitted whole, or `src/assets/og/default-<locale>.png`, rendered by `scripts/og-default.mjs`).
