@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { withoutEmptyMedia } from './lib/content/project-utils';
+import { projectLinks, projectStatus, releaseSchema } from './lib/content/release';
 
 /**
  * Project contract — docs/especificacion.md §12.
@@ -32,7 +33,7 @@ const projects = defineCollection({
         /** Short line for cards (home carousel). Falls back to summary. */
         tagline: z.string().min(1).max(70).optional(),
         publicationStatus: z.enum(['draft', 'published', 'archived']),
-        projectStatus: z.enum(['active', 'completed', 'prototype', 'paused']),
+        projectStatus,
         projectType: z.enum(['personal', 'open-source', 'professional']),
         featured: z.boolean().default(false),
         featuredOrder: z.number().int().optional(),
@@ -60,18 +61,7 @@ const projects = defineCollection({
         gallery: z
           .array(z.object({ src: image(), alt: z.string().min(1), caption: z.string().optional() }))
           .default([]),
-        links: z
-          .object({
-            /** A working demo of the product itself. */
-            demo: z.url().optional(),
-            /** An interactive playground (not the product running): labelled as such. */
-            playground: z.url().optional(),
-            code: z.url().optional(),
-            docs: z.url().optional(),
-            /** Where to install it (a marketplace, a store, a package page). */
-            install: z.url().optional(),
-          })
-          .default({}),
+        links: projectLinks.default({}),
         seo: z.object({ title: z.string().optional(), description: z.string().optional() }).optional(),
       })
       // Publication rules: nothing is published without a date and a cover (§12).
@@ -153,4 +143,14 @@ const skills = defineCollection({
   }),
 });
 
-export const collections = { projects, notes, skills };
+/**
+ * Latest production release of a project, written only by .github/workflows/project-sync.yml
+ * (`src/data/releases/<slug>.json`, entry id = slug). Read through src/lib/content/projects.ts,
+ * which applies it over the case study's frontmatter.
+ */
+const releases = defineCollection({
+  loader: glob({ pattern: '*.json', base: './src/data/releases' }),
+  schema: releaseSchema,
+});
+
+export const collections = { projects, notes, skills, releases };

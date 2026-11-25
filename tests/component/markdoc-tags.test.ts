@@ -98,4 +98,16 @@ describe('ProjectMeta', () => {
     expect(html).toContain('Active · Private product');
     expect(html).toContain('Team of 4');
   });
+
+  it('shows the latest release only when the project sent one', async () => {
+    expect(await container.renderToString(ProjectMeta, { props: { data: base } })).not.toContain(
+      'Latest release',
+    );
+    const html = await container.renderToString(ProjectMeta, {
+      props: { data: { ...base, version: '0.15.0', updatedAt: new Date('2026-11-25') } },
+    });
+    expect(html).toContain('Latest release');
+    expect(html).toContain('v0.15.0');
+    expect(html).toMatch(/<time[^>]*datetime="2026-11-25"[^>]*>November 25, 2026<\/time>/);
+  });
 });

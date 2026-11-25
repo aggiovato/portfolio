@@ -75,6 +75,10 @@ in params.items %}`, `{{ item.TITLE|LINK|ENCLOSURE }}`, `{{ item.DESCRIPTION|str
 - Projects are read only through `src/lib/content/projects.ts`, notes only through `src/lib/content/notes.ts`
   (draft filter). Never `getCollection('projects' | 'notes')` in pages. The Notes menu entry and `/notes/`
   only exist once a note is visible (§7).
+- Project releases: other repositories call `.github/workflows/project-release.yml` after a
+  production release; `project-sync.yml` validates the facts (`src/lib/content/release.ts`), commits
+  `src/data/releases/<slug>.json` (bot-only, never edited by hand) and deploys the last version tag
+  with them. `projects.ts` applies them over the frontmatter (status, links, `updatedAt`, `version`).
 - About's «What I work with» tree lives in `src/content/skills/<locale>.yaml` (read through
   `src/lib/content/skills.ts`); translations keep the English ids and branch counts.
 - Pages live in `src/pages/[...locale]/` and use `localeParams()`; no hard-coded copy or internal links.

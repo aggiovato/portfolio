@@ -142,6 +142,7 @@ export const es: UiDictionary = {
   'project.meta.type': 'Tipo',
   'project.meta.period': 'Periodo',
   'project.meta.status': 'Estado',
+  'project.meta.release': 'Última versión',
   'project.meta.role': 'Rol',
   'project.meta.context': 'Contexto',
   'project.privateProduct': 'Producto privado',

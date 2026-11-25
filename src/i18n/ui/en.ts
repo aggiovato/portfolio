@@ -143,6 +143,7 @@ export const en = {
   'project.meta.type': 'Type',
   'project.meta.period': 'Period',
   'project.meta.status': 'Status',
+  'project.meta.release': 'Latest release',
   'project.meta.role': 'Role',
   'project.meta.context': 'Context',
   'project.privateProduct': 'Private product',

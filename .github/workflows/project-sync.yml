@@ -1,0 +1,152 @@
+name: Project sync
+
+# Another repository released a version to production (its pipeline called project-release.yml,
+# which sent a `project-release` event): record the facts and publish them without a site release.
+#   record → validate the payload again (scripts/project-sync.mjs), skip a project with no case
+#            study, and commit src/data/releases/<slug>.json to main when it changed
+#   build  → the last version tag (what production runs) plus main's src/data/releases/, so site
+#            changes still in «Unreleased» never ship this way; checks, build, draft check
+#   deploy → that build to production through deploy.yml, on the hosts DEPLOY_TARGETS picks
+# Commits made with GITHUB_TOKEN start no other workflow, so ci.yml does not run for them.
+# Manual run (Actions → Project sync): paste the `project` object as JSON, to test or replay.
+on:
+  repository_dispatch:
+    types: [project-release]
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: The `project` object, as JSON (see tests/unit/release.test.ts for its shape)
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  record:
+    name: Record the release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      changed: ${{ steps.sync.outputs.changed }}
+      slug: ${{ steps.sync.outputs.slug }}
+      version: ${{ steps.sync.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Validate and write
+        id: sync
+        env:
+          # Through the environment, never inlined in the script: the payload is outside input.
+          PAYLOAD: >-
+            ${{ github.event_name == 'repository_dispatch' && toJSON(github.event.client_payload.project)
+            || inputs.payload }}
+        run: |
+          printf '%s' "$PAYLOAD" > "$RUNNER_TEMP/payload.json"
+          node scripts/project-sync.mjs "$RUNNER_TEMP/payload.json"
+      - name: Commit to main
+        if: steps.sync.outputs.changed == 'true'
+        env:
+          SLUG: ${{ steps.sync.outputs.slug }}
+          VERSION: ${{ steps.sync.outputs.version }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/data/releases
+          git commit -m "content(projects): $SLUG v$VERSION"
+          # Another sync (or a merge) may land first: rebase onto it and try again.
+          for attempt in 1 2 3; do
+            git push origin HEAD:main && exit 0
+            sleep $((attempt * 5))
+            git pull --rebase origin main
+          done
+          echo "::error::Could not push the record to main."; exit 1
+
+  build:
+    name: Build the last release with the new facts
+    needs: record
+    if: needs.record.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Syncs build one at a time; a waiting one is replaced by a newer one, whose main has every
+    # record committed before it.
+    concurrency:
+      group: project-sync-build
+      cancel-in-progress: false
+    outputs:
+      tag: ${{ steps.base.outputs.tag }}
+      sha: ${{ steps.base.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Last version tag plus main's release facts
+        id: base
+        run: |
+          git fetch -q origin main
+          sha=$(git rev-parse origin/main)
+          tag=$(git describe --tags --abbrev=0 --match 'v*.*.*' "$sha")
+          git checkout -q "$tag"
+          git checkout "$sha" -- src/data/releases
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Building $tag with src/data/releases from main (${sha::7})" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Placeholder images
+        run: npm run assets:placeholders
+      # The tag's code passed e2e when it was released; only validated data changed, so types,
+      # content schemas and the draft check are enough here.
+      - name: Astro check
+        run: npm run check
+      - name: Build (production)
+        run: npm run build
+      - name: Drafts stay out of dist/ and the sitemap
+        run: npm run verify:drafts
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  cloudflare:
+    name: Deploy (Cloudflare)
+    needs: [record, build]
+    if: contains(vars.DEPLOY_TARGETS || 'cloudflare', 'cloudflare')
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: ./.github/workflows/deploy.yml
+    with:
+      host: cloudflare
+      environment: production
+      head-sha: ${{ needs.build.outputs.sha }}
+      message: ${{ needs.record.outputs.slug }} v${{ needs.record.outputs.version }} on ${{ needs.build.outputs.tag }}
+    secrets: inherit
+
+  netlify:
+    name: Deploy (Netlify, backup)
+    needs: [record, build]
+    if: contains(vars.DEPLOY_TARGETS, 'netlify')
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: ./.github/workflows/deploy.yml
+    with:
+      host: netlify
+      environment: production
+      head-sha: ${{ needs.build.outputs.sha }}
+      message: ${{ needs.record.outputs.slug }} v${{ needs.record.outputs.version }} on ${{ needs.build.outputs.tag }}
+    secrets: inherit
