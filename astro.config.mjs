@@ -37,8 +37,8 @@ const keystaticTrailingSlash = {
 };
 
 // Production URL: canonical links, hreflang, sitemap, share images and the notes feeds are built
-// from it. Change it here (and in Netlify) when a custom domain is added.
-const SITE_URL = 'https://aggiovato.netlify.app';
+// from it. Change it here (and in Cloudflare) when a custom domain is added.
+const SITE_URL = 'https://portfolio.aggiovato.workers.dev';
 
 export default defineConfig({
   site: SITE_URL,

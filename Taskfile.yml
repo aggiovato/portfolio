@@ -73,6 +73,11 @@ tasks:
     deps: [build]
     cmd: '{{.NODE}} npx astro preview --port {{.PORT}}'
 
+  serve:cf:
+    desc: Build and serve dist/ as Cloudflare Workers does (headers, redirects, 404, trailing slash)
+    deps: [build]
+    cmd: '{{.NODE}} npx -y wrangler@4.158.0 dev --port 8787'
+
   verify:drafts:
     desc: Fail if a draft project (any locale) ended up in the production build or sitemap
     deps: [build]

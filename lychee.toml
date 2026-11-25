@@ -13,7 +13,7 @@ accept = ["200..=299", "429"]
 exclude = [
   # The production site itself (canonical, og:image, feeds): new pages exist in dist/ before they
   # are released; internal links are checked against the files instead.
-  '^https://aggiovato\.netlify\.app',
+  '^https://portfolio\.aggiovato\.workers\.dev',
   # LinkedIn refuses automated requests (status 999) whatever the URL.
   '^https://(www\.)?linkedin\.com',
   # Brevo form endpoints only take POST.

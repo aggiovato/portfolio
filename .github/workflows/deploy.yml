@@ -1,0 +1,139 @@
+name: Deploy
+
+# Publishes the tested build (the `dist` artifact of the calling run) to one host:
+#   cloudflare → static assets on Workers (wrangler.jsonc). Production replaces the live version;
+#                a preview uploads a version served only at its alias (pr-N), never in production.
+#   netlify    → the backup host, the same dist/ (public/_headers and _redirects work on both).
+# A PR's preview is linked in the PR. Without the host's secrets (forks, Dependabot) it skips.
+on:
+  workflow_call:
+    inputs:
+      host:
+        description: cloudflare or netlify
+        type: string
+        required: true
+      environment:
+        description: preview or production
+        type: string
+        required: true
+      pr-number:
+        description: The PR a preview belongs to; 0 otherwise
+        type: number
+        default: 0
+      head-sha:
+        description: The commit deployed (a PR's own head, not GitHub's merge commit)
+        type: string
+        required: true
+      message:
+        description: What the host records with the version
+        type: string
+        required: true
+    outputs:
+      url:
+        description: Where this version is served
+        value: ${{ jobs.deploy.outputs.url }}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy (${{ inputs.host }}, ${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+    # One deploy per host and target at a time; a newer push supersedes a queued preview.
+    concurrency:
+      group: deploy-${{ inputs.host }}-${{ inputs.environment }}-${{ inputs.pr-number }}
+      cancel-in-progress: ${{ inputs.environment == 'preview' }}
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ steps.deploy.outputs.url }}
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      HOST: ${{ inputs.host }}
+      ENVIRONMENT: ${{ inputs.environment }}
+      ALIAS: pr-${{ inputs.pr-number }}
+      MESSAGE: ${{ inputs.message }}
+      CLOUDFLARE_API_TOKEN: ${{ inputs.host == 'cloudflare' && secrets.CLOUDFLARE_API_TOKEN || '' }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ inputs.host == 'cloudflare' && secrets.CLOUDFLARE_ACCOUNT_ID || '' }}
+      NETLIFY_AUTH_TOKEN: ${{ inputs.host == 'netlify' && secrets.NETLIFY_AUTH_TOKEN || '' }}
+      NETLIFY_SITE_ID: ${{ inputs.host == 'netlify' && secrets.NETLIFY_SITE_ID || '' }}
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - name: Check credentials
+        id: creds
+        run: |
+          case "$HOST" in
+            cloudflare) [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ] && ok=true ;;
+            netlify) [ -n "$NETLIFY_AUTH_TOKEN" ] && [ -n "$NETLIFY_SITE_ID" ] && ok=true ;;
+            *) echo "::error::Unknown host $HOST."; exit 1 ;;
+          esac
+          if [ "${ok:-}" = "true" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$HOST secrets not available for this run; skipping deploy."
+          fi
+      # Only .nvmrc and wrangler.jsonc are needed; checkout runs first because it cleans the workspace.
+      - uses: actions/checkout@v7
+        if: steps.creds.outputs.ok == 'true'
+        with:
+          sparse-checkout: |
+            .nvmrc
+            wrangler.jsonc
+          sparse-checkout-cone-mode: false
+      # The very build the e2e job tested, where wrangler.jsonc expects it.
+      - uses: actions/download-artifact@v7
+        if: steps.creds.outputs.ok == 'true'
+        with:
+          name: dist
+          path: dist/
+      - uses: actions/setup-node@v7
+        if: steps.creds.outputs.ok == 'true'
+        with:
+          node-version-file: .nvmrc
+      - name: Deploy
+        id: deploy
+        if: steps.creds.outputs.ok == 'true'
+        run: |
+          if [ "$HOST" = "cloudflare" ]; then
+            wrangler=(npx -y wrangler@4.158.0)
+            if [ "$ENVIRONMENT" = "production" ]; then
+              "${wrangler[@]}" deploy --message "$MESSAGE" | tee deploy.log
+              url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+            else
+              "${wrangler[@]}" versions upload --preview-alias "$ALIAS" --message "$MESSAGE" | tee deploy.log
+              url=$(grep -oE "https://$ALIAS-[a-z0-9.-]+\.workers\.dev" deploy.log | head -1)
+            fi
+          else
+            if [ "$ENVIRONMENT" = "production" ]; then target=(--prod); else target=(--alias "$ALIAS"); fi
+            npx -y netlify-cli@27.16.1 deploy --dir dist --site "$NETLIFY_SITE_ID" --no-build \
+              "${target[@]}" --message "$MESSAGE" --json > deploy.json
+            url=$(node -e "const d=require('./deploy.json'); console.log(process.env.ENVIRONMENT==='production' ? d.url : d.deploy_url)")
+          fi
+          if [ -z "$url" ]; then
+            echo "::error::No URL in the $HOST deploy's output."; exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed ($HOST, $ENVIRONMENT): $url" >> "$GITHUB_STEP_SUMMARY"
+      - name: Link the preview in the PR
+        if: steps.creds.outputs.ok == 'true' && inputs.environment == 'preview' && inputs.pr-number > 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+          URL: ${{ steps.deploy.outputs.url }}
+          HEAD_SHA: ${{ inputs.head-sha }}
+          PR_NUMBER: ${{ inputs.pr-number }}
+        run: |
+          # Cloudflare keeps one comment up to date (its alias URL is stable); Netlify's URL
+          # changes per deploy, so each gets its own.
+          if [ "$HOST" = "cloudflare" ]; then
+            body="Preview (Cloudflare): $URL (commit ${HEAD_SHA::7}, after quality, build and e2e passed)"
+            gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --edit-last --body "$body" \
+              || gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            body="Preview (Netlify, backup): $URL (commit ${HEAD_SHA::7}, after quality, build and e2e passed)"
+            gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "$body"
+          fi

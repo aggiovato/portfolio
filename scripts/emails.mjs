@@ -20,7 +20,7 @@
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
-const SITE = 'https://aggiovato.netlify.app';
+const SITE = 'https://portfolio.aggiovato.workers.dev';
 const LINKS = { github: 'https://github.com/aggiovato', linkedin: 'https://www.linkedin.com/in/heberlugo' };
 
 // Night masthead from src/styles/tokens.css; paper body and inks chosen for light email clients.

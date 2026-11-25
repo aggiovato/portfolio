@@ -32,6 +32,9 @@ coverage/
 # go-task checksums
 .task/
 
+# wrangler local state (task serve:cf)
+.wrangler/
+
 # Local-only working docs: product spec and design references (mockup, logo design system).
 docs/
 

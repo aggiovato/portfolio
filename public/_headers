@@ -1,9 +1,9 @@
-# Netlify response headers (static site, no server).
+# Response headers (static site, no server): Cloudflare Workers assets and Netlify read this file.
 # Fingerprinted build assets never change under the same name: cache them for a year.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Netlify serves .webmanifest as application/octet-stream; with nosniff a browser may then refuse
+# Netlify serves .webmanifest as application/octet-stream (Cloudflare gets it right); with nosniff a browser may then refuse
 # it, so name the type the Web App Manifest spec registers.
 /site.webmanifest
   Content-Type: application/manifest+json

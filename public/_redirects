@@ -1,2 +1,2 @@
-# Netlify redirects (static site). Common guesses for the sitemap point to the one Astro generates.
+# Static redirects, read by Cloudflare Workers assets and Netlify. Common guesses for the sitemap point to the one Astro generates.
 /sitemap.xml  /sitemap-index.xml  301
