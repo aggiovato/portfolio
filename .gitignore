@@ -35,6 +35,9 @@ coverage/
 # wrangler local state (task serve:cf)
 .wrangler/
 
+# impeccable plugin's per-session hook cache (the rest of .impeccable/ is versioned)
+.impeccable/hook.cache.json
+
 # Local-only working docs: product spec and design references (mockup, logo design system).
 docs/
 
