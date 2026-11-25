@@ -1,0 +1,158 @@
+---
+slug: super-3t
+title: Super 3T
+summary: Born as a test of Ultimate Tic Tac Toe and growing into a collection of classic games, all on one engine. Computer opponents at three levels, offline play, and private online rooms with chat.
+tagline: Classic board games, rebuilt with care, one engine at a time.
+publicationStatus: published
+publishedAt: 2026-11-26
+projectStatus: active
+projectType: personal
+featured: true
+featuredOrder: 2
+categories:
+  - Angular
+  - Game
+  - Cloudflare Workers
+role:
+  - Product design
+  - Interface design
+  - Development
+periodLabel: November 2026 – present
+glance:
+  problem: "Ultimate Tic Tac Toe turns on one rule newcomers miss: your cell sends your rival to a board. It started as a test of that rule and kept growing."
+  contribution: "Designed and built it alone: rules engine, three computer levels, interface, online rooms on Cloudflare, tests and the release pipeline."
+  outcome:
+    - "In development and live on Cloudflare: nine releases between 19 and 25 November 2026."
+    - "Plays offline as an installable app; online rooms by invitation, with chat."
+    - "Four games on one engine package: Super 3T, tic tac toe, Dots and Boxes, Ship Sink."
+    - "A 95 % coverage threshold on the rules engine and the computer opponent."
+stack:
+  - name: Angular 22
+    layer: interface
+    rationale: Standalone components and signals; the board, the views and the departure-board interface.
+  - name: NgRx SignalStore
+    layer: interface
+    rationale: One store per running match (series, current game, computer turn), built on signals.
+  - name: TypeScript game core
+    layer: runtime
+    rationale: A framework-free package with the rules and the computer players, shared by the app, its Web Worker and the API.
+  - name: Web Worker
+    layer: runtime
+    rationale: The computer thinks off the main thread, so the board stays responsive during its search.
+  - name: Hono + Durable Objects
+    layer: api
+    rationale: Online rooms on Cloudflare Workers; one Durable Object per room orders its moves and holds both sockets.
+  - name: Angular service worker
+    layer: infrastructure
+    rationale: Offline play and installation, with updates that wait until the game is saved.
+  - name: Cloudflare Workers
+    layer: infrastructure
+    rationale: Static assets plus an edge Worker for /api; a preview per pull request, a pre environment and production.
+  - name: Vitest + fast-check
+    layer: quality
+    rationale: Unit and property tests of the engine and the opponent in Node; API tests in the Workers runtime.
+  - name: Playwright
+    layer: quality
+    rationale: End-to-end flows on desktop and mobile, plus a two-browser online game against the deployed pre environment.
+cover:
+  src: ../../../assets/projects/super-3t/cover.webp
+  alt: "Super 3T on desktop and phone, mid-game: on the desktop board 9 is won by X and board 3 is outlined in orange as O's forced board, under the flap row “O → 3”; on the phone, board 1 opens zoomed in an orange outline under “O → 1”, with the nine boards as a thumbnail."
+  caption: "Real screens from the live demo: the flap row and the orange outline answer “where do I play?” on every turn."
+gallery:
+  - src: ../../../assets/projects/super-3t/how-to-play.webp
+    alt: "The how-to-play ticket over the game on a first visit: four rules, each beside a small board drawing, with Skip and Play buttons."
+    caption: "First visit: four rules over the real game, then play."
+  - src: ../../../assets/projects/super-3t/phone.webp
+    alt: "Super 3T on a phone: a thumbnail of the nine boards with board 1 marked, and board 1 zoomed below in an orange outline, with numbered cells and the score."
+    caption: "On phones, one board at a time, with the whole game as a thumbnail."
+  - src: ../../../assets/projects/super-3t/ship-sink.webp
+    alt: "Ship Sink, the fourth game: a 10×10 grid with the player's fleet placed at random, the cells around each ship hatched, and Turn, Shuffle and Confirm fleet buttons."
+    caption: "Ship Sink: place the fleet, then fire against the computer or online."
+links:
+  demo: https://super-3t.aggiovato.workers.dev
+  code: https://github.com/aggiovato/super-tic-tac-toe
+---
+
+## Problem
+
+Ultimate Tic Tac Toe is a 3×3 board where every cell is another tic tac toe. One rule makes it a game: the cell you play decides which board your rival plays next. Most people have never heard of the variant, and the usual versions leave them asking two questions on every turn: where can I play, and why does my rival have to play there?
+
+Super 3T started as a test: could a newcomer finish a game of Ultimate Tic Tac Toe without help, on a phone passed between two people? Once the engine, the opponent and the interface held up, the same foundations could carry other classic games, and the project turned into a collection.
+
+{% callout type="note" title="In development" %}
+Super 3T is live and still growing: most releases add a game, a mode or a way to play together. This case study follows the version in production.
+{% /callout %}
+
+## My contribution
+
+A personal project, designed and built alone: the product scope and the order of the deliveries, the visual identity (name, mark, palette and the departure-board interface), the rules engines, the computer players, the Angular app, the online API, the tests and the delivery pipeline.
+
+## From one game to a collection
+
+- **v0.1** Ultimate Tic Tac Toe for two people on one device, with its rules engine.
+- **v0.2** A computer opponent at three levels, thinking in a Web Worker.
+- **v0.3** Classic tic tac toe, Dots and Boxes and a games library; games saved on the device, history, tactical challenges and a how-to-play ticket.
+- **v0.4** Offline and installable, served from Cloudflare.
+- **v0.5** Online rooms by invitation, for every game.
+- **v0.7** Ship Sink, the first game with hidden information, against the computer and online.
+- **v0.8** A chat between the two players of a room.
+
+## Solution
+
+- **The rule on screen.** Both levels share the same 1–9 numbering. A flap row says who moves and where (`O → 3`), a line explains why ("X played cell 3, so O plays on board 3") and the forced board is the only thing in orange.
+- **A first visit that teaches.** A how-to-play ticket explains the game in four rules over the real board; three tactical challenges train the key idea of sending the rival to a board where any reply loses.
+- **Phones first.** On narrow screens one board opens at a time, with the whole game as a thumbnail; every target is at least 44 × 44 px. The game is playable by keyboard, with reduced motion and a high-contrast design.
+- **Saved and offline.** Every move is saved on the device; a game resumes mid-turn and counts once. After the first visit the app works with no connection and can be installed.
+- **Online rooms.** Settings create a private room and its link; both players see each move as it happens, the game reconnects after a lost connection, keeps the room's score and adds a chat.
+
+## Under the hood
+
+**One engine package per game.** The rules and the computer players live in `packages/game-core`, plain TypeScript with no framework: each game has a `core` (immutable state, legal moves, results, replay of a whole game from its moves, versioned rules) and an `ai` layer on top, sharing a small `tictac` base. The architecture is written as data: a script run with the linter checks which layer may import which, rejects cycles and verifies that every game in the catalog has its engine and app folders.
+
+**Computer players that feel different.** In Super 3T, Rookie takes a win when one move gives it and otherwise plays a weighted random move; Veteran weighs board wins, blocks and the board its move sends you to, and never hands over the game while it has a safe move; Master searches with alpha-beta and iterative deepening for 600 ms in a Web Worker. Classic tic tac toe's top level plays perfectly, Dots and Boxes' searches the rest of the game exactly once few lines are left, and Ship Sink's only ever sees what a player would see. The app waits at least 450 ms before showing a reply, so your own move lands first.
+
+**The app.** Angular 22 with signals; one NgRx SignalStore per running match (the series, the current game, the computer's turn). Games are kept in IndexedDB after every move and each finished game is counted once by its id. The Angular service worker makes it work offline; a new version is offered under the controls and only switches once the game is saved.
+
+**Online.** The same Cloudflare Worker that serves the static app runs code only for `/api/*` and hands it to the API Worker through a service binding, so every other request is a free static file. The API, built with Hono, gives each room its own Durable Object: it holds both players' hibernatable WebSockets, orders their moves, validates them with the game's own engine, keeps the room in its SQLite storage and deletes it with an alarm after a week without play. In Ship Sink each seat receives only its own view. Chat messages carry a client id, so those written while offline are sent again on reconnecting without arriving twice.
+
+## Technical decisions
+
+{% decision
+   title="One engine package for app, worker and server"
+   problem="The rules had to be identical where the game is played, where the computer thinks and where online moves are accepted."
+   decision="A framework-free TypeScript package with the rules and the computer players, imported by the Angular app, its Web Worker and the Cloudflare API."
+   alternatives="Rules inside Angular services, and a separate check on the server."
+   tradeoff="A workspace and import boundaries to maintain; a lint script checks which layers may import which."
+   evidence="The server validates every online move with the same engine the app plays with; the engine is tested in Node without a browser." /%}
+
+{% decision
+   title="The strongest level searches within a time budget"
+   problem="A deep search on a phone can freeze the board or reply after an unpredictable wait."
+   decision="Alpha-beta search with iterative deepening in a Web Worker, stopped at 600 ms with the best move of the last finished depth; a settled endgame is played at once."
+   alternatives="A fixed search depth, or searching on the main thread."
+   tradeoff="Play strength depends on the device's speed."
+   evidence="Search budgets are tested with deterministic work budgets, and seeded batches of games compare the levels." /%}
+
+{% decision
+   title="One Durable Object per online room"
+   problem="Two players can move or reconnect at the same moment, and in Ship Sink each must see only their own fleet."
+   decision="Each room is a Durable Object that orders its moves, keeps its state in its own SQLite storage and sends each seat only what that player may see."
+   alternatives="A stateless API over a shared database, with locks."
+   tradeoff="The API runs as its own Worker, without preview URLs, so every pull request deploys its own copy of it."
+   evidence="A two-browser end-to-end game runs against the pre environment after each merge, losing the connection and retrying." /%}
+
+{% callout type="constraint" title="Online needs Cloudflare" %}
+The app keeps Netlify as a backup host, but there it has no `/api`: local play and the computer work, online rooms do not.
+{% /callout %}
+
+## Quality
+
+Unit and property tests (fast-check) cover the engines and the computer players in Node, with a coverage threshold of 95 %; the API is tested inside the Workers runtime. Playwright plays the flows on desktop and mobile in Chromium, Firefox and WebKit. ESLint keeps files under 500 lines and functions under 80, and a token check keeps colours and sizes in the design system.
+
+Delivery is a pipeline of its own: every pull request gets a preview of the app with its own copy of the API, deleted when the pull request closes; every merge goes to a pre environment where an online game is played between two browsers; and a release is a pull request that, once merged, sends the very build that passed to production and tags it.
+
+## What's next
+
+- **Accounts**: verified results that follow a player across devices, on Neon Postgres through Hyperdrive and Drizzle, while local play keeps working without signing in.
+- **More classic games** in the collection, on the same engine, interface and online rooms.
+- **Tidier chat internals**: one retry policy on the server and one text rule shared by both ends, recorded during the chat's review.

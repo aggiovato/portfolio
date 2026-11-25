@@ -1,0 +1,158 @@
+---
+slug: super-3t
+title: Super 3T
+summary: Nació como una prueba de Ultimate Tic Tac Toe y se está convirtiendo en una colección de juegos clásicos sobre un mismo motor. Rivales de la máquina en tres niveles, juego sin conexión y salas online privadas con chat.
+tagline: Juegos de mesa clásicos, rehechos con cuidado, un motor cada vez.
+publicationStatus: published
+publishedAt: 2026-11-26
+projectStatus: active
+projectType: personal
+featured: true
+featuredOrder: 2
+categories:
+  - Angular
+  - Juego
+  - Cloudflare Workers
+role:
+  - Diseño de producto
+  - Diseño de interfaz
+  - Desarrollo
+periodLabel: Noviembre de 2026 – actualidad
+glance:
+  problem: "Ultimate Tic Tac Toe gira en torno a una regla que quien empieza no ve: tu casilla envía al rival a un tablero. Empezó como una prueba de esa regla y siguió creciendo."
+  contribution: "Lo diseñé y construí solo: motor de reglas, tres niveles de la máquina, interfaz, salas online en Cloudflare, tests y el pipeline de releases."
+  outcome:
+    - "En desarrollo y en producción en Cloudflare: nueve versiones entre el 19 y el 25 de noviembre de 2026."
+    - "Se juega sin conexión como app instalable; salas online por invitación, con chat."
+    - "Cuatro juegos sobre un mismo motor: Super 3T, tres en raya, Puntos y cajas y Ship Sink."
+    - "Un umbral de cobertura del 95 % en el motor de reglas y en la máquina."
+stack:
+  - name: Angular 22
+    layer: interface
+    rationale: Componentes standalone y signals; el tablero, las vistas y la interfaz de panel de salidas.
+  - name: NgRx SignalStore
+    layer: interface
+    rationale: Un store por partida en curso (serie, partida actual, turno de la máquina), sobre signals.
+  - name: TypeScript game core
+    layer: runtime
+    rationale: Un paquete sin framework con las reglas y los jugadores de la máquina, compartido por la app, su Web Worker y la API.
+  - name: Web Worker
+    layer: runtime
+    rationale: La máquina piensa fuera del hilo principal, así que el tablero responde mientras busca.
+  - name: Hono + Durable Objects
+    layer: api
+    rationale: Salas online en Cloudflare Workers; un Durable Object por sala ordena sus jugadas y mantiene los dos sockets.
+  - name: Angular service worker
+    layer: infrastructure
+    rationale: Juego sin conexión e instalación, con actualizaciones que esperan a que la partida esté guardada.
+  - name: Cloudflare Workers
+    layer: infrastructure
+    rationale: Assets estáticos más un Worker en el edge para /api; un preview por pull request, un entorno pre y producción.
+  - name: Vitest + fast-check
+    layer: quality
+    rationale: Tests unitarios y de propiedades del motor y de la máquina en Node; tests de la API en el runtime de Workers.
+  - name: Playwright
+    layer: quality
+    rationale: Flujos end-to-end en escritorio y móvil, y una partida online entre dos navegadores contra el entorno pre desplegado.
+cover:
+  src: ../../../assets/projects/super-3t/cover.webp
+  alt: "Super 3T en escritorio y en móvil, a mitad de partida: en el escritorio, el tablero 9 ganado por X y el tablero 3 con borde naranja como tablero obligado de O, bajo la fila de paletas «O → 3»; en el móvil, el tablero 1 ampliado con borde naranja bajo «O → 1», con los nueve tableros en miniatura."
+  caption: "Pantallas reales de la demo: la fila de paletas y el borde naranja responden «¿dónde juego?» en cada turno."
+gallery:
+  - src: ../../../assets/projects/super-3t/how-to-play.webp
+    alt: "El billete «How to play» sobre la partida en la primera visita: cuatro reglas, cada una junto a un pequeño dibujo de tablero, con los botones Skip y Play."
+    caption: "Primera visita: cuatro reglas sobre la partida real, y a jugar."
+  - src: ../../../assets/projects/super-3t/phone.webp
+    alt: "Super 3T en un móvil: una miniatura de los nueve tableros con el tablero 1 marcado y, debajo, el tablero 1 ampliado con borde naranja, las casillas numeradas y el marcador."
+    caption: "En el móvil, un tablero cada vez, con la partida entera en miniatura."
+  - src: ../../../assets/projects/super-3t/ship-sink.webp
+    alt: "Ship Sink, el cuarto juego: una cuadrícula de 10×10 con la flota colocada al azar, las casillas alrededor de cada barco rayadas y los botones Turn, Shuffle y Confirm fleet."
+    caption: "Ship Sink: coloca la flota y dispara contra la máquina u online."
+links:
+  demo: https://super-3t.aggiovato.workers.dev
+  code: https://github.com/aggiovato/super-tic-tac-toe
+---
+
+## Problema
+
+Ultimate Tic Tac Toe es un tablero de 3×3 en el que cada casilla es otro tres en raya. Una regla lo convierte en un juego: la casilla que juegas decide en qué tablero juega tu rival a continuación. Casi nadie conoce esta variante, y las versiones habituales dejan dos preguntas en cada turno: ¿dónde puedo jugar?, y ¿por qué mi rival tiene que jugar ahí?
+
+Super 3T empezó como una prueba: ¿podía alguien nuevo terminar una partida de Ultimate Tic Tac Toe sin ayuda, en un móvil que se pasan dos personas? Cuando el motor, la máquina y la interfaz aguantaron, esa misma base podía sostener otros juegos clásicos, y el proyecto se convirtió en una colección.
+
+{% callout type="note" title="En desarrollo" %}
+Super 3T está en producción y sigue creciendo: la mayoría de las versiones añaden un juego, un modo o una forma de jugar juntos. Este case study sigue la versión en producción.
+{% /callout %}
+
+## Mi contribución
+
+Un proyecto personal, diseñado y construido por mí solo: el alcance del producto y el orden de las entregas, la identidad visual (nombre, marca, paleta y la interfaz de panel de salidas), los motores de reglas, los jugadores de la máquina, la app en Angular, la API online, los tests y el pipeline de entrega.
+
+## De un juego a una colección
+
+- **v0.1** Ultimate Tic Tac Toe para dos personas en un mismo dispositivo, con su motor de reglas.
+- **v0.2** Un rival de la máquina en tres niveles, que piensa en un Web Worker.
+- **v0.3** El tres en raya clásico, Puntos y cajas y una biblioteca de juegos; partidas guardadas en el dispositivo, historial, retos tácticos y un billete de «cómo se juega».
+- **v0.4** Sin conexión e instalable, servido desde Cloudflare.
+- **v0.5** Salas online por invitación, en todos los juegos.
+- **v0.7** Ship Sink, el primer juego con información oculta, contra la máquina y online.
+- **v0.8** Un chat entre los dos jugadores de una sala.
+
+## Solución
+
+- **La regla en pantalla.** Los dos niveles comparten la misma numeración del 1 al 9. Una fila de paletas dice quién mueve y dónde (`O → 3`), una línea explica por qué («X jugó la casilla 3, así que O juega en el tablero 3») y el tablero obligado es lo único en naranja.
+- **Una primera visita que enseña.** Un billete de «cómo se juega» explica el juego en cuatro reglas sobre el tablero real; tres retos tácticos entrenan la idea clave: mandar al rival a un tablero donde cualquier respuesta pierde.
+- **Primero el móvil.** En pantallas estrechas se abre un tablero cada vez, con la partida entera en miniatura; cada zona táctil mide al menos 44 × 44 px. Se puede jugar con teclado, con movimiento reducido y con un diseño de alto contraste.
+- **Guardado y sin conexión.** Cada jugada se guarda en el dispositivo; una partida se reanuda a mitad de turno y cuenta una sola vez. Tras la primera visita la app funciona sin conexión y se puede instalar.
+- **Salas online.** Los ajustes crean una sala privada y su enlace; los dos jugadores ven cada jugada al instante, el juego se reconecta tras perder la conexión, guarda el marcador de la sala y añade un chat.
+
+## Por dentro
+
+**Un paquete de motor por juego.** Las reglas y los jugadores de la máquina viven en `packages/game-core`, TypeScript sin framework: cada juego tiene un `core` (estado inmutable, jugadas legales, resultados, reproducción de una partida completa a partir de sus jugadas, reglas versionadas) y una capa `ai` encima, sobre una pequeña base común `tictac`. La arquitectura está escrita como datos: un script que corre con el linter comprueba qué capa puede importar cuál, rechaza ciclos y verifica que cada juego del catálogo tenga sus carpetas de motor y de app.
+
+**Rivales que se notan distintos.** En Super 3T, Novato gana si una jugada se lo da y, si no, juega al azar con pesos; Veterano valora ganar tableros, bloquear y el tablero al que te envía su jugada, y nunca regala la partida mientras tenga una jugada segura; Maestro busca con alfa-beta y profundización iterativa durante 600 ms en un Web Worker. El nivel más alto del tres en raya clásico juega perfecto, el de Puntos y cajas calcula exactamente el resto de la partida cuando quedan pocas líneas, y el de Ship Sink solo ve lo que vería un jugador. La app espera al menos 450 ms antes de mostrar la respuesta, para que tu jugada se vea primero.
+
+**La app.** Angular 22 con signals; un NgRx SignalStore por partida en curso (la serie, la partida actual, el turno de la máquina). Las partidas se guardan en IndexedDB tras cada jugada y cada partida terminada cuenta una sola vez por su id. El service worker de Angular la hace funcionar sin conexión; una versión nueva se ofrece bajo los controles y solo se activa cuando la partida está guardada.
+
+**Online.** El mismo Worker de Cloudflare que sirve la app estática solo ejecuta código para `/api/*` y lo pasa al Worker de la API por un service binding, así que el resto de peticiones son ficheros estáticos gratuitos. La API, hecha con Hono, da a cada sala su propio Durable Object: mantiene los WebSockets hibernables de los dos jugadores, ordena sus jugadas, las valida con el motor del propio juego, guarda la sala en su almacenamiento SQLite y la borra con una alarma tras una semana sin jugar. En Ship Sink cada puesto recibe solo su propia vista. Los mensajes del chat llevan un id de cliente, así que los escritos sin conexión se reenvían al reconectar sin llegar dos veces.
+
+## Decisiones técnicas
+
+{% decision
+   title="Un mismo paquete de motor para la app, el worker y el servidor"
+   problem="Las reglas tenían que ser idénticas donde se juega, donde piensa la máquina y donde se aceptan las jugadas online."
+   decision="Un paquete TypeScript sin framework con las reglas y los jugadores de la máquina, importado por la app en Angular, su Web Worker y la API en Cloudflare."
+   alternatives="Reglas dentro de servicios de Angular y una comprobación aparte en el servidor."
+   tradeoff="Un workspace y unas fronteras de importación que mantener; un script de lint comprueba qué capas pueden importar cuáles."
+   evidence="El servidor valida cada jugada online con el mismo motor con el que juega la app; el motor se prueba en Node sin navegador." /%}
+
+{% decision
+   title="El nivel más fuerte busca dentro de un presupuesto de tiempo"
+   problem="Una búsqueda profunda en un móvil puede congelar el tablero o responder tras una espera imprevisible."
+   decision="Búsqueda alfa-beta con profundización iterativa en un Web Worker, detenida a los 600 ms con la mejor jugada de la última profundidad terminada; un final resuelto se juega al instante."
+   alternatives="Una profundidad de búsqueda fija, o buscar en el hilo principal."
+   tradeoff="La fuerza de juego depende de la velocidad del dispositivo."
+   evidence="Los presupuestos de búsqueda se prueban con presupuestos de trabajo deterministas, y lotes de partidas con semilla comparan los niveles." /%}
+
+{% decision
+   title="Un Durable Object por sala online"
+   problem="Dos jugadores pueden mover o reconectarse a la vez, y en Ship Sink cada uno solo debe ver su propia flota."
+   decision="Cada sala es un Durable Object que ordena sus jugadas, guarda su estado en su propio almacenamiento SQLite y envía a cada puesto solo lo que ese jugador puede ver."
+   alternatives="Una API sin estado sobre una base de datos compartida, con bloqueos."
+   tradeoff="La API va en su propio Worker, sin URLs de preview, así que cada pull request despliega su propia copia."
+   evidence="Tras cada merge se juega una partida online end-to-end entre dos navegadores contra el entorno pre, perdiendo la conexión y reintentando." /%}
+
+{% callout type="constraint" title="Lo online necesita Cloudflare" %}
+La app mantiene Netlify como host de respaldo, pero allí no tiene `/api`: el juego local y la máquina funcionan, las salas online no.
+{% /callout %}
+
+## Calidad
+
+Tests unitarios y de propiedades (fast-check) cubren los motores y los jugadores de la máquina en Node, con un umbral de cobertura del 95 %; la API se prueba dentro del runtime de Workers. Playwright juega los flujos en escritorio y móvil en Chromium, Firefox y WebKit. ESLint mantiene los ficheros por debajo de 500 líneas y las funciones por debajo de 80, y una comprobación de tokens mantiene colores y tamaños dentro del sistema de diseño.
+
+La entrega es un pipeline en sí misma: cada pull request tiene un preview de la app con su propia copia de la API, que se borra al cerrar el pull request; cada merge va a un entorno pre donde se juega una partida online entre dos navegadores; y una versión es un pull request que, al mergearse, lleva a producción exactamente el build que pasó las pruebas y lo etiqueta.
+
+## Qué viene después
+
+- **Cuentas**: resultados verificados que acompañan al jugador entre dispositivos, sobre Neon Postgres con Hyperdrive y Drizzle, mientras el juego local sigue funcionando sin iniciar sesión.
+- **Más juegos clásicos** en la colección, sobre el mismo motor, la misma interfaz y las mismas salas online.
+- **Un chat más ordenado por dentro**: una sola política de reintentos en el servidor y una misma regla de texto en los dos extremos, anotadas en la revisión del chat.
