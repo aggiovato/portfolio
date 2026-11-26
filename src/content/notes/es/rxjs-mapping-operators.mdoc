@@ -6,6 +6,7 @@ summary: >-
   mapeo de RxJS: cada uno proyecta valores en flujos internos y añade su propia política de concurrencia.
 publicationStatus: published
 publishedAt: 2026-11-14
+updatedAt: 2026-11-26
 tags:
   - RxJS
   - Angular
@@ -80,6 +81,13 @@ Los eventos nuevos se ignoran hasta que se completa el flujo interno activo.
 Solo empieza A. B y C se descartan, no se encolan. Cuando A termina, un evento futuro puede iniciar
 una petición nueva. Úsalo para ignorar clics repetidos mientras se envía un formulario.
 
+Es una regla de la interfaz, no una garantía. El clic A inicia un pago; el clic B, mientras A sigue
+en curso, se ignora; A termina; el clic C inicia un segundo pago. Y un reintento de red, una segunda
+pestaña u otro dispositivo nunca pasan por este operador. Si una operación debe ocurrir una sola
+vez, como un cobro, el servidor tiene que hacerla idempotente: el cliente envía una clave que
+identifica la operación, y una petición repetida con la misma clave devuelve el primer resultado en
+lugar de volver a cobrar.
+
 ## Elige el comportamiento
 
 | ¿Qué debe hacer un evento nuevo? | Operador | Respuestas |
@@ -104,7 +112,7 @@ query$.pipe(
 
 {% question text="Un formulario crea un recurso con cada «Guardar». Cada clic debe crear su recurso, en orden, y ninguna petición puede cancelarse ni saltarse por la siguiente. ¿Qué operador?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=2 explanation="`concatMap` pone en cola cada creación y la empieza cuando termina la anterior: se ejecutan todas, en orden. `switchMap` podría cancelar una en curso; `exhaustMap` la descartaría." /%}
 
-{% question text="Un botón «Pagar»: un doble clic nunca debe cobrar dos veces. ¿Qué operador?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=4 explanation="`exhaustMap` ignora los clics nuevos mientras el primer pago está en curso: se descartan, no se ponen en cola, y solo se cobra una vez." /%}
+{% question text="Un botón «Pagar»: mientras un pago está en curso, más clics no deben iniciar otro. ¿Qué operador?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=4 explanation="`exhaustMap` descarta los clics mientras el primer pago está en curso. Protege el botón, no el cobro: un clic después de que termine, un reintento u otra pestaña pueden enviar una segunda petición, así que el servidor debe hacer el pago idempotente." /%}
 
 {% question text="Con los eventos del experimento (A tarda 5 s, B 3 s, C 1 s), ¿en qué orden llegan las respuestas?" options=["A, B, C", "C, B, A", "Solo C", "Solo A"] answer=2 explanation="`mergeMap` ejecuta las tres peticiones a la vez y reenvía cada respuesta según termina: C a los 3 s, B a los 4 s, A a los 5 s. No se conserva el orden de entrada." %}
 ```ts

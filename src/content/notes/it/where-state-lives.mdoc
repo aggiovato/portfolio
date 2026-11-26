@@ -5,6 +5,7 @@ summary: >-
   Quale strategia di gestione dello stato dovrebbe avere il mio frontend? Dove va ogni parte dello stato, quando conviene uno store e lo stesso modulo Angular con e senza SignalStore.
 publicationStatus: published
 publishedAt: 2026-11-18
+updatedAt: 2026-11-26
 tags:
   - Angular
   - NgRx
@@ -55,12 +56,18 @@ da sola. Ha anche un costo: più struttura, convenzioni da concordare e la tenta
 dentro tutto. Centralizzare può semplificare molto, oppure trasformare un problema locale in una
 dipendenza di tutta l'applicazione.
 
+Uno store, poi, non risolve da solo la coerenza. Dà a ogni aggiornamento un responsabile e un unico
+posto in cui avvenire, ma dentro lo store una risposta lenta può ancora sovrascriverne una più
+recente, e una richiesta può ancora partire due volte. Per questo servono una politica di
+concorrenza (annullare, mettere in coda o ignorare ciò che arriva mentre è occupato), l'invalidazione
+dei dati diventati obsoleti e regole fatte rispettare dal server.
+
 Se devo scegliere un criterio per cercare più struttura, non parto contando i componenti: do più
 peso a questi segnali:
 
 - ogni modifica obbliga ad aggiornare a mano diversi componenti,
 - le regole di aggiornamento sono sparse in varie schermate,
-- le risposte possono arrivare fuori ordine, o devi ritentare o annullare,
+- le risposte possono arrivare fuori ordine, o ti servono retry e undo,
 - è difficile spiegare come l'applicazione è arrivata a un certo stato.
 
 La domanda non è quanti componenti leggono un dato, ma **quanti possono modificarlo**, con quali regole
@@ -177,16 +184,20 @@ submit() {
 ```
 
 Ora il modulo si limita a chiamare il metodo della sua azione nello store: tutta la logica della
-richiesta e della gestione del dato esce dalle sue competenze. `exhaustMap` ignora un secondo clic
-mentre una creazione è in corso, e il template non cambia. Il codice non diminuisce: il guadagno è
+richiesta e della gestione del dato esce dalle sue competenze, e il template non cambia.
+`exhaustMap` ignora un secondo clic mentre una creazione è in corso. È una politica, non uno scudo
+contro i duplicati: anche una seconda prenotazione che l'utente voleva davvero creare in quel
+momento viene scartata, e quando la prima finisce il clic successivo crea di nuovo. Se ogni clic
+deve contare, `concatMap` li mette in coda; se un duplicato non deve mai arrivare al database, deve
+riconoscerlo il server. Il codice non diminuisce: il guadagno è
 che l'operazione e le sue regole hanno **un responsabile esplicito**, e questo ripaga quando più
 componenti o regole dipendono da essa.
 
 ## Dove vive lo store
 
 Al componente basta `inject(BookingsStore)`, ma da dove arriva quell'istanza? Scegliere uno store
-non decide dove vive. Tre domande: chi ne ha bisogno, quando dovrebbe ripartire da zero e quando si
-carica il suo codice. In Angular, dove lo fornisci risponde a tutte e tre:
+non decide dove vive, e qui si nascondono due decisioni diverse. Una è lo **scope**: chi condivide
+un'istanza e quando viene distrutta. In Angular, dove lo fornisci risponde a questo:
 
 ```ts
 @Component({
@@ -199,8 +210,14 @@ export class BookingsPageComponent {}
 
 Fornito in un componente, lo store nasce e muore con lui, e i suoi figli fanno `inject()` di quella
 stessa istanza. Fornito in ogni editor, ogni editor ha il proprio. Una feature nello store globale
-di NgRx, invece, vive quanto l'applicazione. E se lo fornisci in una rotta a caricamento differito,
-il suo codice arriva con quella rotta e non pesa sul primo caricamento.
+di NgRx, invece, vive quanto l'applicazione.
+
+L'altra decisione è il **caricamento**: quando si scarica il codice dello store. Dipende da come si
+importa il codice, non da `providers`. Il suo codice arriva più tardi solo se tutto ciò che lo usa
+viene caricato in lazy loading, per esempio dietro una rotta con `loadComponent` o
+`loadChildren`. Fornirlo in un componente decide quanto vive l'istanza; non rende lazy il suo
+codice. Le due decisioni vanno spesso insieme, in una rotta lazy che fornisce anche lo store,
+ma rispondono a domande diverse.
 
 La prova più chiara: se apro due editor insieme, voglio che condividano la bozza o che ognuno abbia
 la propria?
@@ -224,6 +241,8 @@ posto evidente*.
 {% question text="Per decidere se un dato ha bisogno di più struttura, cosa pesa di più secondo la nota?" options=["Quanti componenti lo leggono", "Quanti possono modificarlo, con quali regole e con quali conseguenze", "Quante schermate ha l'applicazione"] answer=2 explanation="La nota si preoccupa meno di quanti componenti leggono un dato e più di quanti possono modificarlo, con quali regole e con quali conseguenze." /%}
 
 {% question text="Sposti la creazione delle prenotazioni dal componente a un SignalStore. Qual è il vero vantaggio?" options=["C'è meno codice in totale", "Il modulo non ha più stato", "Le sue responsabilità e regole stanno in un posto esplicito"] answer=3 explanation="Lo stato non sparisce e il codice non diminuisce: l'operazione e il suo stato hanno un responsabile esplicito. Il modulo resta nel componente." /%}
+
+{% question text="Aggiungi `providers: [BookingsStore]` a un componente. Che cosa decide?" options=["Quando si scarica il codice dello store", "Quali componenti condividono un'istanza e quando viene distrutta", "Che le risposte non possano più arrivare fuori ordine"] answer=2 explanation="`providers` stabilisce lo scope: il componente e i suoi figli condividono un'istanza, distrutta insieme al componente. Il lazy loading dipende da come si importa il codice, e ordinare le risposte richiede una politica di concorrenza." /%}
 
 {% question text="Apri due editor di prenotazioni insieme. Quante istanze di `DraftStore` ci sono?" options=["Una, condivisa dai due editor", "Due: ogni editor fornisce la propria", "Una per tutta l'applicazione"] answer=2 explanation="`providers: [DraftStore]` nell'editor crea un'istanza con ogni editor, quindi ognuno conserva la propria bozza." %}
 ```ts

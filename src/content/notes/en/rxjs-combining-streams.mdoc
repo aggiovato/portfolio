@@ -6,6 +6,7 @@ summary: >-
   zip and forkJoin: only the rule for when values from different sources become one result changes.
 publicationStatus: published
 publishedAt: 2026-11-15
+updatedAt: 2026-11-26
 tags:
   - RxJS
   - Angular
@@ -68,6 +69,19 @@ A1 is skipped: B has not emitted yet. It is not queued. At 4s, A2 uses B1. B2 at
 output. Here, the output completes with A at 6s. Use it for a submit event that reads the latest
 form state.
 
+Careful with forms: `valueChanges` does not emit the current value when you subscribe. If the user
+saves before changing anything, `form.valueChanges` has no value yet, and the click is skipped just
+like A1. Start the stream with the form's current value:
+
+```ts
+const form$ = this.form.valueChanges.pipe(startWith(this.form.value));
+
+submit$.pipe(withLatestFrom(form$)).subscribe(([, value]) => save(value));
+```
+
+If you only need the value at the moment of the click, you can also read it then:
+`submit$.pipe(map(() => this.form.getRawValue()))`, which includes disabled controls.
+
 ## {% highlight %}zip{% /highlight %}: first with first
 
 Wait until every input has a value for the next pair. Consume each value once, in input order.
@@ -111,7 +125,7 @@ These tools combine streams; they do not create threads. An unhandled error in a
 combined output.
 
 {% quiz %}
-{% question text="Saving must use the latest form state, but a change in the form alone must not save anything. Which operator replaces `???`?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=2 explanation="With `withLatestFrom`, only the source (`submit$`) triggers an output; `form$` just updates the stored value." %}
+{% question text="Saving must use the latest form state, but a change in the form alone must not save anything. Which operator replaces `???`?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=2 explanation="With `withLatestFrom`, only the source (`submit$`) triggers an output; `form$` just updates the stored value. It needs a value before the first click, so start it with the form's current value." %}
 ```ts
 submit$.pipe(???(form$)).subscribe(([, form]) => save(form));
 ```
