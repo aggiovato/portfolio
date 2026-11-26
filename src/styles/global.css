@@ -91,6 +91,55 @@ samp {
   color: var(--color-text);
 }
 
+/*
+ * Scrollbars in the site's palette instead of the browser's generic dark one: a violet-grey thumb
+ * (the controls' border, ≥ 3.6:1 on every surface, WCAG 1.4.11) on the surface it scrolls. No
+ * lavender: it is always visible, and lavender is kept for actions and the current place. The page
+ * keeps the default width, easier to grab; inner scroll areas (code, tables, the mobile menu) are
+ * thin and let their own surface show through.
+ */
+html {
+  scrollbar-color: var(--color-control-border) var(--color-bg);
+}
+
+:where(body *) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-control-border) transparent;
+}
+
+/* Safari reads only these pseudo-elements; Chromium ignores them once scrollbar-color is set. */
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid var(--color-bg);
+    border-radius: 999px;
+    background: var(--color-control-border);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-text-muted);
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  :where(body *)::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  :where(body *)::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  :where(body *)::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+}
+
 /* ---------- Utilities ---------- */
 
 .container {

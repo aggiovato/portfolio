@@ -23,6 +23,8 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 - Italian notes use the English terms Italian developers say every day: stream, cold and hot,
   marble diagram, retry, scope, lazy loading, union type, optimistic locking. «Diagramma di flusso»,
   which reads as a flowchart in Italian, is gone.
+- Scrollbars take the site's palette: a violet-grey thumb on the night background, thin inside code
+  blocks, tables and the mobile menu.
 
 ---
 
