@@ -20,6 +20,8 @@ const COVERS = [
   { note: 'rxjs-mapping-operators', diagram: 'rxjs-mapping-operators/cover' },
   { note: 'rxjs-combining-streams', diagram: 'rxjs-combining-streams/cover' },
   { note: 'where-state-lives', svg: 'where-state-lives/cover.svg' },
+  { note: 'component-tree-nightmare', svg: 'component-tree-nightmare/cover.svg' },
+  { note: 'status-state-machine', svg: 'status-state-machine/cover.svg' },
 ];
 const W = 1600;
 const H = 840;

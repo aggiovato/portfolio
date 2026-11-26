@@ -1,0 +1,200 @@
+---
+slug: component-tree-nightmare
+title: When your component tree becomes a nightmare
+summary: >-
+  Prop drilling, component boundaries and the hidden cost of abstraction. A booking screen grows
+  until its tree starts dictating where data travels, and what to try before reaching for a store.
+publicationStatus: draft
+tags:
+  - React
+  - Angular
+  - Architecture
+cover:
+  src: ../../../assets/notes/component-tree-nightmare/cover.webp
+  alt: 'A component tree: BookingPage at the top, then BookingLayout and BookingPanel with dashed outlines, then BookingForm. Beside each level the same three props, booking, canEdit and onSave, travel down: solid at the page, dashed through the layout and the panel, and solid again at the form that uses them.'
+---
+
+Every frontend I have worked on reached the same point. A screen starts clean, a few requirements
+later the same five props travel through three components that never read them, and someone says
+"we need Context" or "this should go in a store". Sometimes they are right. Often the tree is
+telling us something else: that its boundaries no longer match the responsibilities inside it.
+
+So the question of this note is not *how do I avoid passing props*, but: **does my component tree
+reflect clear responsibilities, or is it dictating the path my data has to travel?** A deep tree is
+not a problem by itself. It becomes one when its boundaries force data through components that do
+not need it, mix responsibilities or hide dependencies.
+
+{% callout type="note" title="How this note relates to the store one" %}
+[Does my frontend need a store?](/notes/where-state-lives/) asks *where each piece of state
+lives*. This one asks *how the tree and its dependencies are shaped*. They meet, but the answer here
+is often not a new place for state.
+{% /callout %}
+
+## Everything starts clean
+
+A booking screen: a form to edit the booking and a summary next to it. The page loads the booking
+and saves it; the form edits it; the summary shows it.
+
+```tsx
+function BookingPage() {
+  const { booking, save, saving } = useBooking(id);
+
+  return (
+    <BookingLayout>
+      <BookingForm booking={booking} onSave={save} saving={saving} />
+      <BookingSummary booking={booking} />
+    </BookingLayout>
+  );
+}
+```
+
+Props here are explicit, cheap and easy to follow: you can read in one place who gives what to
+whom. Passing props is not the problem, and nothing in this note argues against it.
+
+## The {% highlight %}drilling{% /highlight %} begins
+
+Then the requirements arrive. Only some roles can edit. Validation errors come back from the server.
+The form shows its own saving state. The design asks for a panel with a title and actions around the
+form, and the layout grows a second column. Someone wraps the form in `BookingPanel` and moves both
+inside `BookingLayout`, and now the page cannot reach the form directly:
+
+```tsx
+<BookingLayout booking={booking} canEdit={canEdit} saving={saving} errors={errors} onSave={save} />
+
+function BookingLayout({ booking, canEdit, saving, errors, onSave }: LayoutProps) {
+  return (
+    <div className="layout">
+      <BookingPanel booking={booking} canEdit={canEdit} saving={saving} errors={errors} onSave={onSave} />
+      <BookingSummary booking={booking} />
+    </div>
+  );
+}
+```
+
+That is **prop drilling**: passing props through components that do not use them, only to deliver
+them to a descendant. `BookingLayout` and `BookingPanel` now know about bookings, permissions and
+errors, although all they do is arrange things on the screen.
+
+{% diagram src="component-tree-nightmare/drilling.en.svg" alt="The booking tree: BookingPage owns the data; BookingLayout and BookingPanel, outlined with dashes, each receive five props and use none; BookingForm uses all five; BookingSummary uses the booking. On the right, the five props booking, canEdit, saving, errors and onSave are forwarded twice before they are used." caption="Two components in the middle only forward what the form needs." /%}
+
+The cost is not the typing. It is that a change in the form's needs (a new prop, a renamed callback)
+now touches three files, the intermediate components cannot be reused without dragging booking
+concerns along, and a reader has to walk the whole chain to know where `errors` comes from.
+
+## The component {% highlight %}nightmare{% /highlight %}
+
+"Component nightmare" is not a formal anti-pattern; it is the name I give to the moment a tree stops
+helping. It rarely shows up as one big mistake. It is a mix of symptoms:
+
+- components whose props are mostly forwarded, not used;
+- wrappers so generic they take a dozen flags (`showHeader`, `compact`, `withActions`…) to cover
+  every screen that uses them;
+- logic spread across levels: validation in the form, permissions in the panel, saving in the page;
+- the opposite as well: the screen fragmented into so many tiny components that following one
+  interaction means opening ten files.
+
+More components do not make a worse architecture, and fewer do not make a better one. What matters
+is whether each boundary hides something that belongs together.
+
+## {% highlight %}Refactor{% /highlight %} before adding state
+
+Before choosing a tool, ask two questions about each piece of data: **which component should know
+it**, and **who should own the decision about it**. In the booking screen, the layout and the panel
+should know nothing about bookings. They frame content. So let them take content:
+
+```tsx
+function BookingPage() {
+  const { booking, save, saving, errors } = useBooking(id);
+  const canEdit = useCan('booking:edit');
+
+  return (
+    <BookingLayout aside={<BookingSummary booking={booking} />}>
+      <BookingPanel title="Edit booking">
+        <BookingForm booking={booking} canEdit={canEdit} saving={saving} errors={errors} onSave={save} />
+      </BookingPanel>
+    </BookingLayout>
+  );
+}
+```
+
+`BookingLayout` and `BookingPanel` receive `children` (and a slot for the aside) instead of booking
+props. The form gets its props where it is written, in the page that owns the data. The tree is just
+as deep as before; what changed is who depends on what.
+
+{% diagram src="component-tree-nightmare/composed.en.svg" alt="The same tree after composing: BookingLayout and BookingPanel receive children and no booking props; BookingForm, highlighted, gets its props directly from BookingPage, shown by a dashed arrow from the page to the form." caption="Same depth, different dependencies: the page hands the form its props directly." /%}
+
+Composition is one of several moves:
+
+- **Compose**: pass elements as children or slots, so intermediate layers stop carrying data.
+- **Co-locate**: move state down to the component that is its only user. A `saving` flag that only
+  the form shows can live in the form.
+- **Split by domain, not by size**: extract a component when it hides a responsibility (the
+  permissions of the form), not because a file got long.
+- **Lift deliberately**: when two siblings need the same state, first decide who owns it, then lift
+  it to their closest common parent. That is still explicit.
+
+Composition does not fix every hierarchy. If the form sits five routes away from the data, or many
+unrelated components need the same value, there is a real cross-cutting dependency, and that is the
+next section.
+
+## Context, DI or store?
+
+These are different mechanisms, not stronger versions of the same thing:
+
+| Mechanism | What it gives you | What it costs |
+| --- | --- | --- |
+| Props | Explicit, typed, local dependencies | Boilerplate when the path is long |
+| Composition (children, slots) | The owner passes data where it is used | Parents decide more of the layout |
+| React Context | A value available to any descendant | Hidden dependency; every consumer updates when the value changes |
+| Angular DI (a service) | An instance resolved by the injector tree | Hidden dependency; scope depends on where it is provided |
+| A store | One owner for shared, changing state and its rules | Structure, conventions and a dependency on the store |
+
+React Context and Angular's dependency injection are not equivalent either. Context passes a
+*value* down the component tree. Angular's injector resolves *instances* (usually services) through
+a hierarchy of element and environment injectors, and where you provide them decides who shares
+one. In Angular the same booking screen would use content projection (`<ng-content>`) for the
+composition step, inputs and outputs for the explicit path, and a service provided on the page for
+a dependency that many descendants really need.
+
+A good reason for Context or DI: a value many components read and few change, such as the current
+user, the theme or the locale. A good reason for a store: shared state with rules about how it
+changes. A weak reason for any of them: "the props were annoying".
+
+## The hidden trade-offs
+
+Context, DI and stores remove lines from the tree diagram, but the dependency does not disappear.
+`BookingForm` still needs the booking; now it reaches for it instead of receiving it. That has
+consequences:
+
+- **Reading the code**: a component's props show what it needs; an `inject()` or `useContext()`
+  inside it is easier to miss.
+- **Testing**: props are set in the test; a context or a provider has to be set up around it.
+- **Reuse**: a component that reads a specific context only works under that provider.
+- **Scope**: the value now depends on where the provider sits, which is one more thing to get right.
+
+Sometimes that trade is worth it. The point is to make it on purpose.
+
+## In short
+
+When props start travelling through components that do not use them, the tree is asking a question
+about boundaries before it asks for a tool. I look first at who should know each piece of data and
+who should own it, and try composition, co-location or lifting before Context, DI or a store. When
+a dependency really is cross-cutting, I reach for those, knowing the dependency is still there, only
+less visible.
+
+Did you solve prop drilling, or did you just hide your dependencies?
+
+{% quiz %}
+{% question text="A tree is six levels deep. Every component uses the props it receives. What does the note suggest?" options=["Flatten it: depth is the problem", "Nothing yet: depth alone is not a defect", "Move the data to a store"] answer=2 explanation="A deep tree is not a problem by itself. The warning sign is components that only forward props, mix responsibilities or hide dependencies." /%}
+
+{% question text="`BookingLayout` receives five booking props and uses none of them. What is the first move to try?" options=["Wrap the page in a Context provider", "Make the layout more generic, with more flags", "Pass the form in as children"] answer=3 explanation="The layout only frames content. Composing (passing elements as children or slots) lets the page give the form its props directly, and keeps the dependency explicit." /%}
+
+{% question text="Two sibling components need the same selection, and only they use it. What comes first?" options=["Decide who owns the selection", "Create a global store for it", "Duplicate it in both siblings"] answer=1 explanation="Ownership first. Often the answer is to lift it to their closest common parent, which keeps it explicit; a store is for shared state with its own rules." /%}
+
+{% question text="Many components across the app read the current locale, and it almost never changes. Which tool fits best?" options=["A store with actions and effects", "Passing it as a prop through every level", "Context, or a service through Angular DI"] answer=3 explanation="A read-mostly value needed by many components is a good case for Context or DI. A store pays off when the state changes under rules; drilling it everywhere is the problem we started with." /%}
+{% /quiz %}
+
+Sources: React's [Passing Props to a Component](https://react.dev/learn/passing-props-to-a-component)
+and [Passing Data Deeply with Context](https://react.dev/learn/passing-data-deeply-with-context);
+Angular's [content projection](https://angular.dev/guide/components/content-projection) and
+[hierarchical dependency injection](https://angular.dev/guide/di/hierarchical-dependency-injection).
