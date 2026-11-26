@@ -12,6 +12,10 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+---
+
+## [2.3.0] — 2026-11-26
+
 ### Added
 
 - Note «Your status is a state machine»: a booking's `status` grows rules until its transitions
