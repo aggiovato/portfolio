@@ -12,6 +12,12 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- Note «Your status is a state machine»: a booking's `status` grows rules until its transitions
+  need to be as explicit as its states, with the lifecycle drawn, a transition table and function,
+  races between two operators and how to test it; in English, Spanish and Italian.
+
 ### Changed
 
 - Notes reviewed: «switchMap, concatMap, mergeMap or exhaustMap?» no longer suggests `exhaustMap`

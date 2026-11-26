@@ -16,6 +16,7 @@ const PAGES = [
   '/notes/rxjs-fundamentals/',
   '/notes/rxjs-mapping-operators/',
   '/es/notes/where-state-lives/',
+  '/it/notes/status-state-machine/',
   '/newsletter/pending/',
 ];
 
