@@ -1,0 +1,302 @@
+---
+slug: status-state-machine
+title: Tu status es una máquina de estados
+summary: >-
+  De strings de estado a transiciones de negocio explícitas. El status de una reserva empieza como
+  una etiqueta y acaba codificando quién puede cambiar qué, cuándo y qué pasa si dos lo intentan a la vez.
+publicationStatus: published
+publishedAt: 2026-11-27
+tags:
+  - TypeScript
+  - Arquitectura
+  - Modelado de dominio
+cover:
+  src: ../../../assets/notes/status-state-machine/cover.webp
+  alt: 'Un diagrama de estados: pending pasa a assigned con ASSIGN o a cancelled con CANCEL; assigned pasa a completed con COMPLETE o a rejected con REJECT; desde rejected, REASSIGN vuelve a assigned y CANCEL lleva a cancelled. Completed y cancelled tienen doble borde por ser estados finales.'
+---
+
+Si hablamos de aplicaciones de negocio, tarde o temprano acabamos chocando con el famoso campo
+`status`. Pongamos una reserva: su estado es la forma más rápida de saber en qué punto de su vida
+está. Lo normal es que empiece en `pending`, pase a `assigned` y termine en `completed`, aunque a
+veces el proveedor la rechaza (`rejected`) y toca buscar otro, o directamente se cancela
+(`cancelled`). Al principio no es más que una etiqueta que la interfaz pinta en un chip. Después el
+negocio añade una regla sobre cuándo se puede pasar de un estado a otro, luego otra, y otra más, cada
+una en un sitio distinto. Y un día una reserva que ya estaba completada aparece como rechazada, y
+nadie sabe qué pantalla lo hizo.
+
+Ojo, que el título exagera un poco a propósito. No todo campo de estado necesita una librería de
+máquinas de estados, ni mucho menos un autómata complicado. Pero en cuanto ese `status` tiene reglas
+sobre cómo puede cambiar, esas reglas ya son parte del negocio, y ahí es donde quiero llegar: **las
+transiciones merecen ser tan explícitas como los propios estados**.
+
+## Empieza con un {% highlight %}string{% /highlight %}
+
+Volvamos al principio. La primera versión de nuestra reserva suele ser algo así:
+
+```ts
+interface Booking {
+  id: string;
+  status: 'pending' | 'assigned' | 'rejected' | 'completed' | 'cancelled';
+}
+
+// En cualquier parte de la aplicación:
+booking.status = 'completed';
+```
+
+Y durante un tiempo va de maravilla: el tipo unión nos protege de las erratas, el chip tiene sus
+cinco colores y todos contentos. Lo que este código no cuenta es *qué cambios de estado están
+permitidos*. ¿Tiene sentido que una reserva ya completada vuelva a `pending`? ¿O que una que el
+proveedor nos acaba de rechazar pase directamente a completada? No mucho, ¿verdad? Pues ahí está el
+riesgo del string: cualquiera que tenga una reserva en la mano puede ponerle el estado que quiera, ya
+sea una pantalla de administración, un proceso en segundo plano o ese endpoint que alguien escribió un
+viernes por la tarde para salir del paso.
+
+## La primera transición inválida
+
+Y entonces llegan las reglas, como siempre, de una en una y sin avisar:
+
+- Solo se puede asignar a un proveedor que esté libre.
+- Solo se completa lo que está asignado (lo que se completa es un servicio que alguien tenía).
+- Si el proveedor la rechaza, buscamos otro o la cancelamos, y si ya van tres rechazos, toca
+  cancelarla.
+- Lo completado o cancelado ya no se toca, y si cancelamos hay que avisar al cliente.
+
+Si te fijas, ninguna habla de lo que *es* un estado. Todas hablan de cómo se pasa de uno a otro, con
+qué condiciones y qué pasa después. Y como nuestro string no tiene dónde guardar nada de eso, las
+reglas acaban repartidas entre botones, endpoints y `if` sueltos, cada uno con su propia versión de la
+historia.
+
+## Los estados no bastan
+
+Para hablar de esto sin liarnos viene bien ponerle nombre a cada pieza:
+
+- **Estado**: dónde está ahora la reserva (`pending`).
+- **Evento**: algo que pide un cambio (`ASSIGN`, con un proveedor).
+- **Transición**: el paso permitido de un estado a otro cuando llega un evento.
+- **Guard**: la condición que necesita esa transición (que el proveedor esté libre).
+- **Acción**: lo que pasa como consecuencia (avisar al cliente).
+- **Invariante**: lo que tiene que ser cierto siempre (una reserva completada tiene proveedor).
+
+Con estas piezas ya podemos dibujar la vida de nuestra reserva:
+
+{% diagram src="status-state-machine/machine.es.svg" alt="Diagrama de estados de una reserva: empieza en Pending. ASSIGN, si el proveedor está libre, lleva a Assigned; CANCEL lleva a Cancelled. Desde Assigned, COMPLETE lleva a Completed y REJECT, cuando el proveedor la rechaza, a Rejected. Desde Rejected, REASSIGN, si el proveedor está libre y hay menos de 3 intentos, vuelve a Assigned, y CANCEL lleva a Cancelled. Completed y Cancelled son estados finales." caption="Seis transiciones, cada una con su evento y, si lo tiene, su guard. Completed y Cancelled son finales." /%}
+
+## {% highlight %}Transiciones{% /highlight %} explícitas
+
+Y aquí va el mismo dibujo en forma de tabla. Guárdala, que más adelante la vamos a reutilizar como
+plan de pruebas:
+
+| Desde | Evento | Guard | Hacia |
+| --- | --- | --- | --- |
+| Pending | `ASSIGN` | El proveedor está libre | Assigned |
+| Pending | `CANCEL` | — | Cancelled |
+| Assigned | `COMPLETE` | — | Completed |
+| Assigned | `REJECT` | — | Rejected |
+| Rejected | `REASSIGN` | El proveedor está libre y hay menos de 3 intentos | Assigned |
+| Rejected | `CANCEL` | — | Cancelled |
+| Completed, Cancelled | cualquiera | — | Se rechaza: estado final |
+
+En el código, cambiar el estado deja de ser una simple asignación y pasa a ser una función: le pasas
+el estado actual y un evento, y te devuelve el siguiente estado o te dice por qué no se puede.
+
+```ts
+type BookingState =
+  | { status: 'pending' }
+  | { status: 'assigned'; providerId: string; attempts: number }
+  | { status: 'rejected'; attempts: number };
+// ...completed y cancelled
+
+type BookingEvent =
+  | { type: 'ASSIGN'; providerId: string }
+  | { type: 'REASSIGN'; providerId: string };
+// ...REJECT, COMPLETE y CANCEL
+
+const MAX_ATTEMPTS = 3;
+
+// ok(state) o refuse(motivo): el siguiente estado, o por qué se rechaza
+function transition(state: BookingState, event: BookingEvent, ctx: Context): Result {
+  switch (state.status) {
+    case 'pending':
+      if (event.type === 'ASSIGN') {
+        if (!ctx.isFree(event.providerId)) return refuse('provider-busy');
+        return ok({ status: 'assigned', providerId: event.providerId, attempts: 1 });
+      }
+      // CANCEL → cancelled
+      break;
+    case 'assigned':
+      // COMPLETE → completed, REJECT → rejected (sin guards)
+      break;
+    case 'rejected':
+      if (event.type === 'REASSIGN') {
+        if (state.attempts >= MAX_ATTEMPTS) return refuse('too-many-attempts');
+        if (!ctx.isFree(event.providerId)) return refuse('provider-busy');
+        return ok({ status: 'assigned', providerId: event.providerId, attempts: state.attempts + 1 });
+      }
+      // CANCEL → cancelled
+      break;
+  }
+  return refuse(`${event.type} is not allowed from ${state.status}`);
+}
+```
+
+Fíjate en que los estados son objetos (`{ status: 'assigned', providerId, … }`) y no simples
+strings. Esa es la gracia de la unión discriminada: cada estado lleva consigo los datos que solo
+tienen sentido en él, así que una reserva asignada siempre tiene proveedor y una rechazada siempre
+lleva la cuenta de sus intentos. Pero ojo, los tipos no son las reglas. No saben si el proveedor está
+libre, ni quién puede rechazar, ni qué pasa si llegan dos peticiones a la vez. Eso le toca a la
+función, y al resto de cosas que vamos a ver en esta nota.
+
+## Dónde vive la {% highlight %}máquina{% /highlight %}
+
+La interfaz también tiene que conocer la máquina, para enseñar solo los botones que tienen sentido o
+explicar por qué «Completar» está deshabilitado. Pero que no nos engañe: una comprobación en el
+frontend mejora la experiencia, no protege nada. Otra pestaña, un cliente antiguo o una llamada
+directa a la API se la saltan sin enterarse.
+
+Quien manda de verdad es el servidor. La misma `transition` (o su equivalente en el backend) se
+ejecuta donde se guarda el cambio, y la del frontend es solo un adelanto. Y ya que estamos, un
+consejo que ahorra disgustos: no mezcles estados de negocio con estados de la petición. `rejected`
+es algo que le pasa a la reserva; `saving` o `request-failed` es algo que le pasa a una petición de
+una pantalla. Si acaban en el mismo campo, un día un error de red se convierte en una decisión de
+negocio.
+
+## Cuando todo llega a la vez
+
+Hasta aquí todo parece bastante ordenado, una función decide y el servidor manda. Pero en la vida
+real las peticiones no hacen cola educadamente, llegan a la vez, y ahí la historia se complica un
+poco.
+
+Imagina esta escena, que seguro te suena. Dos operadores abren la misma reserva, que está
+`pending`. La operadora A la asigna a un proveedor y el operador B, que no ha visto nada, la cancela
+un segundo después. Los dos han hecho lo correcto con lo que tenían en pantalla, y las dos
+transiciones son válidas desde `pending`. Veamos qué pasa si el servidor se limita a leer, comprobar y
+escribir:
+
+| Momento | Operadora A | Operador B |
+| --- | --- | --- |
+| 0 s | Lee la reserva: `pending` | |
+| 1 s | | Lee la reserva: `pending` |
+| 2 s | `ASSIGN` es válido desde `pending`: escribe `assigned` | |
+| 3 s | | `CANCEL` es válido desde `pending`: escribe `cancelled` |
+
+Resultado: gana el último que escribe. La reserva queda cancelada, pero el proveedor ya tiene el
+aviso y va de camino. Y lo curioso es que nadie se ha saltado ninguna regla: B comprobó un estado que
+ya no existía cuando fue a escribir. Entre leer y escribir pasó un rato, y en ese hueco otro cambió
+la reserva.
+
+La solución es no dejar ese hueco, que comprobar y escribir sea un solo paso y que pase donde vive el
+dato. Lo más habitual es pedirle a la base de datos que solo actualice si la reserva sigue tal cual
+la leímos:
+
+```sql
+UPDATE bookings
+SET status = 'assigned', provider_id = $2, version = version + 1
+WHERE id = $1 AND status = 'pending' AND version = $3;
+-- 0 rows updated: someone changed it first. Reload and decide again.
+```
+
+Leámoslo con calma. El `WHERE` repite la condición de la máquina (`status = 'pending'`) y además
+mira una versión, un número que sube con cada cambio. Si alguien tocó la reserva entre que la leímos
+y la escribimos, la versión ya no cuadra, el `UPDATE` no actualiza nada y nos enteramos. En la
+escena de antes, B recibiría un «0 filas actualizadas», recargaría, vería que ya está `assigned` y
+haría otra cosa, como hablar con su compañera en vez de cancelar a ciegas.
+
+A esto se le llama bloqueo optimista: no bloqueamos nada mientras el usuario piensa, solo
+comprobamos al final si alguien se nos adelantó. La otra opción es una transacción que bloquee la
+fila mientras se decide, y cuál te conviene depende del sistema. Pero la idea de fondo es la misma:
+la máquina de estados dice qué cambios son legales, no impide que dos cambios legales choquen. Eso
+depende de cómo guardamos.
+
+{% callout type="note" title="¿Y un bloqueo desde el frontend?" %}
+Y si ya nos ponemos creativos, podemos ir un paso más allá en la interfaz y montar un WebSocket que
+bloquee la reserva mientras alguien la tiene abierta, para que solo una persona pueda editarla y las
+demás vean algo tipo «Ana está editando esta reserva». Para la experiencia es buena idea, porque los
+dos operadores ni llegarían a chocar. Pero es un complemento, no un sustituto. Una pestaña que se
+cierra sin avisar o una conexión que se cae dejan el bloqueo colgado (hay que hacer que caduque, con
+un latido cada pocos segundos), y un proceso en segundo plano o una llamada directa a la API ni se
+enteran de que existe. Así que aunque lo montemos, el `UPDATE` sigue haciendo falta: el WebSocket
+evita la mayoría de los choques, el servidor los evita todos.
+{% /callout %}
+
+Y luego están los efectos, como avisar al cliente por email cuando cancelamos, que traen su propio
+drama: nuestra base de datos y el proveedor de email no se hablan entre sí, y cualquiera de los dos
+puede fallar después de que el otro ya haya hecho su parte. La idea corta es apuntar la intención junto
+al cambio (el patrón *outbox*) y hacer que el aviso se pueda repetir sin liarla, la misma idempotencia
+que pedíamos para los pagos en la [nota de los operadores de mapeo](/es/notes/rxjs-mapping-operators/).
+Pero eso da para una nota entera, así que lo dejamos para otro día.
+
+## {% highlight %}Prueba{% /highlight %} las transiciones
+
+¿Te acuerdas de la tabla? Pues aquí la tenemos convertida en tests. Cada fila es un caso, y cada fila
+que falta, también:
+
+```ts
+// Cada fila de la tabla (desde + evento → hacia) se acepta
+it.each([
+  ['pending', 'ASSIGN', 'assigned'],
+  ['pending', 'CANCEL', 'cancelled'],
+  ['assigned', 'COMPLETE', 'completed'],
+  ['assigned', 'REJECT', 'rejected'],
+  ['rejected', 'REASSIGN', 'assigned'],
+  ['rejected', 'CANCEL', 'cancelled'],
+])('%s + %s → %s', (from, event, to) => {
+  expect(transition(state(from), ev(event), ctx)).toMatchObject({ ok: true, state: { status: to } });
+});
+
+// Los estados finales rechazan cualquier evento
+it.each(['completed', 'cancelled'])('%s is final', (from) => {
+  for (const event of ['ASSIGN', 'REJECT', 'REASSIGN', 'COMPLETE', 'CANCEL']) {
+    expect(transition(state(from), ev(event), ctx).ok).toBe(false);
+  }
+});
+
+// El guard de intentos: tras tres rechazos, REASSIGN se rechaza y solo queda CANCEL
+it('a third rejection leaves only cancelling', () => {
+  const tired = { status: 'rejected', attempts: 3 } as const;
+  expect(transition(tired, ev('REASSIGN'), ctx)).toMatchObject({ ok: false, error: 'too-many-attempts' });
+  expect(transition(tired, ev('CANCEL'), ctx).ok).toBe(true);
+});
+```
+
+Los casos negativos importan tanto como los positivos, porque son justo las reglas que se rompen sin
+querer (fíjate en el último test, que comprueba el límite de intentos). Y cuando los estados empiezan
+a ser muchos, los tests basados en propiedades echan una mano: generas secuencias de eventos al azar y
+compruebas que los invariantes aguantan después de cada una.
+
+## En resumen
+
+«¿Cuántas veces se puede rechazar una reserva antes de cancelarla?» suena a pregunta de producto, y
+lo es. Pero en cuanto alguien contesta «tres», esa respuesta pasa a ser la condición de una flecha
+del dibujo, un guard en la función, un test y, si hace falta, una condición en un `UPDATE`. Así es
+como nuestro campo `status` se convirtió en una máquina de estados: el día que el negocio decidió
+cómo podía cambiar. Y lo que a mí me funciona es apuntar esas decisiones donde el software pueda
+hacerlas cumplir, y no en la memoria de quien estuvo en aquella reunión: las transiciones con sus
+guards, una función que las aplica, el servidor como autoridad y tests que cubren también lo que
+tiene que rechazarse.
+
+Y te confieso algo: los estados de este ejemplo no me salieron a la primera, al menos no unos que
+encajaran con un caso real. Tuve que darle un par de vueltas, preguntándome qué pasa de verdad en el
+negocio cuando un proveedor rechaza una reserva. Ese ir y venir no es una pérdida de tiempo, es
+precisamente el trabajo: cada vuelta pule las reglas, y con ellas los estados y las transiciones. Al
+final, un diagrama que el negocio puede leer y discutir vale más que cualquier librería.
+
+{% callout type="constraint" title="¿Qué puede salir mal?" %}
+Una máquina de estados no sustituye la persistencia, el control de concurrencia ni la idempotencia.
+Un guard en la interfaz no es un guard. Y para empezar no hace falta XState: define primero el
+modelo, y mete una herramienta así solo si lo deja más claro que una función y una tabla.
+{% /callout %}
+
+{% quiz %}
+{% question text="La interfaz oculta el botón «Cancelar» en las reservas completadas. ¿Está protegida una reserva completada de ser cancelada?" options=["Sí: sin botón, nadie puede cancelarla", "No: la API la acepta si el servidor no la frena", "Sí, si además el botón está deshabilitado"] answer=2 explanation="Un guard en el frontend mejora la experiencia, pero otra pestaña o una llamada directa a la API se lo saltan. Quien tiene que rechazar la transición es el servidor." /%}
+
+{% question text="¿Cuál de estos es un estado de negocio, y no un estado de la petición?" options=["`rejected`", "`saving`", "`request-failed`"] answer=1 explanation="`rejected` es algo que le pasa a la reserva. `saving` y `request-failed` le pasan a una petición de una pantalla; si se mezclan, un error de red acaba pareciendo una decisión de negocio." /%}
+
+{% question text="Dos operadores leen la misma reserva pendiente. Uno la asigna y el otro la cancela, y las dos transiciones son válidas desde `pending`. ¿Qué evita un estado final erróneo?" options=["Comprobar en el frontend que sigue en `pending`", "La propia máquina de estados, que ya lo prohíbe", "Un `UPDATE` que solo escribe si sigue como se leyó"] answer=3 explanation="La máquina dice qué cambios son legales, y los dos lo son. Que no choquen depende de que comprobar y escribir sea un solo paso, como un `UPDATE` condicionado al estado o a una versión." /%}
+
+{% question text="El `UPDATE` de B devuelve «0 filas actualizadas». ¿Qué ha pasado?" options=["`CANCEL` no está permitido desde `pending`", "Alguien cambió la reserva después de que B la leyera", "La base de datos ha fallado y basta con reintentar"] answer=2 explanation="La versión (o el estado) ya no coincide con lo que B leyó: alguien se le adelantó. Toca recargar la reserva y decidir otra vez, no repetir la escritura a ciegas." /%}
+{% /quiz %}
+
+Fuentes: el handbook de TypeScript sobre [narrowing y uniones discriminadas](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions);
+[Statecharts](https://statecharts.dev/), una introducción a las máquinas de estados y los
+statecharts; el [aislamiento de transacciones](https://www.postgresql.org/docs/current/transaction-iso.html)
+de PostgreSQL; y la [documentación de XState](https://stately.ai/docs/xstate), por si quieres ver cómo se modela esto con una librería.

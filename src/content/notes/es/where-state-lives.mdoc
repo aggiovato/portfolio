@@ -5,6 +5,7 @@ summary: >-
   ¿Qué estrategia de manejo de estado debería tener mi frontend? Dónde va cada parte del estado, cuándo compensa un store y el mismo formulario de Angular con y sin SignalStore.
 publicationStatus: published
 publishedAt: 2026-11-18
+updatedAt: 2026-11-26
 tags:
   - Angular
   - NgRx
@@ -54,6 +55,12 @@ Un store te da un único sitio donde mirar, actualizaciones predecibles y lógic
 por separado. También cuesta: más estructura, convenciones que acordar y la tentación de meterlo
 todo dentro. Centralizar puede simplificar mucho, o convertir un problema local en una dependencia
 de toda la aplicación.
+
+Un store tampoco resuelve por sí solo la consistencia. Da a cada actualización un responsable y un
+único sitio donde ocurrir, pero dentro del store una respuesta lenta todavía puede pisar a otra más
+nueva, y una petición todavía puede salir dos veces. Para eso hace falta una política de
+concurrencia (cancelar, encolar o ignorar lo que llega mientras está ocupado), invalidar los datos
+que han quedado obsoletos y reglas que haga cumplir el servidor.
 
 Si tengo que decidir un criterio para buscar más estructura, no empiezo contando componentes: doy
 más peso a estas señales:
@@ -175,16 +182,20 @@ submit() {
 ```
 
 Ahora el formulario se limita a llamar al método de su acción en el store: toda la lógica de la
-petición y del tratamiento del dato queda fuera de su jurisdicción. `exhaustMap` ignora un segundo
-clic mientras hay una creación en curso, y la plantilla no cambia. No hay menos código: lo que se
+petición y del tratamiento del dato queda fuera de su jurisdicción, y la plantilla no cambia.
+`exhaustMap` ignora un segundo clic mientras hay una creación en curso. Es una política, no un
+escudo contra duplicados: una segunda reserva que el usuario quería crear en ese momento también se
+descarta, y cuando la primera termina el siguiente clic vuelve a crear. Si cada clic debe contar,
+`concatMap` los pone en cola; si un duplicado nunca debe llegar a la base de datos, el servidor tiene
+que reconocerlo. No hay menos código: lo que se
 gana es que la operación y sus reglas tienen **un responsable explícito**, y eso compensa cuando más
 componentes o reglas dependen de ella.
 
 ## Dónde vive el store
 
 Al componente le basta con `inject(BookingsStore)`, pero ¿de dónde sale esa instancia? Elegir un
-store no decide dónde vive. Hay tres preguntas: quién lo necesita, cuándo debería reiniciarse y
-cuándo se carga su código. En Angular, dónde lo proporcionas responde a las tres:
+store no decide dónde vive, y aquí se esconden dos decisiones distintas. Una es el **alcance**: quién
+comparte una instancia y cuándo se destruye. En Angular, dónde lo proporcionas responde a eso:
 
 ```ts
 @Component({
@@ -197,8 +208,14 @@ export class BookingsPageComponent {}
 
 Proporcionado en un componente, el store nace y muere con él, y sus hijos hacen `inject()` de esa
 misma instancia. Proporcionado en cada editor, cada editor tiene el suyo. Una feature en el store
-global de NgRx, en cambio, vive lo que dura la aplicación. Y si lo proporcionas en una ruta con
-carga diferida, su código llega con esa ruta y no pesa en la carga inicial.
+global de NgRx, en cambio, vive lo que dura la aplicación.
+
+La otra decisión es la **carga**: cuándo se descarga el código del store. Eso depende de cómo se
+importa el código, no de `providers`. Su código llega más tarde solo si todo lo que lo usa se carga
+de forma diferida, por ejemplo detrás de una ruta con `loadComponent` o `loadChildren`. Proporcionarlo
+en un componente decide cuánto vive la instancia; no hace diferida su carga. Las dos decisiones
+suelen ir juntas, en una ruta diferida que además proporciona el store, pero responden a preguntas
+distintas.
 
 La prueba más clara: si abro dos editores a la vez, ¿quiero que compartan el borrador o que cada
 uno tenga el suyo?
@@ -222,6 +239,8 @@ cambio tenga un sitio evidente*.
 {% question text="Al decidir si un dato necesita más estructura, ¿qué pesa más según la nota?" options=["Cuántos componentes lo leen", "Cuántos pueden modificarlo, con qué reglas y con qué consecuencias", "Cuántas pantallas tiene la aplicación"] answer=2 explanation="La nota se preocupa menos por cuántos componentes leen un dato y más por cuántos pueden modificarlo, bajo qué reglas y con qué consecuencias." /%}
 
 {% question text="Mueves la creación de reservas del componente a un SignalStore. ¿Cuál es la ventaja real?" options=["Hay menos código en total", "El formulario deja de tener estado", "Sus responsabilidades y reglas quedan en un lugar explícito"] answer=3 explanation="El estado no desaparece ni hay menos código: la operación y su estado tienen un responsable explícito. El formulario sigue en el componente." /%}
+
+{% question text="Añades `providers: [BookingsStore]` a un componente. ¿Qué decide eso?" options=["Cuándo se descarga el código del store", "Qué componentes comparten una instancia y cuándo se destruye", "Que las respuestas ya no puedan llegar fuera de orden"] answer=2 explanation="`providers` fija el alcance: el componente y sus hijos comparten una instancia, que se destruye con el componente. La carga diferida depende de cómo se importa el código, y ordenar respuestas requiere una política de concurrencia." /%}
 
 {% question text="Abres dos editores de reservas a la vez. ¿Cuántas instancias de `DraftStore` hay?" options=["Una, compartida por los dos editores", "Dos: cada editor proporciona la suya", "Una para toda la aplicación"] answer=2 explanation="`providers: [DraftStore]` en el editor crea una instancia con cada editor, así que cada uno conserva su propio borrador." %}
 ```ts

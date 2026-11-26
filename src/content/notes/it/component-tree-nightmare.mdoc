@@ -1,0 +1,207 @@
+---
+slug: component-tree-nightmare
+title: Quando il tuo albero di componenti diventa un incubo
+summary: >-
+  Prop drilling, confini tra componenti e il costo nascosto dell'astrazione. Una schermata di
+  prenotazioni cresce finché il suo albero detta dove viaggiano i dati, e cosa provare prima di uno store.
+publicationStatus: draft
+tags:
+  - React
+  - Angular
+  - Architettura
+cover:
+  src: ../../../assets/notes/component-tree-nightmare/cover.webp
+  alt: "Un albero di componenti: BookingPage in alto, poi BookingLayout e BookingPanel con bordo tratteggiato, poi BookingForm. Accanto a ogni livello scendono le stesse tre props, booking, canEdit e onSave: piene nella pagina, tratteggiate attraverso il layout e il pannello, e di nuovo piene nel form che le usa."
+---
+
+Tutti i frontend su cui ho lavorato sono arrivati allo stesso punto. Una schermata nasce pulita,
+qualche requisito dopo le stesse cinque props attraversano tre componenti che non le leggono mai, e
+qualcuno dice «ci serve un Context» o «questo dovrebbe stare in uno store». A volte ha ragione.
+Spesso l'albero ci sta dicendo un'altra cosa: che i suoi confini non corrispondono più alle
+responsabilità che contiene.
+
+Quindi la domanda di questa nota non è *come evito di passare props*, ma: **il mio albero di
+componenti riflette responsabilità chiare, o sta dettando la strada che i miei dati devono
+percorrere?** Un albero profondo non è un problema di per sé. Lo diventa quando i suoi confini
+costringono i dati a passare per componenti che non ne hanno bisogno, mescolano responsabilità o
+nascondono dipendenze.
+
+{% callout type="note" title="Come si collega alla nota sullo store" %}
+[Il mio frontend ha bisogno di uno store?](/it/notes/where-state-lives/) chiede *dove vive ogni
+parte dello stato*. Questa chiede *che forma hanno l'albero e le sue dipendenze*. Si toccano, ma qui
+la risposta spesso non è un nuovo posto per lo stato.
+{% /callout %}
+
+## Tutto inizia pulito
+
+Una schermata di prenotazione: un form per modificare la prenotazione e un riepilogo accanto. La
+pagina carica la prenotazione e la salva; il form la modifica; il riepilogo la mostra.
+
+```tsx
+function BookingPage() {
+  const { booking, save, saving } = useBooking(id);
+
+  return (
+    <BookingLayout>
+      <BookingForm booking={booking} onSave={save} saving={saving} />
+      <BookingSummary booking={booking} />
+    </BookingLayout>
+  );
+}
+```
+
+Qui le props sono esplicite, economiche e facili da seguire: puoi leggere in un solo posto chi dà
+cosa a chi. Passare props non è il problema, e niente in questa nota è contro farlo.
+
+## Comincia il {% highlight %}drilling{% /highlight %}
+
+Poi arrivano i requisiti. Solo alcuni ruoli possono modificare. Gli errori di validazione arrivano
+dal server. Il form mostra il proprio stato di salvataggio. Il design chiede un pannello con titolo e
+azioni attorno al form, e il layout guadagna una seconda colonna. Qualcuno avvolge il form in
+`BookingPanel` e mette entrambi dentro `BookingLayout`, e ora la pagina non raggiunge più
+direttamente il form:
+
+```tsx
+<BookingLayout booking={booking} canEdit={canEdit} saving={saving} errors={errors} onSave={save} />
+
+function BookingLayout({ booking, canEdit, saving, errors, onSave }: LayoutProps) {
+  return (
+    <div className="layout">
+      <BookingPanel booking={booking} canEdit={canEdit} saving={saving} errors={errors} onSave={onSave} />
+      <BookingSummary booking={booking} />
+    </div>
+  );
+}
+```
+
+Questo è il **prop drilling**: passare props attraverso componenti che non le usano, solo per
+consegnarle a un discendente. `BookingLayout` e `BookingPanel` ora sanno di prenotazioni, permessi
+ed errori, anche se tutto ciò che fanno è disporre cose sullo schermo.
+
+{% diagram src="component-tree-nightmare/drilling.it.svg" alt="L'albero della prenotazione: BookingPage possiede i dati; BookingLayout e BookingPanel, con bordo tratteggiato, ricevono cinque props ciascuno e non ne usano nessuna; BookingForm le usa tutte e cinque; BookingSummary usa la prenotazione. A destra, le cinque props booking, canEdit, saving, errors e onSave vengono inoltrate due volte prima di essere usate." caption="Due componenti intermedi inoltrano soltanto ciò che serve al form." /%}
+
+Il costo non sta nello scrivere di più. Sta nel fatto che un cambiamento in ciò che serve al form
+(una prop nuova, un callback rinominato) ora tocca tre file, i componenti intermedi non si possono
+riusare senza trascinarsi dietro le prenotazioni, e chi legge deve percorrere tutta la catena per
+sapere da dove arriva `errors`.
+
+## L'{% highlight %}incubo{% /highlight %} dei componenti
+
+«Incubo dei componenti» non è un antipattern formale; è il nome che do al momento in cui un albero
+smette di aiutare. Di rado si presenta come un unico grande errore. È un insieme di sintomi:
+
+- componenti le cui props, per lo più, vengono inoltrate invece che usate;
+- wrapper così generici da richiedere una dozzina di flag (`showHeader`, `compact`,
+  `withActions`…) per coprire tutte le schermate che li usano;
+- logica sparsa tra i livelli: validazione nel form, permessi nel pannello, salvataggio nella
+  pagina;
+- e anche il contrario: la schermata frammentata in così tanti componenti minuscoli che seguire
+  un'interazione costringe ad aprire dieci file.
+
+Più componenti non fanno un'architettura peggiore, né meno componenti una migliore. Conta se ogni
+confine nasconde qualcosa che sta insieme.
+
+## {% highlight %}Rifattorizza{% /highlight %} prima di aggiungere stato
+
+Prima di scegliere uno strumento, fatti due domande su ogni dato: **quale componente dovrebbe
+conoscerlo** e **chi dovrebbe decidere su di esso**. Nella schermata di prenotazione, il layout e il
+pannello non dovrebbero sapere nulla di prenotazioni. Incorniciano contenuto. Quindi dagli
+contenuto:
+
+```tsx
+function BookingPage() {
+  const { booking, save, saving, errors } = useBooking(id);
+  const canEdit = useCan('booking:edit');
+
+  return (
+    <BookingLayout aside={<BookingSummary booking={booking} />}>
+      <BookingPanel title="Edit booking">
+        <BookingForm booking={booking} canEdit={canEdit} saving={saving} errors={errors} onSave={save} />
+      </BookingPanel>
+    </BookingLayout>
+  );
+}
+```
+
+`BookingLayout` e `BookingPanel` ricevono `children` (e uno slot per la colonna laterale) invece di
+props della prenotazione. Il form riceve le sue props dove viene scritto, nella pagina che possiede i
+dati. L'albero è profondo quanto prima; è cambiato chi dipende da cosa.
+
+{% diagram src="component-tree-nightmare/composed.it.svg" alt="Lo stesso albero dopo la composizione: BookingLayout e BookingPanel ricevono children e nessuna prop della prenotazione; BookingForm, evidenziato, riceve le sue props direttamente da BookingPage, come mostra una freccia tratteggiata dalla pagina al form." caption="Stessa profondità, dipendenze diverse: la pagina passa al form le sue props direttamente." /%}
+
+Comporre è una di diverse mosse:
+
+- **Comporre**: passare elementi come children o slot, così i livelli intermedi smettono di
+  trasportare dati.
+- **Avvicinare**: spostare lo stato giù, nel componente che è il suo unico utente. Un flag `saving`
+  che mostra solo il form può vivere nel form.
+- **Dividere per dominio, non per dimensione**: estrarre un componente quando nasconde una
+  responsabilità (i permessi del form), non perché un file è diventato lungo.
+- **Sollevare di proposito**: quando due fratelli hanno bisogno dello stesso stato, decidi prima chi
+  lo possiede, poi sollevalo al loro antenato comune più vicino. Resta esplicito.
+
+Comporre non sistema ogni gerarchia. Se il form sta a cinque rotte di distanza dai dati, o molti
+componenti senza relazione hanno bisogno dello stesso valore, c'è una vera dipendenza trasversale, ed
+è di questo che parla la sezione successiva.
+
+## Context, DI o store?
+
+Sono meccanismi diversi, non versioni più forti della stessa cosa:
+
+| Meccanismo | Cosa ti dà | Quanto costa |
+| --- | --- | --- |
+| Props | Dipendenze esplicite, tipizzate e locali | Codice ripetuto quando il percorso è lungo |
+| Composizione (children, slot) | Chi possiede i dati li passa dove si usano | I genitori decidono di più del layout |
+| React Context | Un valore disponibile per qualsiasi discendente | Dipendenza nascosta; ogni consumatore si aggiorna quando il valore cambia |
+| DI di Angular (un servizio) | Un'istanza risolta dall'albero degli injector | Dipendenza nascosta; lo scope dipende da dove viene fornita |
+| Uno store | Un responsabile per lo stato condiviso e mutevole, e le sue regole | Struttura, convenzioni e una dipendenza dallo store |
+
+Nemmeno React Context e la dependency injection di Angular sono equivalenti. Context passa un
+*valore* lungo l'albero dei componenti. L'injector di Angular risolve *istanze* (di solito servizi)
+attraverso una gerarchia di injector di elemento e di ambiente, e dove le fornisci decide chi ne
+condivide una. In Angular la stessa schermata di prenotazione userebbe la proiezione di contenuto
+(`<ng-content>`) per il passo della composizione, input e output per il percorso esplicito, e un
+servizio fornito nella pagina per una dipendenza di cui molti discendenti hanno davvero bisogno.
+
+Un buon motivo per Context o DI: un valore che leggono molti componenti e cambiano in pochi, come
+l'utente attuale, il tema o la lingua. Un buon motivo per uno store: stato condiviso con regole su
+come cambia. Un motivo debole per uno qualsiasi dei due: «le props erano una seccatura».
+
+## I costi nascosti
+
+Context, DI e store tolgono linee dal diagramma dell'albero, ma la dipendenza non sparisce.
+`BookingForm` ha ancora bisogno della prenotazione; ora va a prenderla invece di riceverla. Questo ha
+delle conseguenze:
+
+- **Leggere il codice**: le props di un componente mostrano ciò di cui ha bisogno; un `inject()` o
+  uno `useContext()` al suo interno sfugge più facilmente.
+- **Testarlo**: le props si impostano nel test; un context o un provider va montato attorno.
+- **Riusarlo**: un componente che legge un context specifico funziona solo sotto quel provider.
+- **Lo scope**: il valore ora dipende da dove sta il provider, una cosa in più da azzeccare.
+
+A volte lo scambio conviene. L'importante è farlo di proposito.
+
+## In breve
+
+Quando le props iniziano ad attraversare componenti che non le usano, l'albero fa una domanda sui
+confini prima di chiedere uno strumento. Guardo prima chi dovrebbe conoscere ogni dato e chi
+dovrebbe possederlo, e provo a comporre, ad avvicinare lo stato a chi lo usa o a sollevarlo prima di
+Context, DI o uno store. Quando una dipendenza è davvero trasversale, li uso, sapendo che la
+dipendenza è ancora lì, solo meno visibile.
+
+Hai risolto il prop drilling, o hai solo nascosto le tue dipendenze?
+
+{% quiz %}
+{% question text="Un albero ha sei livelli di profondità. Ogni componente usa le props che riceve. Cosa suggerisce la nota?" options=["Appiattirlo: il problema è la profondità", "Niente per ora: la profondità non è un difetto", "Spostare i dati in uno store"] answer=2 explanation="Un albero profondo non è un problema di per sé. Il segnale d'allarme sono i componenti che inoltrano soltanto props, mescolano responsabilità o nascondono dipendenze." /%}
+
+{% question text="`BookingLayout` riceve cinque props della prenotazione e non ne usa nessuna. Qual è la prima mossa da provare?" options=["Avvolgere la pagina in un provider di Context", "Rendere il layout più generico, con più flag", "Passare il form come children"] answer=3 explanation="Il layout incornicia soltanto contenuto. Comporre (passare elementi come children o slot) lascia che la pagina dia al form le sue props direttamente, e mantiene la dipendenza esplicita." /%}
+
+{% question text="Due componenti fratelli hanno bisogno della stessa selezione, e la usano solo loro. Cosa viene prima?" options=["Decidere chi possiede la selezione", "Creare uno store globale per lei", "Duplicarla in entrambi i fratelli"] answer=1 explanation="Prima, chi la possiede. Spesso la risposta è sollevarla al loro antenato comune più vicino, il che la mantiene esplicita; uno store serve per lo stato condiviso con regole proprie." /%}
+
+{% question text="Molti componenti dell'applicazione leggono la lingua attuale, e quasi non cambia mai. Quale strumento è più adatto?" options=["Uno store con azioni ed effetti", "Passarla come prop a ogni livello", "Context, o un servizio con la DI di Angular"] answer=3 explanation="Un valore quasi solo letto, che serve a molti componenti, è un buon caso per Context o DI. Uno store conviene quando lo stato cambia secondo regole; passarlo ovunque è il problema da cui siamo partiti." /%}
+{% /quiz %}
+
+Fonti: di React, [Passing Props to a Component](https://react.dev/learn/passing-props-to-a-component)
+e [Passing Data Deeply with Context](https://react.dev/learn/passing-data-deeply-with-context); di
+Angular, la [proiezione di contenuto](https://angular.dev/guide/components/content-projection) e la
+[dependency injection gerarchica](https://angular.dev/guide/di/hierarchical-dependency-injection).

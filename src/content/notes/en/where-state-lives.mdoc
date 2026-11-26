@@ -5,6 +5,7 @@ summary: >-
   Which state management strategy should my frontend have? Where each piece of state belongs, when a store pays off, and the same Angular form with and without a SignalStore.
 publicationStatus: published
 publishedAt: 2026-11-18
+updatedAt: 2026-11-26
 tags:
   - Angular
   - NgRx
@@ -53,6 +54,11 @@ only one we could use.
 A store gives you one place to look, predictable updates and logic you can test on its own. It
 also costs: more structure, conventions to agree on, and the temptation to put everything in it.
 Centralising can simplify a lot, or turn a local problem into a dependency of the whole app.
+
+A store also does not fix consistency on its own. It gives every update an owner and one place to
+happen, but a slow response can still overwrite a newer one inside the store, and a request can
+still go out twice. That takes a concurrency policy (cancel, queue or ignore what arrives while
+busy), invalidating data that went stale, and rules the server enforces.
 
 If I have to pick a criterion for reaching for more structure, I don't start by counting components:
 I give more weight to these signs:
@@ -172,16 +178,19 @@ submit() {
 ```
 
 Now the form just calls its action's method on the store: all the logic of the request and of
-handling the data is out of its hands. `exhaustMap` ignores a second click while a creation is
-running, and the template does not change. There is not less code: the gain is that the operation
+handling the data is out of its hands, and the template does not change. `exhaustMap` ignores a
+second click while a creation is running. That is a policy, not a shield against duplicates: a
+second booking the user really meant to create in that moment is dropped too, and once the first
+one finishes the next click creates again. If every click must count, `concatMap` queues them; if a
+duplicate must never reach the database, the server has to recognise it. There is not less code: the gain is that the operation
 and its rules have **one explicit owner**, which pays off once more components or rules depend on
 it.
 
 ## Where the store lives
 
 The component only needs `inject(BookingsStore)`, but where does that instance come from? Picking a
-store does not decide where it lives. Three questions: who needs it, when it should reset, and when
-its code loads. In Angular, where you provide it answers all three:
+store does not decide where it lives, and two different decisions hide here. One is **scope**: who
+shares an instance and when it is destroyed. In Angular, where you provide it answers that:
 
 ```ts
 @Component({
@@ -194,8 +203,13 @@ export class BookingsPageComponent {}
 
 Provided in a component, the store is born and dies with it, and its children `inject()` that same
 instance. Provided in each editor, every editor gets its own. A feature in NgRx's global store, on
-the other hand, lives as long as the app. And if you provide it in a lazy-loaded route, its code
-arrives with that route instead of weighing on the first load.
+the other hand, lives as long as the app.
+
+The other decision is **loading**: when the store's code is downloaded. That depends on how the code
+is imported, not on `providers`. Its code arrives later only if everything that uses it is loaded
+lazily, for example behind a route with `loadComponent` or `loadChildren`. Providing it in a
+component decides how long the instance lives; it does not make its code lazy. The two often go
+together, in a lazy route that also provides the store, but they answer different questions.
 
 The clearest test: if I open two editors at once, should they share the draft or each have their
 own?
@@ -219,6 +233,8 @@ an obvious place*.
 {% question text="Deciding whether a piece of data needs more structure, what does the note weigh most?" options=["How many components read it", "How many can change it, under which rules and with what consequences", "How many screens the application has"] answer=2 explanation="The note worries less about how many components read a piece of data and more about how many can change it, under which rules and with what consequences." /%}
 
 {% question text="You move the booking creation from the component to a SignalStore. What is the real advantage?" options=["There is less code in total", "The form no longer has state", "Its responsibilities and rules end up in an explicit place"] answer=3 explanation="State does not disappear and there is not less code: the operation and its state get an explicit owner. The form stays in the component." /%}
+
+{% question text="You add `providers: [BookingsStore]` to a component. What does that decide?" options=["When the store's code is downloaded", "Which components share an instance, and when it is destroyed", "That responses can no longer arrive out of order"] answer=2 explanation="`providers` sets the scope: the component and its children share one instance, which is destroyed with the component. Lazy loading depends on how the code is imported, and ordering responses takes a concurrency policy." /%}
 
 {% question text="You open two booking editors at once. How many `DraftStore` instances are there?" options=["One, shared by both editors", "Two: each editor provides its own", "One for the whole application"] answer=2 explanation="`providers: [DraftStore]` on the editor creates an instance with each editor, so each one keeps its own draft." %}
 ```ts

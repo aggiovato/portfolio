@@ -37,6 +37,19 @@ describe('marble diagrams', () => {
     expect(svg).toContain('font-variant-ligatures:none');
   });
 
+  it('marks an unsubscribe apart from complete: the line stops there and fades after it', () => {
+    const spec: MarbleSpec = {
+      duration: 4,
+      lanes: [{ name: 'source$', marbles: [{ t: 1, label: 'A' }], unsubscribe: 2 }],
+    };
+    const { svg } = renderMarble(spec, 'en');
+    const x = MARBLE.trackStart + MARBLE.r + (2 / 4) * (MARBLE.trackEnd - MARBLE.trackStart - 2 * MARBLE.r);
+    expect(svg).toContain(`x2="${x}" y2="40" stroke`);
+    expect(svg).toContain('stroke-dasharray="3 6"');
+    // Without an unsubscribe, the line runs to the end and nothing is dashed.
+    expect(renderMarble(twoLanes, 'en').svg).not.toContain('stroke-dasharray');
+  });
+
   it('translates prose labels and leaves code alone', () => {
     expect(renderMarble(twoLanes, 'es').svg).toContain('>sin emisión<');
     expect(renderMarble(twoLanes, 'it').svg).toContain('>nessuna emissione<');

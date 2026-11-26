@@ -6,6 +6,7 @@ summary: >-
   zip y forkJoin: solo cambia la regla que decide cuándo valores de fuentes distintas forman un resultado.
 publicationStatus: published
 publishedAt: 2026-11-15
+updatedAt: 2026-11-26
 tags:
   - RxJS
   - Angular
@@ -69,6 +70,19 @@ A1 se descarta: B todavía no ha emitido. No se pone en cola. A los 4 s, A2 usa 
 no produce salida. Aquí, la salida se completa con A a los 6 s. Úsalo para un evento de envío que
 lee el último estado del formulario.
 
+Cuidado con los formularios: `valueChanges` no emite el valor actual al suscribirte. Si el usuario
+guarda antes de cambiar nada, `form.valueChanges` todavía no tiene valor, y el clic se descarta igual
+que A1. Empieza el stream con el valor actual del formulario:
+
+```ts
+const form$ = this.form.valueChanges.pipe(startWith(this.form.value));
+
+submit$.pipe(withLatestFrom(form$)).subscribe(([, value]) => save(value));
+```
+
+Si solo necesitas el valor en el momento del clic, también puedes leerlo entonces:
+`submit$.pipe(map(() => this.form.getRawValue()))`, que incluye los controles deshabilitados.
+
 ## {% highlight %}zip{% /highlight %}: el primero con el primero
 
 Espera hasta que cada entrada tenga un valor para el siguiente par. Consume cada valor una sola
@@ -115,7 +129,7 @@ Estas herramientas combinan flujos; no crean hilos. Un error no gestionado en cu
 fallar la salida combinada.
 
 {% quiz %}
-{% question text="Guardar debe usar el último estado del formulario, pero un cambio en el formulario por sí solo no debe guardar nada. ¿Qué operador va en lugar de `???`?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=2 explanation="Con `withLatestFrom`, solo la fuente (`submit$`) dispara una salida; `form$` solo actualiza el valor guardado." %}
+{% question text="Guardar debe usar el último estado del formulario, pero un cambio en el formulario por sí solo no debe guardar nada. ¿Qué operador va en lugar de `???`?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=2 explanation="Con `withLatestFrom`, solo la fuente (`submit$`) dispara una salida; `form$` solo actualiza el valor guardado. Necesita un valor antes del primer clic, así que empiézalo con el valor actual del formulario." %}
 ```ts
 submit$.pipe(???(form$)).subscribe(([, form]) => save(form));
 ```

@@ -3,9 +3,10 @@ slug: rxjs-mapping-operators
 title: switchMap, concatMap, mergeMap o exhaustMap?
 summary: >-
   Un nuovo evento, quattro risposte possibili. Lo stesso esperimento con i quattro operatori di
-  mapping di RxJS: ognuno proietta i valori in flussi interni e aggiunge la propria politica di concorrenza.
+  mapping di RxJS: ognuno proietta i valori in stream interni e aggiunge la propria politica di concorrenza.
 publicationStatus: published
 publishedAt: 2026-11-14
+updatedAt: 2026-11-26
 tags:
   - RxJS
   - Angular
@@ -27,7 +28,7 @@ Stessi ingressi, stesse durate. Cambia solo l'operatore.
 
 ## L'esperimento
 
-Tre eventi, tre flussi interni. Ogni evento può avviare un Observable di richiesta freddo;
+Tre eventi, tre stream interni. Ogni evento può avviare un Observable di richiesta cold;
 l'operatore decide quando sottoscriverlo, o se farlo.
 
 | Evento | Arriva a | La richiesta dura |
@@ -45,7 +46,7 @@ events$.pipe(operator((id) => request$(id)));
 
 ## {% highlight %}switchMap{% /highlight %}: segui l'ultimo
 
-Un nuovo evento annulla la sottoscrizione al flusso interno precedente.
+Un nuovo evento annulla la sottoscrizione allo stream interno precedente.
 
 {% diagram id="rxjs-mapping-operators/switchmap" alt="Linea del tempo di switchMap: A parte a 0 s e viene annullato a 1 s, B parte a 1 s e viene annullato a 2 s, C parte a 2 s e risponde a 3 s." caption="Le barre sono sottoscrizioni attive; Out mostra le risposte." /%}
 
@@ -59,7 +60,7 @@ I nuovi valori aspettano in coda; ognuno parte quando il precedente si completa.
 {% diagram id="rxjs-mapping-operators/concatmap" alt="Linea del tempo di concatMap: A va da 0 s e risponde a 5 s; B aspetta in coda e va da 5 s a 8 s; C aspetta e va da 8 s a 9 s." caption="Le linee tratteggiate sono eventi in attesa nella coda." /%}
 
 A risponde a 5 s, poi B a 8 s e C a 9 s. Usalo per salvataggi ordinati che devono essere eseguiti
-tutti. Se un flusso interno non si completa mai, la coda si blocca.
+tutti. Se uno stream interno non si completa mai, la coda si blocca.
 
 ## {% highlight %}mergeMap{% /highlight %}: lascia sovrapporre il lavoro
 
@@ -73,12 +74,19 @@ passa un limite se ti serve.
 
 ## {% highlight %}exhaustMap{% /highlight %}: occupato? Ignoralo
 
-I nuovi eventi vengono ignorati finché il flusso interno attivo non si completa.
+I nuovi eventi vengono ignorati finché lo stream interno attivo non si completa.
 
 {% diagram id="rxjs-mapping-operators/exhaustmap" alt="Linea del tempo di exhaustMap: A parte a 0 s e risponde a 5 s; B e C arrivano mentre A è in corso e vengono ignorati." caption="B e C vengono scartati, non messi in coda." /%}
 
 Parte solo A. B e C vengono scartati, non messi in coda. Dopo che A si completa, un evento futuro
 può avviare una nuova richiesta. Usalo per ignorare i clic ripetuti mentre si invia un modulo.
+
+È una regola dell'interfaccia, non una garanzia. Il clic A avvia un pagamento; il clic B, mentre A
+è ancora in corso, viene ignorato; A termina; il clic C avvia un secondo pagamento. E un retry di
+rete, una seconda scheda o un altro dispositivo non passano mai da questo operatore. Se
+un'operazione deve avvenire una sola volta, come un addebito, il server deve renderla idempotente:
+il client invia una chiave che identifica l'operazione, e una richiesta ripetuta con la stessa
+chiave restituisce il primo risultato invece di addebitare di nuovo.
 
 ## Scegli il comportamento
 
@@ -104,7 +112,7 @@ query$.pipe(
 
 {% question text="Un modulo crea una risorsa a ogni «Salva». Ogni clic deve creare la sua risorsa, in ordine, e nessuna richiesta può essere annullata o saltata dalla successiva. Quale operatore?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=2 explanation="`concatMap` mette in coda ogni creazione e la avvia quando la precedente si completa: vengono eseguite tutte, in ordine. `switchMap` potrebbe annullarne una in corso; `exhaustMap` la scarterebbe." /%}
 
-{% question text="Un pulsante «Paga»: un doppio clic non deve mai addebitare due volte. Quale operatore?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=4 explanation="`exhaustMap` ignora i nuovi clic mentre il primo pagamento è in corso: vengono scartati, non messi in coda, e l'addebito avviene una sola volta." /%}
+{% question text="Un pulsante «Paga»: mentre un pagamento è in corso, altri clic non devono avviarne un altro. Quale operatore?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=4 explanation="`exhaustMap` scarta i clic mentre il primo pagamento è in corso. Protegge il pulsante, non l'addebito: un clic dopo la fine, un retry o un'altra scheda possono inviare una seconda richiesta, quindi il server deve rendere il pagamento idempotente." /%}
 
 {% question text="Con gli eventi dell'esperimento (A impiega 5 s, B 3 s, C 1 s), in che ordine arrivano le risposte?" options=["A, B, C", "C, B, A", "Solo C", "Solo A"] answer=2 explanation="`mergeMap` esegue le tre richieste insieme e inoltra ogni risposta appena finisce: C a 3 s, B a 4 s, A a 5 s. L'ordine di ingresso non è preservato." %}
 ```ts

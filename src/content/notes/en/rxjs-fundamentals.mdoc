@@ -6,6 +6,7 @@ summary: >-
   pipe() and subscribe(), and the first three operators: map, filter and tap.
 publicationStatus: published
 publishedAt: 2026-11-14
+updatedAt: 2026-11-26
 tags:
   - RxJS
   - Angular
@@ -58,6 +59,38 @@ doubled$.subscribe(console.log);
 ```
 
 {% highlight %}`pipe()`{% /highlight %} composes the operators into a new Observable without subscribing to the chain; a hot source may already be producing values on its own. {% highlight %}`subscribe()`{% /highlight %} registers the consumer and, on a cold source, starts its execution for that subscription. With Angular's `HttpClient`, each subscription sends a request. Angular's `async` pipe can manage the subscription for you.
+
+## {% highlight %}unsubscribe(){% /highlight %} ends your side, {% highlight %}finalize(){% /highlight %} cleans up
+
+There is a third way for a subscription to end, and it comes from the other side. `unsubscribe()` is
+not a notification of the Observable: nothing is emitted, and neither `complete` nor `error` runs.
+It is something the subscriber does to its subscription: stop listening, and let the source release
+what it was holding for it.
+
+{% diagram id="rxjs-fundamentals/unsubscribe" alt="A stream diagram: the values A and B on a line, then a dashed mark labelled unsubscribe(); after it the line continues faded and dashed, with no completion bar." caption="Nothing is emitted at the mark: the subscription stops, and the source may go on unobserved." /%}
+
+That release is the **teardown**: the function a source returns when it is created. It runs however
+the subscription ends: complete, error or unsubscribe. `finalize()` lets you hook into the same
+moment from a pipe.
+
+```ts
+const ticks$ = new Observable<number>((subscriber) => {
+  const id = setInterval(() => subscriber.next(Date.now()), 1000);
+  return () => clearInterval(id); // teardown
+});
+
+const sub = ticks$
+  .pipe(finalize(() => console.log('cleaned up')))
+  .subscribe(render);
+
+sub.unsubscribe(); // the interval stops and 'cleaned up' is logged
+```
+
+| How it ends | Who ends it | Observer callback | Teardown and `finalize` |
+| --- | --- | --- | --- |
+| complete | The source | `complete()` | Run |
+| error | The source | `error(err)` | Run |
+| `unsubscribe()` | The subscriber | None | Run |
 
 ## {% highlight %}map{% /highlight %} changes the value, {% highlight %}filter{% /highlight %} decides what passes
 
@@ -118,6 +151,8 @@ of(10, 20, 30).pipe(filter((n) => n >= 20)).subscribe(render);
 of(5).pipe(tap((n) => n * 2)).subscribe(console.log);
 ```
 {% /question %}
+
+{% question text="You call `sub.unsubscribe()` on a running subscription. What happens?" options=["The `complete` callback runs", "The `error` callback runs", "No callback runs, but the teardown and `finalize()` do"] answer=3 explanation="`unsubscribe()` is an action on the subscription, not a notification: nothing is emitted, so neither `complete` nor `error` runs. The teardown still releases the source's resources, and `finalize()` runs with it." /%}
 
 {% question text="A stream has emitted complete (`|`). What can arrive after it?" options=["More values, if the source keeps producing", "Nothing: no values arrive after complete or error", "Only an error"] answer=2 explanation="Complete and error both end the stream. No more values arrive after either." /%}
 {% /quiz %}

@@ -18,6 +18,11 @@ export interface Lane {
   marbles: { t: number; label: string; tone?: Tone }[];
   /** Time of completion (vertical bar), if the stream completes in the picture. */
   complete?: number;
+  /**
+   * Time the subscriber unsubscribes: a dashed mark, and the line fades after it. It is an action
+   * on the subscription, not a notification, so it must not look like complete (|) or error (X).
+   */
+  unsubscribe?: number;
   /** Small labels under the lane: `next(A)`, «no emission», `log: 20`. */
   notes?: { t: number; text: Text; tone?: 'code' | 'muted' | 'warm' }[];
 }
@@ -72,12 +77,22 @@ export function renderMarble(spec: MarbleSpec, lang: Lang): { svg: string; width
   const out: string[] = [];
 
   const lane = (l: Lane, y: number) => {
+    const lineEnd = l.unsubscribe === undefined ? trackEnd : x(l.unsubscribe);
     out.push(
-      `<line x1="${trackStart}" y1="${y}" x2="${trackEnd}" y2="${y}" stroke="${C.line}" stroke-width="1.5"/>`,
+      `<line x1="${trackStart}" y1="${y}" x2="${lineEnd}" y2="${y}" stroke="${C.line}" stroke-width="1.5"/>`,
     );
     out.push(
       `<text x="12" y="${y + 5}" fill="${C.muted}" font-size="15" style="${MONO}">${esc(l.name)}</text>`,
     );
+    if (l.unsubscribe !== undefined) {
+      // Past this point the source may go on, but nobody is listening.
+      out.push(
+        `<line x1="${lineEnd}" y1="${y}" x2="${trackEnd}" y2="${y}" stroke="${C.line}" stroke-width="1.5" stroke-dasharray="3 6" opacity="0.6"/>`,
+      );
+      out.push(
+        `<line x1="${lineEnd}" y1="${y - 16}" x2="${lineEnd}" y2="${y + 16}" stroke="${C.peach}" stroke-width="2" stroke-dasharray="4 3" stroke-linecap="round"/>`,
+      );
+    }
     if (l.complete !== undefined) {
       const cx = x(l.complete);
       out.push(

@@ -2,10 +2,11 @@
 slug: rxjs-combining-streams
 title: combineLatest, withLatestFrom, zip o forkJoin?
 summary: >-
-  Due flussi, quattro modi di combinarli. Lo stesso esperimento con combineLatest, withLatestFrom,
+  Due stream, quattro modi di combinarli. Lo stesso esperimento con combineLatest, withLatestFrom,
   zip e forkJoin: cambia solo la regola che decide quando valori di fonti diverse diventano un risultato.
 publicationStatus: published
 publishedAt: 2026-11-15
+updatedAt: 2026-11-26
 tags:
   - RxJS
   - Angular
@@ -69,6 +70,19 @@ A1 viene saltato: B non ha ancora emesso. Non viene messo in coda. A 4 s, A2 usa
 produce output. Qui l'output si completa con A a 6 s. Usalo per un evento di invio che legge
 l'ultimo stato del form.
 
+Attenzione ai form: `valueChanges` non emette il valore attuale quando ti iscrivi. Se l'utente salva
+prima di cambiare qualcosa, `form.valueChanges` non ha ancora un valore, e il clic viene saltato
+come A1. Fai partire lo stream con il valore attuale del form:
+
+```ts
+const form$ = this.form.valueChanges.pipe(startWith(this.form.value));
+
+submit$.pipe(withLatestFrom(form$)).subscribe(([, value]) => save(value));
+```
+
+Se ti serve solo il valore al momento del clic, puoi anche leggerlo allora:
+`submit$.pipe(map(() => this.form.getRawValue()))`, che include i controlli disabilitati.
+
 ## {% highlight %}zip{% /highlight %}: il primo con il primo
 
 Attende che ogni input abbia un valore per la coppia successiva. Consuma ogni valore una sola volta,
@@ -94,7 +108,7 @@ forkJoin([a$, b$]);
 {% diagram id="rxjs-combining-streams/forkjoin" alt="Linea temporale di forkJoin: un unico output, [A2,B2], a 7 s, quando B si completa, e poi l'output si completa." caption="Una sola emissione, solo dopo che tutti gli input si sono completati." /%}
 
 Che A finisca a 6 s non basta: B finisce a 7 s. Un input che non si completa mai può lasciarti in
-attesa. In RxJS 7, un input vuoto completa l'unione senza alcun valore. Usalo per più richieste HTTP
+attesa. In RxJS 7, un input vuoto completa il join senza alcun valore. Usalo per più richieste HTTP
 finite che servono insieme.
 
 ## Scegli l'innesco
@@ -109,11 +123,11 @@ diversi.
 | Quando la coppia successiva è pronta | `zip` | 2 s, 5 s |
 | Quando tutti gli input si completano | `forkJoin` | 7 s |
 
-Questi strumenti combinano flussi; non creano thread. Un errore non gestito in qualsiasi input fa
+Questi strumenti combinano stream; non creano thread. Un errore non gestito in qualsiasi input fa
 fallire l'output combinato.
 
 {% quiz %}
-{% question text="Il salvataggio deve usare l'ultimo stato del modulo, ma una modifica al modulo da sola non deve salvare nulla. Quale operatore va al posto di `???`?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=2 explanation="Con `withLatestFrom`, solo la sorgente (`submit$`) produce un'uscita; `form$` aggiorna solo il valore memorizzato." %}
+{% question text="Il salvataggio deve usare l'ultimo stato del modulo, ma una modifica al modulo da sola non deve salvare nulla. Quale operatore va al posto di `???`?" options=["`combineLatest`", "`withLatestFrom`", "`zip`", "`forkJoin`"] answer=2 explanation="Con `withLatestFrom`, solo la sorgente (`submit$`) produce un'uscita; `form$` aggiorna solo il valore memorizzato. Gli serve un valore prima del primo clic, quindi fallo partire con il valore attuale del form." %}
 ```ts
 submit$.pipe(???(form$)).subscribe(([, form]) => save(form));
 ```

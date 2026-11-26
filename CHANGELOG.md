@@ -12,6 +12,26 @@ Write entries under «Unreleased» as you work; `task release:patch|minor|major`
 
 ## [Unreleased]
 
+### Added
+
+- Note «Your status is a state machine»: a booking's `status` grows rules until its transitions
+  need to be as explicit as its states, with the lifecycle drawn, a transition table and function,
+  races between two operators and how to test it; in English, Spanish and Italian.
+
+### Changed
+
+- Notes reviewed: «switchMap, concatMap, mergeMap or exhaustMap?» no longer suggests `exhaustMap`
+  makes a payment happen once (it guards the button; the server needs idempotency); «Does my
+  frontend need a store?» separates a provider's scope from lazy loading and says what a store does
+  not fix on its own; «combineLatest, withLatestFrom, zip or forkJoin?» shows why a form needs a
+  starting value with `withLatestFrom`; «Understand the stream, then the operator» adds
+  `unsubscribe()`, teardown and `finalize()`, with a new diagram. In every language.
+- Italian notes use the English terms Italian developers say every day: stream, cold and hot,
+  marble diagram, retry, scope, lazy loading, union type, optimistic locking. «Diagramma di flusso»,
+  which reads as a flowchart in Italian, is gone.
+- Scrollbars take the site's palette: a violet-grey thumb on the night background, thin inside code
+  blocks, tables and the mobile menu.
+
 ---
 
 ## [2.2.0] — 2026-11-25

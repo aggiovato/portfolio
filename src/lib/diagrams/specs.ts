@@ -73,6 +73,28 @@ export const DIAGRAMS = {
       to: { en: 'later', es: 'después', it: 'dopo' },
     },
   },
+  'rxjs-fundamentals/unsubscribe': {
+    duration: 4,
+    lanes: [
+      {
+        name: 'source$',
+        marbles: [
+          { t: 0.8, label: 'A' },
+          { t: 2, label: 'B' },
+        ],
+        unsubscribe: 2.9,
+        notes: [
+          { t: 0.8, text: 'next(A)', tone: 'code' },
+          { t: 2, text: 'next(B)', tone: 'code' },
+          { t: 3.25, text: 'unsubscribe()', tone: 'warm' },
+        ],
+      },
+    ],
+    axis: {
+      from: { en: 'earlier', es: 'antes', it: 'prima' },
+      to: { en: 'later', es: 'después', it: 'dopo' },
+    },
+  },
   'rxjs-fundamentals/map': {
     duration: 4,
     lanes: [

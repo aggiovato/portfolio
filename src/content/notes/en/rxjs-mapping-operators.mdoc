@@ -6,6 +6,7 @@ summary: >-
   operators: each projects values into inner streams and adds its own concurrency policy.
 publicationStatus: published
 publishedAt: 2026-11-14
+updatedAt: 2026-11-26
 tags:
   - RxJS
   - Angular
@@ -78,6 +79,13 @@ New events are ignored until the active inner stream completes.
 Only A starts. B and C are dropped, not queued. After A completes, a future event can start a new
 request. Use it to ignore repeated clicks while a form is submitting.
 
+That is a rule for the interface, not a guarantee. Click A starts a payment; click B, while A is
+still running, is ignored; A finishes; click C starts a second payment. And a network retry, a
+second tab or another device never passes through this operator at all. If an operation must happen
+only once, like a charge, the server has to make it idempotent: the client sends a key that
+identifies the operation, and a repeated request with the same key returns the first result instead
+of charging again.
+
 ## Choose the behaviour
 
 | What should a new event do? | Operator | Responses |
@@ -102,7 +110,7 @@ query$.pipe(
 
 {% question text="A form creates a resource on every «Save». Each click must create its own resource, in order, and no request may be cancelled or skipped by the next one. Which operator?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=2 explanation="`concatMap` queues each creation and starts it when the previous one completes: all of them run, in order. `switchMap` could cancel one in flight; `exhaustMap` would drop it." /%}
 
-{% question text="A «Pay» button: a double click must never charge twice. Which operator?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=4 explanation="`exhaustMap` ignores new clicks while the first payment is in flight: they are dropped, not queued, so only one charge is made." /%}
+{% question text="A «Pay» button: while a payment is in flight, more clicks must not start another one. Which operator?" options=["`switchMap`", "`concatMap`", "`mergeMap`", "`exhaustMap`"] answer=4 explanation="`exhaustMap` drops clicks while the first payment is running. It guards the button, not the charge: a click after it finishes, a retry or another tab can still send a second request, so the server must make the payment idempotent." /%}
 
 {% question text="With the experiment's events (A takes 5s, B 3s, C 1s), in what order do the responses arrive?" options=["A, B, C", "C, B, A", "Only C", "Only A"] answer=2 explanation="`mergeMap` runs the three requests at once and forwards each response as it finishes: C at 3s, B at 4s, A at 5s. Input order is not preserved." %}
 ```ts

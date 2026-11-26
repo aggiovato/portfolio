@@ -1,0 +1,296 @@
+---
+slug: status-state-machine
+title: Your status is a state machine
+summary: >-
+  From status strings to explicit business transitions. A booking's status starts as a label and
+  ends up encoding who may change what, when, and what happens if two people try at once.
+publicationStatus: published
+publishedAt: 2026-11-27
+tags:
+  - TypeScript
+  - Architecture
+  - Domain modeling
+cover:
+  src: ../../../assets/notes/status-state-machine/cover.webp
+  alt: 'A state diagram: pending goes to assigned with ASSIGN or to cancelled with CANCEL; assigned goes to completed with COMPLETE or to rejected with REJECT; from rejected, REASSIGN goes back to assigned and CANCEL leads to cancelled. Completed and cancelled have double outlines as final states.'
+---
+
+If we are talking about business apps, sooner or later we run into the famous `status` field. Take
+a booking: its status is the quickest way to know where it is in its life. Usually it starts in
+`pending`, moves to `assigned` and ends up in `completed`, although sometimes the provider rejects it
+(`rejected`) and we have to find another one, or it simply gets cancelled (`cancelled`). At first it
+is just a label the interface paints in a chip. Then the business adds a rule about when it may go
+from one state to another, then another, and one more, each in a different place. And one day a
+booking that was already completed shows up as rejected, and nobody can say which screen did it.
+
+Fair warning, the title exaggerates a little on purpose. Not every status field needs a
+state-machine library, let alone a complicated automaton. But as soon as that `status` has rules
+about how it may change, those rules are already part of the business, and that is where I want to
+get to: **the transitions deserve to be as explicit as the states themselves**.
+
+## It starts with a {% highlight %}string{% /highlight %}
+
+Let's go back to the beginning. The first version of our booking usually looks something like this:
+
+```ts
+interface Booking {
+  id: string;
+  status: 'pending' | 'assigned' | 'rejected' | 'completed' | 'cancelled';
+}
+
+// Anywhere in the app:
+booking.status = 'completed';
+```
+
+And for a while it works beautifully: the union type saves us from typos, the chip has its five
+colours and everybody is happy. What this code does not tell us is *which status changes are
+allowed*. Does it make sense for a booking that is already completed to go back to `pending`? Or for
+one the provider has just rejected to jump straight to completed? Not really, right? Well, that is
+the risk of the string: anyone holding a booking can give it whatever status they like, whether it is
+an admin screen, a background job or that endpoint someone wrote on a Friday afternoon to get out of
+a jam.
+
+## The first invalid transition
+
+And then the rules arrive, as always, one at a time and without warning:
+
+- You can only assign a booking to a provider who is free.
+- Only an assigned booking gets completed (what gets completed is a service someone had).
+- If the provider rejects it, we find another one or cancel it, and after three rejections, cancelling
+  is all that is left.
+- Completed or cancelled bookings are not touched again, and cancelling means telling the customer.
+
+Notice that none of them talks about what a status *is*. They all talk about how you get from one to
+another, under which conditions and what happens next. And since our string has nowhere to keep any
+of that, the rules end up spread across buttons, endpoints and stray `if`s, each with its own version
+of the story.
+
+## States are not enough
+
+To talk about this without getting lost, it helps to give each piece a name:
+
+- **State**: where the booking is now (`pending`).
+- **Event**: something that asks for a change (`ASSIGN`, with a provider).
+- **Transition**: the allowed move from one state to another when an event arrives.
+- **Guard**: the condition that transition needs (the provider is free).
+- **Action**: what happens as a result (tell the customer).
+- **Invariant**: what must always be true (a completed booking has a provider).
+
+With these pieces we can finally draw our booking's life:
+
+{% diagram src="status-state-machine/machine.en.svg" alt="State diagram of a booking: it starts in Pending. ASSIGN, when the provider is free, leads to Assigned; CANCEL leads to Cancelled. From Assigned, COMPLETE leads to Completed and REJECT, when the provider rejects it, to Rejected. From Rejected, REASSIGN, when the provider is free and there have been fewer than 3 attempts, goes back to Assigned, and CANCEL leads to Cancelled. Completed and Cancelled are final states." caption="Six transitions, each with its event and, where it has one, its guard. Completed and Cancelled are final." /%}
+
+## Explicit {% highlight %}transitions{% /highlight %}
+
+And here is the same drawing as a table. Keep it handy, we will reuse it later as our test plan:
+
+| From | Event | Guard | To |
+| --- | --- | --- | --- |
+| Pending | `ASSIGN` | The provider is free | Assigned |
+| Pending | `CANCEL` | — | Cancelled |
+| Assigned | `COMPLETE` | — | Completed |
+| Assigned | `REJECT` | — | Rejected |
+| Rejected | `REASSIGN` | The provider is free and there have been fewer than 3 attempts | Assigned |
+| Rejected | `CANCEL` | — | Cancelled |
+| Completed, Cancelled | any | — | Refused: final state |
+
+In code, changing the status stops being a plain assignment and becomes a function: you pass it the
+current state and an event, and it gives you back the next state or tells you why it cannot happen.
+
+```ts
+type BookingState =
+  | { status: 'pending' }
+  | { status: 'assigned'; providerId: string; attempts: number }
+  | { status: 'rejected'; attempts: number };
+// ...completed and cancelled
+
+type BookingEvent =
+  | { type: 'ASSIGN'; providerId: string }
+  | { type: 'REASSIGN'; providerId: string };
+// ...REJECT, COMPLETE and CANCEL
+
+const MAX_ATTEMPTS = 3;
+
+// ok(state) or refuse(reason): the next state, or why it is refused
+function transition(state: BookingState, event: BookingEvent, ctx: Context): Result {
+  switch (state.status) {
+    case 'pending':
+      if (event.type === 'ASSIGN') {
+        if (!ctx.isFree(event.providerId)) return refuse('provider-busy');
+        return ok({ status: 'assigned', providerId: event.providerId, attempts: 1 });
+      }
+      // CANCEL → cancelled
+      break;
+    case 'assigned':
+      // COMPLETE → completed, REJECT → rejected (no guards)
+      break;
+    case 'rejected':
+      if (event.type === 'REASSIGN') {
+        if (state.attempts >= MAX_ATTEMPTS) return refuse('too-many-attempts');
+        if (!ctx.isFree(event.providerId)) return refuse('provider-busy');
+        return ok({ status: 'assigned', providerId: event.providerId, attempts: state.attempts + 1 });
+      }
+      // CANCEL → cancelled
+      break;
+  }
+  return refuse(`${event.type} is not allowed from ${state.status}`);
+}
+```
+
+Notice that the states are objects (`{ status: 'assigned', providerId, … }`) and not plain strings.
+That is the beauty of the discriminated union: each state carries the data that only makes sense in
+it, so an assigned booking always has a provider and a rejected one always keeps count of its
+attempts. But careful, the types are not the rules. They do not know whether the provider is free,
+who may reject, or what happens when two requests arrive at once. That is the function's job, and
+the job of everything else we will see in this note.
+
+## Where the {% highlight %}machine{% /highlight %} lives
+
+The interface needs to know the machine too, to show only the buttons that make sense or to explain
+why "Complete" is disabled. But let's not be fooled: a check in the frontend improves the experience,
+it protects nothing. Another tab, an old client or a direct API call skips it without noticing.
+
+The one really in charge is the server. The same `transition` (or its equivalent in the backend) runs
+where the change is saved, and the frontend's one is only a preview. And while we are at it, a piece
+of advice that saves trouble: do not mix business states with request states. `rejected` is
+something that happens to the booking; `saving` or `request-failed` is something that happens to one
+request from one screen. If they end up in the same field, one day a network error becomes a
+business decision.
+
+## When everything arrives at once
+
+So far everything looks pretty tidy, a function decides and the server is in charge. But in real life
+requests do not queue up politely, they arrive at the same time, and that is where the story gets a
+little more complicated.
+
+Picture this scene, which you have probably lived through. Two operators open the same booking, which
+is `pending`. Operator A assigns it to a provider and operator B, who has seen nothing, cancels it a
+second later. Both did the right thing with what was on their screen, and both transitions are valid
+from `pending`. Let's see what happens if the server simply reads, checks and writes:
+
+| When | Operator A | Operator B |
+| --- | --- | --- |
+| 0 s | Reads the booking: `pending` | |
+| 1 s | | Reads the booking: `pending` |
+| 2 s | `ASSIGN` is valid from `pending`: writes `assigned` | |
+| 3 s | | `CANCEL` is valid from `pending`: writes `cancelled` |
+
+The result: the last one to write wins. The booking ends up cancelled, but the provider already has
+the notice and is on the way. And the funny thing is that nobody broke a rule: B checked a state that
+no longer existed by the time it wrote. Time passed between reading and writing, and in that gap
+someone else changed the booking.
+
+The fix is to leave no gap: checking and writing must be a single step, and it must happen where the
+data lives. The most common way is to ask the database to update only if the booking is still exactly
+as we read it:
+
+```sql
+UPDATE bookings
+SET status = 'assigned', provider_id = $2, version = version + 1
+WHERE id = $1 AND status = 'pending' AND version = $3;
+-- 0 rows updated: someone changed it first. Reload and decide again.
+```
+
+Let's read it slowly. The `WHERE` repeats the machine's condition (`status = 'pending'`) and also
+looks at a version, a number that goes up with every change. If someone touched the booking between
+our read and our write, the version no longer matches, the `UPDATE` updates nothing and we find out.
+In the scene above, B would get "0 rows updated", reload, see it is already `assigned` and do
+something else, like talk to A instead of cancelling blindly.
+
+This is called optimistic locking: we lock nothing while the user is thinking, we just check at the
+end whether someone got there first. The other option is a transaction that locks the row while the
+decision is made, and which one suits you depends on the system. But the idea underneath is the same:
+the state machine says which changes are legal, it does not stop two legal changes from colliding.
+That depends on how we save.
+
+{% callout type="note" title="What about a lock in the frontend?" %}
+And if we want to get creative, we can go one step further in the interface and set up a WebSocket
+that locks the booking while someone has it open, so only one person can edit it and the others see
+something like "Ana is editing this booking". For the experience it is a good idea, because the two
+operators would never even collide. But it is a complement, not a replacement. A tab closed without
+warning or a dropped connection leaves the lock hanging (it has to expire, with a heartbeat every few
+seconds), and a background job or a direct API call does not even know it exists. So even if we build
+it, the `UPDATE` is still needed: the WebSocket prevents most collisions, the server prevents all of
+them.
+{% /callout %}
+
+And then there are side effects, like emailing the customer when we cancel, which bring their own
+drama: our database and the email provider do not talk to each other, and either one can fail after
+the other has already done its part. The short version is to write the intent down together with the
+change (the *outbox* pattern) and make the notice safe to repeat, the same idempotency we asked for
+with payments in the [mapping operators note](/notes/rxjs-mapping-operators/). But that is worth a
+whole note of its own, so we will leave it for another day.
+
+## {% highlight %}Test{% /highlight %} the transitions
+
+Remember the table? Here it is, turned into tests. Every row is a case, and so is every row that is
+missing:
+
+```ts
+// Every row of the table (from + event → to) is accepted
+it.each([
+  ['pending', 'ASSIGN', 'assigned'],
+  ['pending', 'CANCEL', 'cancelled'],
+  ['assigned', 'COMPLETE', 'completed'],
+  ['assigned', 'REJECT', 'rejected'],
+  ['rejected', 'REASSIGN', 'assigned'],
+  ['rejected', 'CANCEL', 'cancelled'],
+])('%s + %s → %s', (from, event, to) => {
+  expect(transition(state(from), ev(event), ctx)).toMatchObject({ ok: true, state: { status: to } });
+});
+
+// Final states refuse every event
+it.each(['completed', 'cancelled'])('%s is final', (from) => {
+  for (const event of ['ASSIGN', 'REJECT', 'REASSIGN', 'COMPLETE', 'CANCEL']) {
+    expect(transition(state(from), ev(event), ctx).ok).toBe(false);
+  }
+});
+
+// The attempts guard: after three rejections REASSIGN is refused and only CANCEL is left
+it('a third rejection leaves only cancelling', () => {
+  const tired = { status: 'rejected', attempts: 3 } as const;
+  expect(transition(tired, ev('REASSIGN'), ctx)).toMatchObject({ ok: false, error: 'too-many-attempts' });
+  expect(transition(tired, ev('CANCEL'), ctx).ok).toBe(true);
+});
+```
+
+The negative cases matter as much as the positive ones, because they are exactly the rules that get
+broken by accident (look at the last test, which checks the limit on attempts). And once the states
+start piling up, property-based tests lend a hand: you generate random sequences of events and check
+that the invariants hold after each one.
+
+## In short
+
+"How many times can a booking be rejected before we cancel it?" sounds like a product question, and
+it is. But as soon as someone answers "three", that answer becomes the condition on an arrow in the
+drawing, a guard in the function, a test and, if needed, a condition in an `UPDATE`. That is how our
+`status` field became a state machine: the day the business decided how it could change. And what
+works for me is writing those decisions down where the software can enforce them, and not in the
+memory of whoever was in that meeting: the transitions with their guards, one function that applies
+them, the server as the authority, and tests that also cover what must be refused.
+
+And a confession: the states in this example did not come out right the first time, at least not ones
+that fit a real case. I had to go round a couple of times, asking myself what really happens in the
+business when a provider rejects a booking. That back and forth is not wasted time, it is exactly the
+work: each round polishes the rules, and with them the states and the transitions. In the end, a
+diagram the business can read and argue about is worth more than any library.
+
+{% callout type="constraint" title="What can go wrong?" %}
+A state machine does not replace persistence, concurrency control or idempotency. A guard in the
+interface is not a guard. And you do not need XState to start: define the model first, and bring in a
+tool like that only if it makes the model clearer than a function and a table.
+{% /callout %}
+
+{% quiz %}
+{% question text="The UI hides the «Cancel» button on completed bookings. Is a completed booking protected from being cancelled?" options=["Yes: with no button, nobody can cancel it", "No: the API accepts it unless the server stops it", "Yes, as long as the button is also disabled"] answer=2 explanation="A frontend guard improves the experience, but another tab or a direct API call skips it. The one that has to refuse the transition is the server." /%}
+
+{% question text="Which of these is a business state, not a request state?" options=["`rejected`", "`saving`", "`request-failed`"] answer=1 explanation="`rejected` is something that happens to the booking. `saving` and `request-failed` happen to one request from one screen; mix them and a network error ends up looking like a business decision." /%}
+
+{% question text="Two operators read the same pending booking. One assigns it, the other cancels it, and both transitions are valid from `pending`. What prevents a wrong final state?" options=["Checking in the frontend that it is still `pending`", "The state machine itself, which already forbids it", "An `UPDATE` that only writes if it is still as read"] answer=3 explanation="The machine says which changes are legal, and both are. Keeping them from colliding depends on checking and writing being one step, like an `UPDATE` conditioned on the status or a version." /%}
+
+{% question text="B's `UPDATE` returns «0 rows updated». What happened?" options=["`CANCEL` is not allowed from `pending`", "Someone changed the booking after B read it", "The database failed and a retry is enough"] answer=2 explanation="The version (or the status) no longer matches what B read: someone got there first. Reload the booking and decide again, rather than repeating the write blindly." /%}
+{% /quiz %}
+
+Sources: the TypeScript handbook on [narrowing and discriminated unions](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions);
+[Statecharts](https://statecharts.dev/), an introduction to state machines and statecharts;
+PostgreSQL's [transaction isolation](https://www.postgresql.org/docs/current/transaction-iso.html); and the [XState docs](https://stately.ai/docs/xstate), if you want to see how this is modelled with a library.

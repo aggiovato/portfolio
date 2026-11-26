@@ -1,30 +1,31 @@
 ---
 slug: rxjs-fundamentals
-title: Capisci il flusso, poi l'operatore
+title: Capisci lo stream, poi l'operatore
 summary: >-
   Una guida visuale ai fondamenti di RxJS: Observable e Promise a confronto, come leggere un
-  diagramma dei flussi, pipe() e subscribe(), e i primi tre operatori: map, filter e tap.
+  diagramma degli stream, pipe() e subscribe(), e i primi tre operatori: map, filter e tap.
 publicationStatus: published
 publishedAt: 2026-11-14
+updatedAt: 2026-11-26
 tags:
   - RxJS
   - Angular
 cover:
   src: ../../../assets/notes/rxjs-fundamentals/cover.webp
-  alt: 'Diagramma a biglie: i valori 1, 2 e 3 passano per map(n => n * 10) ed escono come 10, 20 e 30.'
+  alt: 'Marble diagram: i valori 1, 2 e 3 passano per map(n => n * 10) ed escono come 10, 20 e 30.'
 ---
 
 Smetti di memorizzare i nomi degli operatori. Segui quello che succede a ogni valore: quando sai
 leggere un valore attraverso una pipe, ogni operatore è solo una regola su cosa fa a quel valore.
 
-## Un risultato, o un flusso di valori
+## Un risultato, o uno stream di valori
 
 Una **Promise** si risolve una volta sola: al massimo un valore di adempimento o un rifiuto.
 `new Promise(executor)` esegue subito l'executor, e le sue callback di `.then()` vengono sempre
 eseguite in modo asincrono. Non ha un metodo di annullamento proprio.
 
 Un **Observable** consegna da zero a molti valori, e può completarsi o andare in errore. Una
-sorgente fredda avvia una nuova esecuzione per ogni sottoscrizione; una sorgente calda può
+sorgente cold avvia una nuova esecuzione per ogni sottoscrizione; una sorgente hot può
 condividere un produttore già in funzione. Le emissioni possono essere sincrone o asincrone.
 
 `unsubscribe()` ferma la tua sottoscrizione, non necessariamente la sorgente.
@@ -32,19 +33,19 @@ condividere un produttore già in funzione. Le emissioni possono essere sincrone
 | | Promise | Observable |
 | --- | --- | --- |
 | Valori | Uno, o un rifiuto | Da zero a molti |
-| Parte | L'executor viene eseguito subito, in `new Promise()` | Alla sottoscrizione (fredda) o già in funzione (calda) |
+| Parte | L'executor viene eseguito subito, in `new Promise()` | Alla sottoscrizione (cold) o già in funzione (hot) |
 | Tempi | Callback sempre asincrone | Sincrono o asincrono |
 | Annullare | Nessun metodo proprio | `unsubscribe()` ferma la tua sottoscrizione |
 
 ## Leggere il diagramma
 
-Il tempo scorre da sinistra a destra. Ogni punto è un valore; ogni linea è un flusso.
+Il tempo scorre da sinistra a destra. Ogni punto è un valore; ogni linea è uno stream.
 
-{% diagram id="rxjs-fundamentals/reading" alt="Un diagramma di flusso: i valori A e B su una linea che va da prima a dopo, poi una barra verticale che segna il completamento." caption="Due valori, poi il completamento." /%}
+{% diagram id="rxjs-fundamentals/reading" alt="Un diagramma di uno stream: i valori A e B su una linea che va da prima a dopo, poi una barra verticale che segna il completamento." caption="Due valori, poi il completamento." /%}
 
 - `next(A)`: viene emesso un valore.
-- `|` complete: il flusso termina normalmente.
-- `X` error: il flusso termina con un errore.
+- `|` complete: lo stream termina normalmente.
+- `X` error: lo stream termina con un errore.
 
 Dopo complete o error non arrivano più valori. Queste linee non sono thread di esecuzione: mostrano
 solo quando arrivano i valori.
@@ -57,19 +58,51 @@ const doubled$ = source$.pipe(map((n) => n * 2));
 doubled$.subscribe(console.log);
 ```
 
-{% highlight %}`pipe()`{% /highlight %} compone gli operatori in un nuovo Observable senza sottoscriversi alla catena; una sorgente calda può già produrre valori per conto suo. {% highlight %}`subscribe()`{% /highlight %} registra il consumatore e, su una sorgente fredda, ne avvia l'esecuzione per quella sottoscrizione. Con l'`HttpClient` di Angular, ogni sottoscrizione invia una richiesta. La pipe `async` di Angular può gestire la sottoscrizione al posto tuo.
+{% highlight %}`pipe()`{% /highlight %} compone gli operatori in un nuovo Observable senza sottoscriversi alla catena; una sorgente hot può già produrre valori per conto suo. {% highlight %}`subscribe()`{% /highlight %} registra il consumatore e, su una sorgente cold, ne avvia l'esecuzione per quella sottoscrizione. Con l'`HttpClient` di Angular, ogni sottoscrizione invia una richiesta. La pipe `async` di Angular può gestire la sottoscrizione al posto tuo.
+
+## {% highlight %}unsubscribe(){% /highlight %} chiude il tuo lato, {% highlight %}finalize(){% /highlight %} pulisce
+
+C'è un terzo modo in cui una sottoscrizione può finire, e arriva dall'altro lato. `unsubscribe()` non
+è una notifica dell'Observable: non viene emesso nulla, e non vengono eseguiti né `complete` né
+`error`. È qualcosa che il sottoscrittore fa alla propria sottoscrizione: smettere di ascoltare e
+lasciare che la sorgente liberi ciò che teneva per lei.
+
+{% diagram id="rxjs-fundamentals/unsubscribe" alt="Un diagramma di uno stream: i valori A e B su una linea, poi un segno tratteggiato con l'etichetta unsubscribe(); dopo di esso la linea prosegue attenuata e tratteggiata, senza barra di completamento." caption="Al segno non viene emesso nulla: la sottoscrizione si ferma, e la sorgente può continuare senza che nessuno la osservi." /%}
+
+Quel rilascio è il **teardown**: la funzione che una sorgente restituisce quando viene creata. Viene
+eseguito comunque finisca la sottoscrizione: complete, error o unsubscribe. `finalize()` ti permette
+di agganciarti allo stesso momento da una pipe.
+
+```ts
+const ticks$ = new Observable<number>((subscriber) => {
+  const id = setInterval(() => subscriber.next(Date.now()), 1000);
+  return () => clearInterval(id); // teardown
+});
+
+const sub = ticks$
+  .pipe(finalize(() => console.log('cleaned up')))
+  .subscribe(render);
+
+sub.unsubscribe(); // l'intervallo si ferma e viene registrato 'cleaned up'
+```
+
+| Come finisce | Chi la fa finire | Callback dell'observer | Teardown e `finalize` |
+| --- | --- | --- | --- |
+| complete | La sorgente | `complete()` | Eseguiti |
+| error | La sorgente | `error(err)` | Eseguiti |
+| `unsubscribe()` | Il sottoscrittore | Nessuno | Eseguiti |
 
 ## {% highlight %}map{% /highlight %} cambia il valore, {% highlight %}filter{% /highlight %} decide cosa passa
 
-{% diagram id="rxjs-fundamentals/map" alt="Diagramma a biglie: map(n => n * 10) trasforma 1, 2 e 3 in 10, 20 e 30." caption="map cambia ogni valore." /%}
+{% diagram id="rxjs-fundamentals/map" alt="Marble diagram: map(n => n * 10) trasforma 1, 2 e 3 in 10, 20 e 30." caption="map cambia ogni valore." /%}
 
-{% diagram id="rxjs-fundamentals/filter" alt="Diagramma a biglie: filter(n => n >= 20) riceve 10, 20 e 30 e lascia passare solo 20 e 30." caption="filter scarta i valori che non superano la prova." /%}
+{% diagram id="rxjs-fundamentals/filter" alt="Marble diagram: filter(n => n >= 20) riceve 10, 20 e 30 e lascia passare solo 20 e 30." caption="filter scarta i valori che non superano la prova." /%}
 
 `filter` scarta le emissioni; non emette `true` o `false`.
 
 ## {% highlight %}tap{% /highlight %} osserva senza trasformare
 
-{% diagram id="rxjs-fundamentals/tap" alt="Diagramma a biglie: 20 e 30 entrano in tap, la console registra 20 e poi 30, e gli stessi 20 e 30 escono invariati." caption="tap registra ogni valore; il flusso prosegue invariato." /%}
+{% diagram id="rxjs-fundamentals/tap" alt="Marble diagram: 20 e 30 entrano in tap, la console registra 20 e poi 30, e gli stessi 20 e 30 escono invariati." caption="tap registra ogni valore; lo stream prosegue invariato." /%}
 
 Restituire un valore da `tap` non cambia il valore emesso. Usalo per osservare; evita di modificare
 oggetti al suo interno.
@@ -97,7 +130,7 @@ source$
 {% highlight %}map{% /highlight %} trasforma, {% highlight %}filter{% /highlight %} seleziona, {% highlight %}tap{% /highlight %} osserva.
 
 {% quiz %}
-{% question text="Quante richieste invia questo codice?" options=["Nessuna: non c'è `pipe()`", "Una, condivisa dai due sottoscrittori", "Due: una per sottoscrizione"] answer=3 explanation="`HttpClient` restituisce un Observable freddo: ogni `subscribe()` avvia la propria esecuzione, e ogni esecuzione invia una richiesta." %}
+{% question text="Quante richieste invia questo codice?" options=["Nessuna: non c'è `pipe()`", "Una, condivisa dai due sottoscrittori", "Due: una per sottoscrizione"] answer=3 explanation="`HttpClient` restituisce un Observable cold: ogni `subscribe()` avvia la propria esecuzione, e ogni esecuzione invia una richiesta." %}
 ```ts
 const user$ = this.http.get<User>('/api/user');
 user$.subscribe(renderHeader);
@@ -105,7 +138,7 @@ user$.subscribe(renderMenu);
 ```
 {% /question %}
 
-{% question text="Chiami `pipe()` su una sorgente fredda ma mai `subscribe()`. Cosa viene eseguito?" options=["La sorgente, con il risultato salvato per dopo", "Niente: `pipe()` compone solo un nuovo Observable", "Gli operatori, senza la sorgente"] answer=2 explanation="`pipe()` compone gli operatori senza sottoscriversi alla catena. Su una sorgente fredda, niente parte fino a `subscribe()`." /%}
+{% question text="Chiami `pipe()` su una sorgente cold ma mai `subscribe()`. Cosa viene eseguito?" options=["La sorgente, con il risultato salvato per dopo", "Niente: `pipe()` compone solo un nuovo Observable", "Gli operatori, senza la sorgente"] answer=2 explanation="`pipe()` compone gli operatori senza sottoscriversi alla catena. Su una sorgente cold, niente parte fino a `subscribe()`." /%}
 
 {% question text="Cosa riceve `render`?" options=["`false`, `true`, `true`", "`20`, `30`", "`10`, `20`, `30`"] answer=2 explanation="`filter` decide cosa passa: scarta `10` ed emette `20` e `30` invariati. Non emette mai `true` o `false`." %}
 ```ts
@@ -119,7 +152,9 @@ of(5).pipe(tap((n) => n * 2)).subscribe(console.log);
 ```
 {% /question %}
 
-{% question text="Un flusso ha emesso complete (`|`). Cosa può arrivare dopo?" options=["Altri valori, se la sorgente continua a produrre", "Niente: nessun valore arriva dopo complete o error", "Solo un errore"] answer=2 explanation="Complete ed error chiudono entrambi il flusso. Dopo nessuno dei due arrivano altri valori." /%}
+{% question text="Chiami `sub.unsubscribe()` su una sottoscrizione attiva. Che cosa succede?" options=["Viene eseguito il callback `complete`", "Viene eseguito il callback `error`", "Nessun callback, ma il teardown e `finalize()` sì"] answer=3 explanation="`unsubscribe()` è un'azione sulla sottoscrizione, non una notifica: non viene emesso nulla, quindi non vengono eseguiti né `complete` né `error`. Il teardown libera comunque le risorse della sorgente, e `finalize()` viene eseguito con lui." /%}
+
+{% question text="Uno stream ha emesso complete (`|`). Cosa può arrivare dopo?" options=["Altri valori, se la sorgente continua a produrre", "Niente: nessun valore arriva dopo complete o error", "Solo un errore"] answer=2 explanation="Complete ed error chiudono entrambi lo stream. Dopo nessuno dei due arrivano altri valori." /%}
 {% /quiz %}
 
 Fonti: [Observable](https://rxjs.dev/guide/observable) e [operatori](https://rxjs.dev/guide/operators) nella documentazione di RxJS, e la [guida al client HTTP](https://angular.dev/guide/http) di Angular.
