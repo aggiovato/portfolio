@@ -1,0 +1,15 @@
+{
+  "slug": "super-3t",
+  "status": "active",
+  "version": "0.8.1",
+  "releasedAt": "2026-11-28",
+  "links": {
+    "demo": "https://super-3t.aggiovato.workers.dev",
+    "code": "https://github.com/aggiovato/super-tic-tac-toe"
+  },
+  "source": {
+    "repository": "aggiovato/super-tic-tac-toe",
+    "commit": "01dcbda",
+    "run": "https://github.com/aggiovato/super-tic-tac-toe/actions/runs/46087548379"
+  }
+}
